@@ -1,5 +1,17 @@
 # KapMan KB Changelog
 
+## [3.0.0-alpha] — 2026-05-11
+
+### Added
+- `llm_runtime/WYCKOFF_v3.0.md` — Wyckoff phase and event principle file.
+  Session 6 of 15 in the v3.0 rewrite cycle. Owns the propose-confirm
+  protocol, four-phase vocabulary (Accumulation/Markup/Distribution/Markdown),
+  named-event reading guide, structural levels, and session-scope UNKNOWN
+  state. Maps all 26 legacy anchors (WYCKOFF_PHASE_001-013,
+  WYCKOFF_EVENT_001-013). Four anchors deferred to forthcoming
+  engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md
+  (PHASE_007, PHASE_009, PHASE_013, EVENT_012).
+
 ## [3.0.0-alpha] — 2026-05-10
 
 ### 2026-05-10 — DEALER_v3.0.md content cutover (session 3 of 15)
