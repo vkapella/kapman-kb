@@ -137,3 +137,13 @@ This repository separates runtime and engineering materials:
 | PIPELINE_012 | engineering_only/TOOL_SURFACE_v3.0.md | PIPELINE_012 | PENDING REWRITE |
 | PIPELINE_011 | llm_runtime/PASS2_VALIDATION_v3.0.md | PIPELINE_011 | PENDING REWRITE |
 | SCORING_001 | DROPPED | N/A | DROPPED |
+
+### RISK v3.0 rewrite resolution (2026-05-10)
+
+| Legacy ID | v3.0 destination | Status | Rationale |
+|---|---|---|---|
+| RISK_001 | — | DROPPED | C4 pipeline null-write observation; engineering-state, no LLM runtime effect |
+| RISK_002 | — | DROPPED | AI base disclaimer implementation detail; not a risk principle |
+| RISK_003 | — | DROPPED | Schema check-constraint absence; backend observation only |
+| RISK_004 | — | DROPPED | C4 authority_constraints injection gap; backend reference, not LLM rule |
+| RISK_005 | llm_runtime/RISK_v3.0.md § Legacy anchors | MIGRATED | Sizing ladder rewritten as judgment bands; percentages preserved in Appendix as reference points |
