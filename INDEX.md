@@ -57,20 +57,20 @@ This repository separates runtime and engineering materials:
 | WYCKOFF_EVENT_011 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_011 | PENDING REWRITE |
 | WYCKOFF_EVENT_012 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_012 | PENDING REWRITE |
 | WYCKOFF_EVENT_013 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_013 | PENDING REWRITE |
-| DEALER_001 | llm_runtime/DEALER_v3.0.md | DEALER_001 | PENDING REWRITE |
-| DEALER_002 | llm_runtime/DEALER_v3.0.md | DEALER_002 | PENDING REWRITE |
-| DEALER_003 | llm_runtime/DEALER_v3.0.md | DEALER_003 | PENDING REWRITE |
-| DEALER_004 | llm_runtime/DEALER_v3.0.md | DEALER_004 | PENDING REWRITE |
-| DEALER_005 | llm_runtime/DEALER_v3.0.md | DEALER_005 | PENDING REWRITE |
-| DEALER_006 | llm_runtime/DEALER_v3.0.md | DEALER_006 | PENDING REWRITE |
-| DEALER_007 | llm_runtime/DEALER_v3.0.md | DEALER_007 | PENDING REWRITE |
-| DEALER_008 | llm_runtime/DEALER_v3.0.md | DEALER_008 | PENDING REWRITE |
-| DEALER_009 | llm_runtime/DEALER_v3.0.md | DEALER_009 | PENDING REWRITE |
-| DEALER_010 | llm_runtime/DEALER_v3.0.md | DEALER_010 | PENDING REWRITE |
-| DEALER_011 | llm_runtime/DEALER_v3.0.md | DEALER_011 | PENDING REWRITE |
-| DEALER_012 | llm_runtime/DEALER_v3.0.md | DEALER_012 | PENDING REWRITE |
-| DEALER_013 | llm_runtime/DEALER_v3.0.md | DEALER_013 | PENDING REWRITE |
-| DEALER_014 | llm_runtime/DEALER_v3.0.md | DEALER_014 | PENDING REWRITE |
+| DEALER_001 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_001 | Migrated to engineering-only pipeline spec (formula and computation details). |
+| DEALER_002 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_002 | Migrated to engineering-only pipeline spec (formula and computation details). |
+| DEALER_003 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_003 | Migrated to engineering-only pipeline spec (formula and computation details). |
+| DEALER_004 | llm_runtime/DEALER_v3.0.md § Operational heuristics; engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_004 | Runtime interpretation retained in DEALER principle; pipeline computation details moved to engineering-only spec. |
+| DEALER_005 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_005 | Migrated to engineering-only pipeline spec (formula and computation details). |
+| DEALER_006 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_006 | Migrated to engineering-only pipeline spec (formula and computation details). |
+| DEALER_007 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_007 | Migrated to engineering-only pipeline spec (formula and computation details). |
+| DEALER_008 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_008 | Migrated to engineering-only pipeline spec (formula and computation details). |
+| DEALER_009 | llm_runtime/DEALER_v3.0.md § Principle, § Operational heuristics, § Appendix; engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_009 | Runtime semantics retained in DEALER principle and appendix; pipeline computation details moved to engineering-only spec. |
+| DEALER_010 | llm_runtime/DEALER_v3.0.md § Operational heuristics, § Appendix; engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_010 | Runtime semantics retained in DEALER principle and appendix; pipeline computation details moved to engineering-only spec. |
+| DEALER_011 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_011 | Migrated to engineering-only pipeline spec (formula and computation details). |
+| DEALER_012 | llm_runtime/DEALER_v3.0.md § Operational heuristics; engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_012 | Runtime interpretation retained in DEALER principle; pipeline computation details moved to engineering-only spec. |
+| DEALER_013 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_013 | Migrated to engineering-only pipeline spec (formula and computation details). |
+| DEALER_014 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_014 | Migrated to engineering-only pipeline spec (formula and computation details). |
 | VOLATILITY_001 | llm_runtime/VOLATILITY_v3.0.md | VOLATILITY_001 | PENDING REWRITE |
 | VOLATILITY_002 | llm_runtime/VOLATILITY_v3.0.md | VOLATILITY_002 | PENDING REWRITE |
 | VOLATILITY_003 | llm_runtime/VOLATILITY_v3.0.md | VOLATILITY_003 | PENDING REWRITE |
