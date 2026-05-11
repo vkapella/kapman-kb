@@ -31,32 +31,32 @@ This repository separates runtime and engineering materials:
 
 | Legacy ID | v3.0 destination file | Anchor name | Status |
 |---|---|---|---|
-| WYCKOFF_PHASE_001 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_001 | PENDING REWRITE |
-| WYCKOFF_PHASE_002 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_002 | PENDING REWRITE |
-| WYCKOFF_PHASE_003 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_003 | PENDING REWRITE |
-| WYCKOFF_PHASE_004 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_004 | PENDING REWRITE |
-| WYCKOFF_PHASE_005 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_005 | PENDING REWRITE |
-| WYCKOFF_PHASE_006 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_006 | PENDING REWRITE |
-| WYCKOFF_PHASE_007 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_007 | PENDING REWRITE |
-| WYCKOFF_PHASE_008 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_008 | PENDING REWRITE |
-| WYCKOFF_PHASE_009 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_009 | PENDING REWRITE |
-| WYCKOFF_PHASE_010 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_010 | PENDING REWRITE |
-| WYCKOFF_PHASE_011 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_011 | PENDING REWRITE |
-| WYCKOFF_PHASE_012 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_012 | PENDING REWRITE |
-| WYCKOFF_PHASE_013 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_PHASE_013 | PENDING REWRITE |
-| WYCKOFF_EVENT_001 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_001 | PENDING REWRITE |
-| WYCKOFF_EVENT_002 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_002 | PENDING REWRITE |
-| WYCKOFF_EVENT_003 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_003 | PENDING REWRITE |
-| WYCKOFF_EVENT_004 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_004 | PENDING REWRITE |
-| WYCKOFF_EVENT_005 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_005 | PENDING REWRITE |
-| WYCKOFF_EVENT_006 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_006 | PENDING REWRITE |
-| WYCKOFF_EVENT_007 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_007 | PENDING REWRITE |
-| WYCKOFF_EVENT_008 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_008 | PENDING REWRITE |
-| WYCKOFF_EVENT_009 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_009 | PENDING REWRITE |
-| WYCKOFF_EVENT_010 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_010 | PENDING REWRITE |
-| WYCKOFF_EVENT_011 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_011 | PENDING REWRITE |
-| WYCKOFF_EVENT_012 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_012 | PENDING REWRITE |
-| WYCKOFF_EVENT_013 | llm_runtime/WYCKOFF_v3.0.md | WYCKOFF_EVENT_013 | PENDING REWRITE |
+| WYCKOFF_PHASE_001 | llm_runtime/WYCKOFF_v3.0.md § Operational heuristics — minimum history guard | WYCKOFF_PHASE_001 | MIGRATED |
+| WYCKOFF_PHASE_002 | llm_runtime/WYCKOFF_v3.0.md § Principle — phase vocabulary (Accumulation) | WYCKOFF_PHASE_002 | MIGRATED |
+| WYCKOFF_PHASE_003 | llm_runtime/WYCKOFF_v3.0.md § Principle — phase vocabulary (Markup) | WYCKOFF_PHASE_003 | MIGRATED |
+| WYCKOFF_PHASE_004 | llm_runtime/WYCKOFF_v3.0.md § Principle — phase vocabulary (Distribution) | WYCKOFF_PHASE_004 | MIGRATED |
+| WYCKOFF_PHASE_005 | llm_runtime/WYCKOFF_v3.0.md § Principle — phase vocabulary (Markdown) | WYCKOFF_PHASE_005 | MIGRATED |
+| WYCKOFF_PHASE_006 | llm_runtime/WYCKOFF_v3.0.md § Operational heuristics — Markdown requires SOW | WYCKOFF_PHASE_006 | MIGRATED |
+| WYCKOFF_PHASE_007 | engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md (forthcoming) | WYCKOFF_PHASE_007 | DEFERRED |
+| WYCKOFF_PHASE_008 | llm_runtime/WYCKOFF_v3.0.md § Operational heuristics — priority order | WYCKOFF_PHASE_008 | MIGRATED |
+| WYCKOFF_PHASE_009 | engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md (forthcoming) | WYCKOFF_PHASE_009 | DEFERRED |
+| WYCKOFF_PHASE_010 | llm_runtime/WYCKOFF_v3.0.md § Principle + § Operational heuristics — UNKNOWN state | WYCKOFF_PHASE_010 | MIGRATED |
+| WYCKOFF_PHASE_011 | llm_runtime/WYCKOFF_v3.0.md § Operational heuristics — phase succession duration | WYCKOFF_PHASE_011 | MIGRATED |
+| WYCKOFF_PHASE_012 | llm_runtime/WYCKOFF_v3.0.md § Operational heuristics — SOS/SOW sequence eligibility | WYCKOFF_PHASE_012 | MIGRATED |
+| WYCKOFF_PHASE_013 | engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md (forthcoming) | WYCKOFF_PHASE_013 | DEFERRED |
+| WYCKOFF_EVENT_001 | llm_runtime/WYCKOFF_v3.0.md § Operational heuristics — minimum history guard | WYCKOFF_EVENT_001 | MIGRATED |
+| WYCKOFF_EVENT_002 | llm_runtime/WYCKOFF_v3.0.md § Appendix — event reading guide (SC) | WYCKOFF_EVENT_002 | MIGRATED |
+| WYCKOFF_EVENT_003 | llm_runtime/WYCKOFF_v3.0.md § Appendix — event reading guide (SC prior trend) | WYCKOFF_EVENT_003 | MIGRATED |
+| WYCKOFF_EVENT_004 | llm_runtime/WYCKOFF_v3.0.md § Appendix — event reading guide (BC) | WYCKOFF_EVENT_004 | MIGRATED |
+| WYCKOFF_EVENT_005 | llm_runtime/WYCKOFF_v3.0.md § Appendix — event reading guide (BC prior trend) | WYCKOFF_EVENT_005 | MIGRATED |
+| WYCKOFF_EVENT_006 | llm_runtime/WYCKOFF_v3.0.md § Appendix — event reading guide (AR) | WYCKOFF_EVENT_006 | MIGRATED |
+| WYCKOFF_EVENT_007 | llm_runtime/WYCKOFF_v3.0.md § Appendix — event reading guide (AR_TOP) | WYCKOFF_EVENT_007 | MIGRATED |
+| WYCKOFF_EVENT_008 | llm_runtime/WYCKOFF_v3.0.md § Appendix — event reading guide (Spring) | WYCKOFF_EVENT_008 | MIGRATED |
+| WYCKOFF_EVENT_009 | llm_runtime/WYCKOFF_v3.0.md § Appendix — event reading guide (UT) | WYCKOFF_EVENT_009 | MIGRATED |
+| WYCKOFF_EVENT_010 | llm_runtime/WYCKOFF_v3.0.md § Appendix — event reading guide (SOS) | WYCKOFF_EVENT_010 | MIGRATED |
+| WYCKOFF_EVENT_011 | llm_runtime/WYCKOFF_v3.0.md § Appendix — event reading guide (SOW) | WYCKOFF_EVENT_011 | MIGRATED |
+| WYCKOFF_EVENT_012 | engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md (forthcoming) | WYCKOFF_EVENT_012 | DEFERRED |
+| WYCKOFF_EVENT_013 | llm_runtime/WYCKOFF_v3.0.md § Operational heuristics — ST not delivered | WYCKOFF_EVENT_013 | MIGRATED |
 | DEALER_001 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_001 | Migrated to engineering-only pipeline spec (formula and computation details). |
 | DEALER_002 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_002 | Migrated to engineering-only pipeline spec (formula and computation details). |
 | DEALER_003 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_003 | Migrated to engineering-only pipeline spec (formula and computation details). |
