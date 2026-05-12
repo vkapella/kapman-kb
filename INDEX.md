@@ -133,10 +133,10 @@ This repository separates runtime and engineering materials:
 | PIPELINE_007 | engineering_only/BACKEND_PIPELINE_v3.0.md | PIPELINE_007 | PENDING REWRITE |
 | PIPELINE_008 | engineering_only/BACKEND_PIPELINE_v3.0.md | PIPELINE_008 | PENDING REWRITE |
 | PIPELINE_009 | engineering_only/BACKEND_PIPELINE_v3.0.md | PIPELINE_009 | PENDING REWRITE |
-| PIPELINE_010 | engineering_only/TOOL_SURFACE_v3.0.md | PIPELINE_010 | PENDING REWRITE |
+| PIPELINE_010 | engineering_only/PASS1_MCP_REFERENCE_v3.0.md (forthcoming) — full endpoint inventory; runtime behavioral residue in llm_runtime/PASS1_SCREENING_v3.0.md § Operational heuristics ("The Pass 1 IV source is Polygon avg_iv") | PIPELINE_010 | MIGRATED |
 | PIPELINE_012 | engineering_only/TOOL_SURFACE_v3.0.md | PIPELINE_012 | PENDING REWRITE |
-| PIPELINE_011 | llm_runtime/PASS2_VALIDATION_v3.0.md | PIPELINE_011 | PENDING REWRITE |
-| SCORING_001 | DROPPED | N/A | DROPPED |
+| PIPELINE_011 | llm_runtime/PASS1_SCREENING_v3.0.md § Operational heuristics ("Pass 1 data does not carry forward as authoritative into Pass 2") | PIPELINE_011 | MIGRATED |
+| SCORING_001 | engineering_only/PASS1_MCP_REFERENCE_v3.0.md (forthcoming) — pass-through constraint and storage bounds; runtime: not referenced in any trigger evaluation | SCORING_001 | MIGRATED |
 
 ### RISK v3.0 rewrite resolution (2026-05-10)
 
