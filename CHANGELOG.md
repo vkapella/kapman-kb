@@ -3,6 +3,17 @@
 ## [3.0.0-alpha] — 2026-05-11
 
 ### Added
+- `llm_runtime/PASS1_SCREENING_v3.0.md` (status: draft) — Pass 1 screening
+  runbook (T2). Operationalizes the six-step eligible-set determination
+  workflow, inline-sequential propose-confirm for multi-ticker runs, Pass 1
+  IV source discipline (Polygon avg_iv), candidate zone format, and the
+  Pass 1 / Pass 2 data-boundary rule (PIPELINE_011 compaction guard).
+  Legacy anchors: PIPELINE_010 → engineering_only; PIPELINE_011 → this file;
+  SCORING_001 → engineering_only.
+
+## [3.0.0-alpha] — 2026-05-11
+
+### Added
 - `llm_runtime/WYCKOFF_v3.0.md` — Wyckoff phase and event principle file.
   Session 6 of 15 in the v3.0 rewrite cycle. Owns the propose-confirm
   protocol, four-phase vocabulary (Accumulation/Markup/Distribution/Markdown),
