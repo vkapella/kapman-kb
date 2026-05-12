@@ -19,11 +19,12 @@ This repository separates runtime and engineering materials:
 | llm_runtime/RISK_v3.0.md | T1 | principle | Risk management principles |
 | llm_runtime/SIGNAL_v3.0.md | T1 | principle | Signal entry/exit principles |
 | llm_runtime/PASS1_SCREENING_v3.0.md | T2 | runbook | Pass 1 screening workflow |
-| llm_runtime/PASS2_VALIDATION_v3.0.md | T2 | runbook | Pass 2 validation workflow |
+| llm_runtime/PASS2_VALIDATION_v3.0.md | T2 | PASS2 validation runbook | Session 8 | Active |
 | llm_runtime/PORTFOLIO_MGMT_v3.0.md | T2 | runbook | Portfolio management workflow |
 | llm_runtime/REPORT_STYLE_v3.0.md | T3 | style | Report style guidance |
 | llm_runtime/REPORT_FORMAT_v3.0.md | T3 | style | Report format guidance |
 | llm_runtime/SIC_SECTOR_MAP_v3.0.md | T3 | reference | SIC to sector map reference |
+| llm_runtime/SYSTEM_PARAMS_v3.0.md | T3 | Operator-configurable parameter reference | Session 8 | Active |
 | engineering_only/BACKEND_PIPELINE_v3.0.md | T4 | reference | Backend pipeline reference |
 | engineering_only/TOOL_SURFACE_v3.0.md | T4 | reference | Tool-surface reference |
 
@@ -102,6 +103,7 @@ This repository separates runtime and engineering materials:
 | SIGNAL_003 | engineering_only/BACKEND_PIPELINE_v3.0.md | SIGNAL_003 | PENDING REWRITE |
 | SIGNAL_004 | engineering_only/BACKEND_PIPELINE_v3.0.md | SIGNAL_004 | PENDING REWRITE |
 | VALIDATION_001 | llm_runtime/KAPMAN_GUARDRAILS_v3.0.md | VALIDATION_001 | PENDING REWRITE |
+| VALIDATION_001 (PASS2 residue) | PASS2_VALIDATION_v3.0.md § Legacy anchors | Active — anti-hallucination floor narrowing at Pass 2 |
 | VALIDATION_002 | engineering_only/BACKEND_PIPELINE_v3.0.md | VALIDATION_002 | PENDING REWRITE |
 | VALIDATION_003 | engineering_only/BACKEND_PIPELINE_v3.0.md | VALIDATION_003 | PENDING REWRITE |
 | VALIDATION_004 | engineering_only/BACKEND_PIPELINE_v3.0.md | VALIDATION_004 | PENDING REWRITE |
@@ -134,8 +136,9 @@ This repository separates runtime and engineering materials:
 | PIPELINE_008 | engineering_only/BACKEND_PIPELINE_v3.0.md | PIPELINE_008 | PENDING REWRITE |
 | PIPELINE_009 | engineering_only/BACKEND_PIPELINE_v3.0.md | PIPELINE_009 | PENDING REWRITE |
 | PIPELINE_010 | engineering_only/PASS1_MCP_REFERENCE_v3.0.md (forthcoming) — full endpoint inventory; runtime behavioral residue in llm_runtime/PASS1_SCREENING_v3.0.md § Operational heuristics ("The Pass 1 IV source is Polygon avg_iv") | PIPELINE_010 | MIGRATED |
-| PIPELINE_012 | engineering_only/TOOL_SURFACE_v3.0.md | PIPELINE_012 | PENDING REWRITE |
+| PIPELINE_012 | PASS2_VALIDATION_v3.0.md § Legacy anchors | Active — chain truncation handling |
 | PIPELINE_011 | llm_runtime/PASS1_SCREENING_v3.0.md § Operational heuristics ("Pass 1 data does not carry forward as authoritative into Pass 2") | PIPELINE_011 | MIGRATED |
+| PIPELINE_011 (mis-filing note) | PASS2_VALIDATION_v3.0.md § Legacy anchors | Mis-filing resolved; authoritative destination is PASS1 |
 | SCORING_001 | engineering_only/PASS1_MCP_REFERENCE_v3.0.md (forthcoming) — pass-through constraint and storage bounds; runtime: not referenced in any trigger evaluation | SCORING_001 | MIGRATED |
 
 ### RISK v3.0 rewrite resolution (2026-05-10)

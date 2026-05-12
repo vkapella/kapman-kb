@@ -42,7 +42,7 @@ IV/HV band computation at Pass 1 uses the Polygon options-metrics endpoint as th
 
 **Pass 1 outputs are candidate zones, not validated specifics.**
 
-Every eligible candidate output contains: the resolved structure (long call, long put, debit spread, CSP, or LEAP), the resolved direction (BULLISH, BEARISH, or NEUTRAL), a candidate strike zone expressed as a price range relative to current spot (e.g., "ATM to slightly OTM"), and a DTE target band appropriate to the intended trade horizon (45–60 DTE for swing trades, 12–24 months DTE for LEAPs). Exact strikes, exact expiration dates, entry prices, stop-loss prices, profit targets, and risk-reward ratios are never produced at Pass 1 — these require Pass 2 chain validation. When a candidate's structure would naturally call for a specific level (e.g., a CSP candidate's put strike), Pass 1 expresses it as a zone anchored to structural levels (e.g., "below the current support shelf, ATM to 5% OTM") rather than as a price or delta. Confidence values are assigned per the band discipline in the Appendix; alternatives carry strictly lower confidence than the primary.
+Every eligible candidate output contains: the resolved structure (long call, long put, debit spread, CSP, or LEAP), the resolved direction (BULLISH, BEARISH, or NEUTRAL), a candidate strike zone expressed as a price range relative to current spot (e.g., "ATM to slightly OTM"), and a DTE target band appropriate to the intended trade horizon (`SWING_DTE_BAND` for swing trades, `CSP_DTE_BAND` for cash-secured puts, `LEAP_DTE_BAND` for LEAPs, per SYSTEM_PARAMS). Exact strikes, exact expiration dates, entry prices, stop-loss prices, profit targets, and risk-reward ratios are never produced at Pass 1 — these require Pass 2 chain validation. When a candidate's structure would naturally call for a specific level (e.g., a CSP candidate's put strike), Pass 1 expresses it as a zone anchored to structural levels (e.g., "below the current support shelf, ATM to 5% OTM") rather than as a price or delta. Confidence values are assigned per the band discipline in the Appendix; alternatives carry strictly lower confidence than the primary.
 
 **Degraded inputs degrade outputs — the conservative default is the safety mechanism.**
 
@@ -165,7 +165,7 @@ Before per-candidate evaluation begins, three conditions must hold:
 | Structure | Named structure label | Long call / Long put / Call debit spread / Put debit spread / CSP / LEAP (long call) |
 | Direction | BULLISH / BEARISH / NEUTRAL | BULLISH |
 | Strike zone | Price range relative to current spot, or delta range | ATM to 5% OTM / Slightly ITM to ATM |
-| DTE band | Calendar day range | 45–60 DTE (swing) / 12–24 months DTE (LEAP) |
+| DTE band | Calendar day range | `SWING_DTE_BAND` (swing, per SYSTEM_PARAMS) / `CSP_DTE_BAND` (CSP, per SYSTEM_PARAMS) / `LEAP_DTE_BAND` (LEAP, per SYSTEM_PARAMS) |
 | IV source label | Data-quality label when spread-mandate fires on Pass 1 source | *Needs chain validation — spread-mandate fired on Polygon avg_iv; Pass 2 confirms* |
 
 **Confidence band discipline.**
