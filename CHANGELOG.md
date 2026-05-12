@@ -1,5 +1,26 @@
 # KapMan KB Changelog
 
+## [3.0.0-session8] — 2026-05-11
+
+### Added
+- `llm_runtime/SYSTEM_PARAMS_v3.0.md` (T3): new single-source-of-truth reference for all operator-configurable trading parameters. Parameters owned: SWING_DTE_BAND (60–120 days), CSP_DTE_BAND (45–60 days), LEAP_DTE_BAND (12–24 months), IV_HV_ELEVATED_THRESHOLD (1.20), IV_RANK_EXTREME_FLOOR (75), NEAR_FLIP_BAND_PCT (0.25%).
+- `llm_runtime/PASS2_VALIDATION_v3.0.md` (T2): full Pass 2 validation runbook replacing scaffold. Owns: seven-step validation workflow, chain quality classification (Full/Limited/Weak), spread-mandate three-outcome resolution, strike and expiration selection, PIPELINE_012 chain truncation behavioral contract, regime drift handling, Validated/Flagged/Rejected output states.
+
+### Changed
+- `llm_runtime/PASS1_SCREENING_v3.0.md`: hardcoded DTE literals replaced with SYSTEM_PARAMS parameter name references.
+- `llm_runtime/SIGNAL_v3.0.md`: hardcoded DTE label strings replaced with SYSTEM_PARAMS parameter name references.
+- `llm_runtime/VOLATILITY_v3.0.md`: SYSTEM_PARAMS pointer sentence added to IV/HV ratio bands Appendix table.
+- `llm_runtime/DEALER_v3.0.md`: SYSTEM_PARAMS pointer sentence added to near-flip zone Appendix table.
+
+### Fixed
+- SWING_DTE_BAND corrected from 45–60 days (v3.0 authoring error) to 60–120 days per actual operator practice.
+- CSP_DTE_BAND explicitly separated from SWING_DTE_BAND; confirmed at 45–60 days.
+
+### Legacy anchors resolved
+- PIPELINE_012 → PASS2_VALIDATION_v3.0.md § Legacy anchors
+- VALIDATION_001 (PASS2 residue) → PASS2_VALIDATION_v3.0.md § Legacy anchors
+- PIPELINE_011 (mis-filing) → confirmed PASS1-owned; mis-filing note in PASS2 Legacy anchors
+
 ## [3.0.0-alpha] — 2026-05-11
 
 ### Added
