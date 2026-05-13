@@ -1,5 +1,18 @@
 # KapMan KB Changelog
 
+## [3.0.0-alpha] — 2026-05-12 — Session 11
+
+### Added
+- Added `REPORT_STYLE_v3.0.md` (T3, draft). Direct successor to
+  `KAPMAN_REPORT_STYLE_GLOSSARY_v2.3.md` (full migration). New v3.0
+  content: four-level urgency hierarchy for portfolio row classes
+  (`.advisory`, `.warn` DTE-decay use, `.exited`, `.expired`);
+  `.tag-critical` badge class for Expired unacknowledged positions;
+  `.flags-col` 200px column class for portfolio Flags field;
+  body font-size corrected 7.8pt -> 7pt; print-color-adjust declarations
+  made explicit; `rationale-col` 180px confirmed consistent with
+  REPORT_FORMAT 20-word cap.
+
 ## [3.0.0-alpha] — 2026-05-12 — Session 10
 
 ### Added
