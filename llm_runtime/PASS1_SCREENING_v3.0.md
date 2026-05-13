@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.0
+kb_version: 3.0.1
 file_last_updated: 2026-05-13
 status: active
 tier: T2
@@ -19,6 +19,10 @@ Pass 1 screening is the eligible-set determination pass: it takes the operator's
 **The macro gate runs once per screening run, before any per-candidate evaluation begins.**
 
 The hostile-macro composite is SPY-derived: both conditions must hold — SPY spot well below its gamma flip AND SPY DGPI in the weakening tier or worse (≤ −20) — for hostile macro to be active. The macro gate is evaluated first, before the candidate list is touched, because its result applies uniformly to every candidate in the run. When hostile macro is active, long-premium directional structures (long calls, long puts, call debit spreads) are refused for every candidate without per-candidate re-evaluation; the eligible-set redirect — CSPs, long puts, hedges, LEAPs — applies run-wide. When only one hostile-macro condition holds (SPY below flip with DGPI > −20, or SPY above flip with DGPI ≤ −20), the macro layer reads as mixed and is treated as the more conservative of the two readings throughout the run. When SPY dealer-status is LIMITED or INVALID, the macro layer is read with reduced confidence and the run output says so; macro regime is not asserted as supportive on weak SPY data, and the conservative read applies. A hostile-macro run is not an empty run — it is a redirected run, and the report surfaces the eligible alternatives explicitly for each candidate rather than returning a wall of refusals.
+
+**The near-event-risk screen runs per candidate, before the macro gate.**
+
+Earnings proximity is evaluated first for each candidate because it is the fastest-resolving veto: a confirmed date within EARNINGS_BLOCK_DAYS closes the candidate immediately with no further evaluation. A candidate inside EARNINGS_CAUTION_DAYS receives a WAIT with an operator-approval gate and does not enter the eligible set until the operator explicitly redirects it. A candidate that was WAIT due to earnings proximity is re-evaluated fresh in any subsequent session where the earnings date has passed.
 
 **A valid screening request has three elements; PASS1 treats each differently.**
 
@@ -143,6 +147,7 @@ Before per-candidate evaluation begins, three conditions must hold:
 
 | Step | What runs | Scope | Governs |
 |---|---|---|---|
+| 0 — Near-event-risk screen | Earnings date lookup; EARNINGS_BLOCK_DAYS / EARNINGS_CAUTION_DAYS evaluation per SIGNAL | Per candidate, before macro gate | Immediate WAIT for block-window candidates; operator-approval WAIT for caution-window candidates |
 | 1 — Macro gate | SPY hostile-macro composite evaluation | Once per run, before any per-candidate work | All candidates in the run |
 | 2 — Wyckoff status | Propose-confirm (if unconfirmed) or confirmed-reading lookup | Per candidate, inline sequential | Wyckoff veto; directional fallback |
 | 3 — Regime reads | MCP fetch: per-ticker dealer metrics, volatility metrics (Pass 1 IV source) | Per candidate | Dealer-timing veto; spread-mandate |
@@ -157,6 +162,8 @@ Before per-candidate evaluation begins, three conditions must hold:
 | Eligible | Candidate passed all applicable trigger gates; a structure and direction are determined | Structure, direction, candidate zone (strike range + DTE band), sizing band note, confidence, data-quality labels | Enters Pass 2 queue |
 | NO_TRADE | Candidate refused for this screening run on a named basis | Named refusal reason, eligible alternatives with lower confidence, structure = NONE for primary | Does not enter Pass 2; alternatives may re-enter as separate candidates if operator directs |
 | WAIT | Candidate is structurally screenable but a required input is degraded or absent | Named degraded input, recheck instruction, WAIT confidence below primary NO_TRADE | Does not enter Pass 2 until input is refreshed and candidate is re-screened |
+| WAIT — near event risk (block) | Earnings within EARNINGS_BLOCK_DAYS | Named earnings date and days remaining | Does not enter Pass 2; re-screens fresh in next session after earnings pass |
+| WAIT — near event risk (caution) | Earnings within EARNINGS_CAUTION_DAYS, outside block window | Named earnings date, days remaining, operator-approval gate | Does not enter Pass 2 unless operator explicitly redirects in current session |
 
 **Candidate zone format.**
 
