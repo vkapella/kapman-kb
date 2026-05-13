@@ -1,5 +1,19 @@
 # KapMan KB Changelog
 
+## [3.0.0-alpha] — 2026-05-13 — Session 13
+
+### Session 13 — 2026-05-13
+
+### Added
+- `SIC_SECTOR_MAP_v3.0.md` (T3, draft) — SIC range -> sector -> benchmark ETF lookup table.
+  Replaces `SIC_SECTOR_ETF_MAPPING_v2.3.md`. Changes from v2.3: XLP added for Consumer Staples
+  (was —); redundant point-code sub-rows consolidated to ranges; Python lookup code and Quick
+  Reference table moved to engineering_only (not yet created — pending). No legacy rule IDs
+  carried; v2.3 antecedent had none.
+
+### Updated
+- `REPORT_STYLE_v3.0.md` — scaffold replaced with session-11 draft content. Status: scaffolding -> draft.
+
 ## [3.0.0-alpha] — 2026-05-13 — Session 12
 
 ### Session 12 — 2026-05-13
