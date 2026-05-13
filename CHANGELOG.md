@@ -1,5 +1,20 @@
 # KapMan KB Changelog
 
+## v3.0.1 — 2026-05-13
+
+### Patch: Earnings-proximity veto
+
+**Problem:** Pass 1 session 2026-05-13 placed NVDA, ZM, ZS, SNOW, MRVL, COST in the Eligible table alongside WAIT badges instead of routing them exclusively to WAIT — Earnings Proximity. No named veto or blocking-window parameters existed.
+
+**Changes:**
+- SYSTEM_PARAMS_v3.0.md: Added EARNINGS_BLOCK_DAYS = 7 and EARNINGS_CAUTION_DAYS = 21 to parameter table.
+- SIGNAL_v3.0.md: Added Heuristic 0 — near-event-risk veto, fires before Wyckoff veto and all other trigger evaluation.
+- PASS1_SCREENING_v3.0.md: Added Step 0 to per-candidate sequence; added near-event-risk screen heuristic; added WAIT sub-type rows to output state definitions table.
+
+**Behavioral change:** Candidates with confirmed earnings ≤ 7d are immediately WAIT — no Eligible row, no pass-through to Pass 2. Candidates 8–21d out are WAIT with explicit operator-approval gate.
+
+**Files touched:** SYSTEM_PARAMS_v3.0.md, SIGNAL_v3.0.md, PASS1_SCREENING_v3.0.md, CHANGELOG.md
+
 ## [3.0.0] — Session 15 — 2026-05-13
 
 ### Status promotion — alpha exit

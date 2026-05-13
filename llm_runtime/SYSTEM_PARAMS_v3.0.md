@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.0
+kb_version: 3.0.1
 file_last_updated: 2026-05-13
 status: active
 tier: T3
@@ -36,6 +36,8 @@ SYSTEM_PARAMS defines values. It does not define what to do with them. The behav
 | `IV_HV_ELEVATED_THRESHOLD` | 1.20 | ratio (IV ÷ HV) | VOLATILITY, SIGNAL | The IV/HV ratio at or above which the spread-mandate fires for new directional entries. Boundary value resolves to elevated (conservative) per VOLATILITY heuristics. |
 | `IV_RANK_EXTREME_FLOOR` | 75 | IV rank score [0–100] | VOLATILITY, SIGNAL | The IV rank score at or above which the extreme tier activates, reinforcing the spread-mandate even when IV/HV reads neutral. |
 | `NEAR_FLIP_BAND_PCT` | 0.25 | percent of spot (±) | DEALER, GUARDRAILS | The symmetric percentage band around the gamma flip level that defines the near-flip zone. Applies identically to SPY (macro layer) and per-ticker. |
+| `EARNINGS_BLOCK_DAYS` | 7 | calendar days | PASS1, SIGNAL | Hard WAIT. Earnings ≤ 7d from screening date: immediate WAIT output, no further regime evaluation, no override path. |
+| `EARNINGS_CAUTION_DAYS` | 21 | calendar days | PASS1, SIGNAL | Soft WAIT. Earnings 8–21d out: WAIT with named operator-approval gate. Candidate does not advance to Eligible until operator explicitly redirects in current session. |
 | `DTE_DECAY_WARNING_THRESHOLD` | 21 | calendar days | PORTFOLIO_MGMT | The remaining DTE at or below which PORTFOLIO_MGMT surfaces a DTE decay warning for an open position. Signals that the operator may want to roll or close rather than hold to expiration. Operator-configurable; 21 days is the default, corresponding to the point where theta decay accelerates materially for most structures. |
 
 ## Workflow integration

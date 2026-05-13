@@ -50,6 +50,14 @@ This repository separates runtime and engineering materials:
 | `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` | — | draft | 15 |
 | `engineering_only/PORTFOLIO_MGMT_MCP_REFERENCE_v3.0.md` | — | draft | 15 |
 
+### v3.0.1 patch file version/status
+
+| File | kb_version | status |
+|---|---|---|
+| SYSTEM_PARAMS_v3.0.md | 3.0.1 | active |
+| SIGNAL_v3.0.md | 3.0.1 | active |
+| PASS1_SCREENING_v3.0.md | 3.0.1 | active |
+
 ### Session 14 llm_runtime inventory verification
 
 | File | Tier | doc_type | Status |
