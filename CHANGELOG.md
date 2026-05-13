@@ -1,5 +1,20 @@
 # KapMan KB Changelog
 
+## [3.0.0-alpha] — Session 15 (engineering_only/) — 2026-05-13
+
+### New files
+- engineering_only/DEALER_PIPELINE_v3.0.md (draft)
+- engineering_only/PASS1_MCP_REFERENCE_v3.0.md (draft)
+- engineering_only/PASS2_MCP_REFERENCE_v3.0.md (draft)
+- engineering_only/SIGNAL_MCP_REFERENCE_v3.0.md (draft)
+- engineering_only/VOLATILITY_MCP_REFERENCE_v3.0.md (draft)
+- engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md (draft)
+- engineering_only/PORTFOLIO_MGMT_MCP_REFERENCE_v3.0.md (draft)
+
+### INDEX.md
+- All seven engineering_only/ files added to file inventory.
+- Forthcoming annotations removed from rule-ID migration table rows for all covered legacy IDs.
+
 ## [3.0.0-alpha] — Session 14 — 2026-05-13
 
 ### Audit pass
