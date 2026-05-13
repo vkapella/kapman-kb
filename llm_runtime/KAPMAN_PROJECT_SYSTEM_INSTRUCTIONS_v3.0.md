@@ -32,9 +32,9 @@ The table below is the authoritative map of all files in `llm_runtime/`. Read it
 | `PASS2_VALIDATION_v3.0.md` | T2 | runbook | draft | Live chain validation, exact strike and expiration selection, spread-mandate enforcement |
 | `PORTFOLIO_MGMT_v3.0.md` | T2 | runbook | draft | Open position monitoring, exit trigger evaluation, DTE decay warnings, P/L reporting |
 | `REPORT_FORMAT_v3.0.md` | T3 | format | draft | Report section order, field caps, footnote overflow mechanics, mode-specific layout |
-| `REPORT_STYLE_v3.0.md` | T3 | style | scaffolding | Visual presentation, HTML/CSS spec, typography, color |
+| `REPORT_STYLE_v3.0.md` | T3 | style | draft | Visual presentation, HTML/CSS spec, typography, color |
 | `SYSTEM_PARAMS_v3.0.md` | T3 | reference | draft | Operator-configurable numeric parameters consumed by name across runtime files |
-| `SIC_SECTOR_MAP_v3.0.md` | T3 | reference | scaffolding | SIC code to sector ETF benchmark mapping |
+| `SIC_SECTOR_MAP_v3.0.md` | T3 | reference | draft | SIC code to sector ETF benchmark mapping |
 
 ---
 
@@ -114,3 +114,10 @@ Enter the output sequence for the confirmed mode per `REPORT_FORMAT_v3.0.md`. Do
 | 3 | Macro gate via SPY dealer metrics | Screening, Hybrid | Yes — eligible set is not defined until gate resolves |
 | 4 | Load position context, check DTE decay | Portfolio, Hybrid | Yes — DTE flags precede screening output |
 | 5 | Proceed to mode output | All | — |
+
+## Legacy anchors (for legend citations and back-compat)
+
+No v2.3 rule IDs map to this file. `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` is a
+net-new v3.0 construct; the v2.3 antecedent (`KAPMAN_PROJECT_INSTRUCTIONS_v2.3.md`)
+carried no discrete rule IDs — its content was distributed across behavioral rules now
+in `KAPMAN_GUARDRAILS_v3.0.md` and format rules now in `REPORT_FORMAT_v3.0.md`.
