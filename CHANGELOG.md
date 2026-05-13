@@ -1,5 +1,13 @@
 # KapMan KB Changelog
 
+## [3.0.0-alpha] — 2026-05-12 — Session 9
+
+### Added
+- `PORTFOLIO_MGMT_v3.0.md` (T2 runbook): Position lifecycle layer. Owns position context schema, Portfolio mode workflow sequence (7 steps), position lifecycle state machine (Open / Advisory / Exited / Expired), Regime exit advisory operationalization (4 branches), DTE decay warning, exit-trigger proximity evaluation, Hybrid mode regime data reuse, position entry recording, Exited and Expired position handling. Net-new v3.0 construct; no v2.3 antecedent.
+
+### Changed
+- `SYSTEM_PARAMS_v3.0.md`: Added `DTE_DECAY_WARNING_THRESHOLD = 21 calendar days`, consumed by PORTFOLIO_MGMT. Updated Workflow integration section to reference PORTFOLIO_MGMT. Updated Operational heuristics to name PORTFOLIO_MGMT as a behavioral owner. Updated `file_last_updated` to 2026-05-12.
+
 ## [3.0.0-session8] — 2026-05-11
 
 ### Added
