@@ -58,6 +58,13 @@ This repository separates runtime and engineering materials:
 | SIGNAL_v3.0.md | 3.0.1 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.1 | active |
 
+### v3.0.1 report metadata patch
+
+| File | kb_version | file_last_updated |
+|---|---|---|
+| REPORT_FORMAT_v3.0.md | 3.0.1 | 2026-05-13 |
+| REPORT_STYLE_v3.0.md | 3.0.1 | 2026-05-13 |
+
 ### Session 14 llm_runtime inventory verification
 
 | File | Tier | doc_type | Status |

@@ -1,5 +1,15 @@
 # KapMan KB Changelog
 
+## [3.0.1] — 2026-05-13
+### Changed
+- REPORT_FORMAT_v3.0.md: legend/footer session metadata element #5 expanded from 1-line to 2-line cap; line 1 carries run start timestamp, render timestamp, elapsed time, and token estimate; new operational heuristic defines timestamp recording discipline and runtime token-estimate formula (N_tickers × 4,000) + 60,000.
+- REPORT_STYLE_v3.0.md: added .session-meta-timing{color:#666;} CSS class; note added to Legend/footer CSS block.
+### Rationale
+Operator requested run timing and token cost visibility in report footer. Timestamps recorded at MCP call boundaries, not reconstructed. Token estimate is a planning figure, not a metered count.
+### Files changed
+- llm_runtime/REPORT_FORMAT_v3.0.md (3.0.0 → 3.0.1)
+- llm_runtime/REPORT_STYLE_v3.0.md (3.0.0 → 3.0.1)
+
 ## v3.0.1 — 2026-05-13
 
 ### Patch: Earnings-proximity veto
