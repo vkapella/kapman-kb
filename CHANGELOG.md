@@ -1,5 +1,13 @@
 # KapMan KB Changelog
 
+## [3.0.2] — 2026-05-13
+### Changed
+- REPORT_FORMAT_v3.0.md: Wyckoff Phase field #4 Notes cell replaced. Previous spec collapsed all non-pipeline-accepted states to "Unconfirmed", discarding the phase label. New spec always renders [Phase] ([status]) using a six-state rendering contract: pipeline-accepted (phase only or phase + event), confirmed, declared, pipeline-flagged (phase? suffix), unconfirmed (phase? suffix), UNKNOWN. Phase abbreviations defined to fit 20-char cap.
+### Rationale
+Operator observed that NO_TRADE and WAIT rows were rendering "Unconfirmed" with no phase label, making it impossible to distinguish a Distribution veto from an Accumulation pre-Spring gate without reading the rationale cell. The MCP delivers the pipeline regime in all cases; the new spec surfaces it always.
+### Files changed
+- llm_runtime/REPORT_FORMAT_v3.0.md (3.0.1 → 3.0.2)
+
 ## [3.0.1] — 2026-05-13
 ### Changed
 - REPORT_FORMAT_v3.0.md: legend/footer session metadata element #5 expanded from 1-line to 2-line cap; line 1 carries run start timestamp, render timestamp, elapsed time, and token estimate; new operational heuristic defines timestamp recording discipline and runtime token-estimate formula (N_tickers × 4,000) + 60,000.
