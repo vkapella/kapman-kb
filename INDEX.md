@@ -33,6 +33,8 @@ This repository separates runtime and engineering materials:
 | File | Tier | Status | Session |
 |---|---|---|---|
 | `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | T0 | draft | 12 |
+| `REPORT_STYLE_v3.0.md` | T3 | draft | 11 |
+| `SIC_SECTOR_MAP_v3.0.md` | T3 | draft | 13 |
 
 ## v2.3 -> v3.0 rule-ID migration table
 
