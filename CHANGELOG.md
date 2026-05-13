@@ -1,5 +1,24 @@
 # KapMan KB Changelog
 
+## [3.0.0-alpha] — Session 14 — 2026-05-13
+
+### Audit pass
+- Full KB audit across all 14 llm_runtime/ files (revised run, RISK_v3.0.md present).
+- Frontmatter integrity: PASS — all 14 files, all 6 fields correct.
+- Cross-file reference resolvability: PASS — 0 dangling references.
+- Named anchor resolution: PASS.
+- Stale forthcoming annotations removed: 47 total across SIGNAL (38), VOLATILITY (6),
+  WYCKOFF (3). Annotation removal only; no content changes.
+- KB inventory status corrected in KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS: REPORT_STYLE
+  and SIC_SECTOR_MAP updated from scaffolding → draft.
+- Legacy anchors section added to KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS (no v2.3
+  antecedents; statement-of-absence pattern).
+- AGENTS.md: reduced-template policy added for doc_type: reference files in llm_runtime/.
+- INDEX.md migration table verified/updated.
+- INDEX.md completeness audit: complete for known legacy IDs; full verification pending
+  operator review of archive/ source files.
+- Session 15: apply remaining fixes, promote all 14 files draft → active.
+
 ## [3.0.0-alpha] — 2026-05-13 — Session 13
 
 ### Session 13 — 2026-05-13

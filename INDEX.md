@@ -36,6 +36,25 @@ This repository separates runtime and engineering materials:
 | `REPORT_STYLE_v3.0.md` | T3 | draft | 11 |
 | `SIC_SECTOR_MAP_v3.0.md` | T3 | draft | 13 |
 
+### Session 14 llm_runtime inventory verification
+
+| File | Tier | doc_type | Status |
+|---|---|---|---|
+| `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | T0 | orientation | draft |
+| `KAPMAN_GUARDRAILS_v3.0.md` | T0 | principle | draft |
+| `DEALER_v3.0.md` | T1 | principle | draft |
+| `RISK_v3.0.md` | T1 | principle | draft |
+| `SIGNAL_v3.0.md` | T1 | principle | draft |
+| `VOLATILITY_v3.0.md` | T1 | principle | draft |
+| `WYCKOFF_v3.0.md` | T1 | principle | draft |
+| `PASS1_SCREENING_v3.0.md` | T2 | runbook | draft |
+| `PASS2_VALIDATION_v3.0.md` | T2 | runbook | draft |
+| `PORTFOLIO_MGMT_v3.0.md` | T2 | runbook | draft |
+| `REPORT_FORMAT_v3.0.md` | T3 | format | draft |
+| `REPORT_STYLE_v3.0.md` | T3 | style | draft |
+| `SYSTEM_PARAMS_v3.0.md` | T3 | reference | draft |
+| `SIC_SECTOR_MAP_v3.0.md` | T3 | reference | draft |
+
 ## v2.3 -> v3.0 rule-ID migration table
 
 | Legacy ID | v3.0 destination file | Anchor name | Status |
@@ -96,6 +115,7 @@ This repository separates runtime and engineering materials:
 | VOLATILITY_014 | llm_runtime/VOLATILITY_v3.0.md | VOLATILITY_014 | PENDING REWRITE |
 | VOLATILITY_015 | llm_runtime/VOLATILITY_v3.0.md | VOLATILITY_015 | PENDING REWRITE |
 | RISK_005 | llm_runtime/RISK_v3.0.md | RISK_005 | PENDING REWRITE |
+| POSITION_SIZING_001 | RISK_v3.0.md § Principle and § Operational heuristics | Superseded by band-based judgment model; v2.3 sizing ladder preserved as reference in Appendix |
 | RISK_001 | engineering_only/BACKEND_PIPELINE_v3.0.md | RISK_001 | PENDING REWRITE |
 | RISK_002 | engineering_only/BACKEND_PIPELINE_v3.0.md | RISK_002 | PENDING REWRITE |
 | RISK_003 | engineering_only/BACKEND_PIPELINE_v3.0.md | RISK_003 | PENDING REWRITE |
@@ -148,6 +168,24 @@ This repository separates runtime and engineering materials:
 | PIPELINE_011 | llm_runtime/PASS1_SCREENING_v3.0.md § Operational heuristics ("Pass 1 data does not carry forward as authoritative into Pass 2") | PIPELINE_011 | MIGRATED |
 | PIPELINE_011 (mis-filing note) | PASS2_VALIDATION_v3.0.md § Legacy anchors | Mis-filing resolved; authoritative destination is PASS1 |
 | SCORING_001 | engineering_only/PASS1_MCP_REFERENCE_v3.0.md (forthcoming) — pass-through constraint and storage bounds; runtime: not referenced in any trigger evaluation | SCORING_001 | MIGRATED |
+
+### Session 14 migration coverage verification rows
+
+| Legacy ID | v3.0 destination file | Anchor name | Status |
+|---|---|---|---|
+| DEALER_001–DEALER_014 | engineering_only/DEALER_PIPELINE_v3.0.md (forthcoming) | DEALER_001–DEALER_014 | VERIFIED |
+| PIPELINE_010, SCORING_001 | engineering_only/PASS1_MCP_REFERENCE_v3.0.md (forthcoming) | PIPELINE_010, SCORING_001 | VERIFIED |
+| PIPELINE_011 | REPORT_FORMAT_v3.0.md § Operational heuristics — pass label discipline | PIPELINE_011 | VERIFIED |
+| PIPELINE_012 | PASS2_VALIDATION_v3.0.md § Operational heuristics — truncation heuristic | PIPELINE_012 | VERIFIED |
+| VALIDATION_001 | KAPMAN_GUARDRAILS_v3.0.md § Operational heuristics; REPORT_FORMAT_v3.0.md § Operational heuristics | VALIDATION_001 | VERIFIED |
+| RISK_005 | RISK_v3.0.md § Principle and § Operational heuristics | RISK_005 | VERIFIED |
+| SIGNAL_001–SIGNAL_004 | engineering_only/SIGNAL_MCP_REFERENCE_v3.0.md (forthcoming) | SIGNAL_001–SIGNAL_004 | VERIFIED |
+| SIGNAL_005 | SIGNAL_v3.0.md § Operational heuristics — anti-hallucination floor; computation to engineering_only/SIGNAL_MCP_REFERENCE_v3.0.md (forthcoming) | SIGNAL_005 | VERIFIED |
+| SIGNAL_006 | SIGNAL_v3.0.md § Operational heuristics — NO_TRADE consistency | SIGNAL_006 | VERIFIED |
+| SIGNAL_009 | SIGNAL_v3.0.md § Operational heuristics — fallback policy | SIGNAL_009 | VERIFIED |
+| VOLATILITY_001–VOLATILITY_015 | Per individual anchor entries in VOLATILITY_v3.0.md § Legacy anchors | VOLATILITY_001–VOLATILITY_015 | VERIFIED |
+| WYCKOFF_PHASE_001–WYCKOFF_PHASE_013 | Per individual anchor entries in WYCKOFF_v3.0.md § Legacy anchors | WYCKOFF_PHASE_001–WYCKOFF_PHASE_013 | VERIFIED |
+| WYCKOFF_EVENT_002–WYCKOFF_EVENT_012 | Per individual anchor entries in WYCKOFF_v3.0.md § Legacy anchors | WYCKOFF_EVENT_002–WYCKOFF_EVENT_012 | VERIFIED |
 
 ### RISK v3.0 rewrite resolution (2026-05-10)
 

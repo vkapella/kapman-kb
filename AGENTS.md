@@ -283,6 +283,37 @@ Mathematical formulas, decision tables, and any content that doesn't
 fit naturally into the principle / heuristics / workflow structure.
 ```
 
+## File template — reference (lookup tables)
+
+Files in `llm_runtime/` with `doc_type: reference` are pure lookup tables with no
+behavioral rules. They use a reduced template:
+
+```markdown
+---
+system: KapMan
+doc_type: reference
+kb_version: <MAJOR.MINOR.PATCH>
+file_last_updated: YYYY-MM-DD
+status: scaffolding | draft | active
+tier: T0 | T1 | T2 | T3
+---
+
+# {DOMAIN}
+
+One paragraph stating what this file contains and what it does not own.
+
+## {Primary content section}
+The lookup table or data content.
+
+## Legacy anchors (for legend citations and back-compat)
+Every legacy rule ID that maps to this file, or a statement that none exist.
+```
+
+This template applies to `SIC_SECTOR_MAP_v3.0.md`, `SYSTEM_PARAMS_v3.0.md`, and any
+future `doc_type: reference` file added to `llm_runtime/`. The Principle, Operational
+heuristics, Workflow integration, and Appendix sections are not required for reference
+files; their omission is not a template compliance defect.
+
 Files in `engineering_only/` use `doc_type: reference` and the section
 structure: `## Purpose / ## Contents / ## Legacy anchors / ## Appendix`.
 
