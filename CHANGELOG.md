@@ -1,5 +1,10 @@
 # KapMan KB Changelog
 
+## [3.0.0-alpha] — 2026-05-12 — Session 10
+
+### Added
+- `REPORT_FORMAT_v3.0.md` (T3, status: draft): information architecture specification for KapMan report output. Defines section presence and ordering rules by mode (Screening, Portfolio, Hybrid), field ordering and caps, source bar placement contract, legend/footer sequencing contract, and output structure for per-ticker and per-position details.
+
 ## [3.0.0-alpha] — 2026-05-12 — Session 9
 
 ### Added

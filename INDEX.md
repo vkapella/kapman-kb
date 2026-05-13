@@ -22,7 +22,7 @@ This repository separates runtime and engineering materials:
 | llm_runtime/PASS2_VALIDATION_v3.0.md | T2 | PASS2 validation runbook | Session 8 | Active |
 | llm_runtime/PORTFOLIO_MGMT_v3.0.md | T2 | runbook | Portfolio management workflow | Session 9 | Draft |
 | llm_runtime/REPORT_STYLE_v3.0.md | T3 | style | Report style guidance |
-| llm_runtime/REPORT_FORMAT_v3.0.md | T3 | style | Report format guidance |
+| llm_runtime/REPORT_FORMAT_v3.0.md | T3 | style | Report format guidance | Session 10 | Draft |
 | llm_runtime/SIC_SECTOR_MAP_v3.0.md | T3 | reference | SIC to sector map reference |
 | llm_runtime/SYSTEM_PARAMS_v3.0.md | T3 | Operator-configurable parameter reference; includes `DTE_DECAY_WARNING_THRESHOLD` (21 days) | Session 9 | Active |
 | engineering_only/BACKEND_PIPELINE_v3.0.md | T4 | reference | Backend pipeline reference |
