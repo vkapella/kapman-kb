@@ -62,7 +62,7 @@ This repository separates runtime and engineering materials:
 
 | File | kb_version | file_last_updated |
 |---|---|---|
-| REPORT_FORMAT_v3.0.md | 3.0.1 | 2026-05-13 |
+| REPORT_FORMAT_v3.0.md | 3.0.2 | 2026-05-13 |
 | REPORT_STYLE_v3.0.md | 3.0.1 | 2026-05-13 |
 
 ### Session 14 llm_runtime inventory verification

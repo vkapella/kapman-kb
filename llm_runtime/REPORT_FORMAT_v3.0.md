@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.1
+kb_version: 3.0.2
 file_last_updated: 2026-05-13
 status: active
 tier: T3
@@ -180,7 +180,7 @@ One row per candidate. Fields render left to right in the order below. Fields ma
 | 1 | Ticker | 6 chars | None — tickers do not overflow | Symbol only; no company name |
 | 2 | Type | 20 chars | None | Structure label: Long Call, Long Put, CSP, Vertical Spread, NONE |
 | 3 | Action | 12 chars | None | ACT TODAY, MONITOR, NO_TRADE, WAIT — vocabulary fixed |
-| 4 | Wyckoff Phase | 20 chars | None | Phase label from WYCKOFF vocabulary; "Unconfirmed" if propose-confirm not completed |
+| 4 | Wyckoff Phase | 20 chars | None | Always render as [Phase] ([status]). Rendering contract by confirmation status — pipeline-accepted (clean): phase label only, e.g. "Markup" or "Accum post-Spring — SOS ✓"; pipeline-accepted (no primary event): phase label only, e.g. "Markup"; confirmed (estimation path): "Phase (confirmed)", e.g. "Markup (confirmed)"; declared (operator-stated): "Phase (declared)", e.g. "Distrib (declared)"; pipeline-flagged: "Phase? (flagged)", e.g. "Distrib? (flagged)"; unconfirmed (declined/skipped): "Phase? (unconfirm'd)", e.g. "Accum? (unconfirm'd)"; UNKNOWN (no read): "UNKNOWN". Phase abbreviations within 20-char cap: Accum pre-Spring, Accum post-Spring, Markup, Distrib, Markdown. The ? suffix on flagged and unconfirmed statuses signals to the operator that the phase shown is the pipeline's read, not a confirmed one. pipeline-accepted carries full trigger authority and needs no qualifier. |
 | 5 | DGPI | 8 chars | None | Tier label (Strongly Supportive → Hostile) + raw score in parens: "Mod. Supportive (+34)" |
 | 6 | Strike | 25 chars | Footnote | Pass 1: "Candidate zone $X–$Y"; Pass 2: exact value(s) |
 | 7 | Exp | 15 chars | None | Pass 1: DTE band label per SYSTEM_PARAMS; Pass 2: exact date YYYY-MM-DD |
