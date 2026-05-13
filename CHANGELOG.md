@@ -1,5 +1,16 @@
 # KapMan KB Changelog
 
+## [3.0.0-alpha] — 2026-05-13 — Session 12
+
+### Session 12 — 2026-05-13
+- `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md`: scaffolding → draft.
+  Added: Principle (T0 peer authority split), KB file inventory table (14 files),
+  tier model (T0–T3 with conflict resolution protocol), mode detection (3 modes,
+  5-step ordered sequence), session entry sequence (5-step blocking checklist).
+  Dropped: Legacy anchors section (no rule IDs map here), Appendix section
+  (no unhoused formulas — all migrated to domain files in sessions 1–11).
+  RISK_v3.0.md added to KB inventory after upload confirmation.
+
 ## [3.0.0-alpha] — 2026-05-12 — Session 11
 
 ### Added
