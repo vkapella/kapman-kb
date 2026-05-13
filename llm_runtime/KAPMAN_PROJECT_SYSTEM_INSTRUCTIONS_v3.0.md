@@ -1,9 +1,9 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 3.0.0-alpha
+kb_version: 3.0.0
 file_last_updated: 2026-05-13
-status: draft
+status: active
 tier: T0
 ---
 

@@ -1,5 +1,12 @@
 # KapMan KB Changelog
 
+## [3.0.0] — Session 15 — 2026-05-13
+
+### Status promotion — alpha exit
+- All 14 llm_runtime/ files promoted from draft to active.
+- kb_version bumped from 3.0.0-alpha to 3.0.0 across all llm_runtime/ files and INDEX.md.
+- KapMan KB v3.0.0 is complete.
+
 ## [3.0.0-alpha] — Session 15 (engineering_only/) — 2026-05-13
 
 ### New files

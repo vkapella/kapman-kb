@@ -39,9 +39,9 @@ This repository separates runtime and engineering materials:
 
 | File | Tier | Status | Session |
 |---|---|---|---|
-| `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | T0 | draft | 12 |
-| `REPORT_STYLE_v3.0.md` | T3 | draft | 11 |
-| `SIC_SECTOR_MAP_v3.0.md` | T3 | draft | 13 |
+| `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | T0 | active | 12 |
+| `REPORT_STYLE_v3.0.md` | T3 | active | 11 |
+| `SIC_SECTOR_MAP_v3.0.md` | T3 | active | 13 |
 | `engineering_only/DEALER_PIPELINE_v3.0.md` | — | draft | 15 |
 | `engineering_only/PASS1_MCP_REFERENCE_v3.0.md` | — | draft | 15 |
 | `engineering_only/PASS2_MCP_REFERENCE_v3.0.md` | — | draft | 15 |
@@ -54,20 +54,20 @@ This repository separates runtime and engineering materials:
 
 | File | Tier | doc_type | Status |
 |---|---|---|---|
-| `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | T0 | orientation | draft |
-| `KAPMAN_GUARDRAILS_v3.0.md` | T0 | principle | draft |
-| `DEALER_v3.0.md` | T1 | principle | draft |
-| `RISK_v3.0.md` | T1 | principle | draft |
-| `SIGNAL_v3.0.md` | T1 | principle | draft |
-| `VOLATILITY_v3.0.md` | T1 | principle | draft |
-| `WYCKOFF_v3.0.md` | T1 | principle | draft |
-| `PASS1_SCREENING_v3.0.md` | T2 | runbook | draft |
-| `PASS2_VALIDATION_v3.0.md` | T2 | runbook | draft |
-| `PORTFOLIO_MGMT_v3.0.md` | T2 | runbook | draft |
-| `REPORT_FORMAT_v3.0.md` | T3 | format | draft |
-| `REPORT_STYLE_v3.0.md` | T3 | style | draft |
-| `SYSTEM_PARAMS_v3.0.md` | T3 | reference | draft |
-| `SIC_SECTOR_MAP_v3.0.md` | T3 | reference | draft |
+| `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | T0 | orientation | active |
+| `KAPMAN_GUARDRAILS_v3.0.md` | T0 | principle | active |
+| `DEALER_v3.0.md` | T1 | principle | active |
+| `RISK_v3.0.md` | T1 | principle | active |
+| `SIGNAL_v3.0.md` | T1 | principle | active |
+| `VOLATILITY_v3.0.md` | T1 | principle | active |
+| `WYCKOFF_v3.0.md` | T1 | principle | active |
+| `PASS1_SCREENING_v3.0.md` | T2 | runbook | active |
+| `PASS2_VALIDATION_v3.0.md` | T2 | runbook | active |
+| `PORTFOLIO_MGMT_v3.0.md` | T2 | runbook | active |
+| `REPORT_FORMAT_v3.0.md` | T3 | format | active |
+| `REPORT_STYLE_v3.0.md` | T3 | style | active |
+| `SYSTEM_PARAMS_v3.0.md` | T3 | reference | active |
+| `SIC_SECTOR_MAP_v3.0.md` | T3 | reference | active |
 
 ## v2.3 -> v3.0 rule-ID migration table
 

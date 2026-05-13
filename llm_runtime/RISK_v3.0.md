@@ -1,9 +1,9 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.0-alpha
-file_last_updated: 2026-05-10
-status: draft
+kb_version: 3.0.0
+file_last_updated: 2026-05-13
+status: active
 tier: T1
 ---
 
