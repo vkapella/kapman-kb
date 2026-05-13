@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.0
+kb_version: 3.0.1
 file_last_updated: 2026-05-13
 status: active
 tier: T3
@@ -86,6 +86,10 @@ A KapMan report is a decision surface, not a compliance document. It is designed
 - Session metadata (date, pass sequence completed, mode)
 
 The legend/footer is the only section that may expand without a hard cap — footnote volume is determined by overflow, not by the operator. The legend/footer never appears mid-report; it is always the final element.
+
+**Run timing and token estimate are recorded at two fixed points — not reconstructed at render time.**
+
+The run start timestamp is the moment the first MCP call of the run fires: the SPY macro gate fetch for Pass 1, or the first live chain fetch for Pass 2 when Pass 2 begins as a standalone run. The render timestamp is the moment Claude begins assembling the final HTML output. Both are noted inline during the session as they occur and carried into the session metadata block — they are never back-calculated or approximated. If no reliable clock signal is present in context, the timestamp renders as `--:-- ET (unavailable)`; timestamps are never fabricated. The token estimate uses the runtime formula `(N_tickers × 4,000) + 60,000`, where N_tickers is the count of candidates that received a Pass 1 determination (Eligible, NO_TRADE, or WAIT) in the current run. Round to the nearest 1,000 and label `~NNNk tokens est.` This is a planning estimate, not a metered API count. When Pass 2 has also run, append `+ P2 chain validation` to the label without adjusting the formula.
 
 ---
 
@@ -284,7 +288,7 @@ Multiple degradation flags are comma-separated on the source bar line. When flag
 | 2 | Data sources | 2 lines | MCP tool surfaces used; matches source bar but may include additional detail |
 | 3 | Chain quality badge key | 3 lines | "Full chain: complete OI and volume data / Limited chain: partial data, floor sizing applied / Invalid chain: dropped from Pass 2" |
 | 4 | Footnotes | No cap — determined by overflow volume | Each footnote on its own line; format: "¹ [Full overflow content, self-contained]" |
-| 5 | Session metadata | 1 line | "Date: YYYY-MM-DD \| Mode: [Screening / Portfolio / Hybrid] \| Passes completed: [Pass 1 / Pass 1 + Pass 2 / Portfolio / Both]" |
+| 5 | Session metadata | 2 lines | Line 1: `Run: HH:MM ET → HH:MM ET (Xh Ym) \| ~NNNk tokens est.` Line 2: `Date: YYYY-MM-DD \| Mode: [Screening / Portfolio / Hybrid] \| Passes: [Pass 1 / Pass 1 + Pass 2 / Portfolio / Both]` |
 
 ---
 

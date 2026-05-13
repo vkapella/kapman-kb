@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: style
-kb_version: 3.0.0
+kb_version: 3.0.1
 file_last_updated: 2026-05-13
 status: active
 tier: T3
@@ -297,6 +297,7 @@ Appears immediately below subtitle per REPORT_FORMAT placement rule. Text color 
 - `margin-top: 4px`
 - `border-top: 1px solid #ccc`
 - `padding-top: 3px`
+/* session-meta-timing: de-emphasize run timing / token line relative to date/mode line */
 
 Internal element order governed by REPORT_FORMAT. REPORT_STYLE owns only the visual block.
 
@@ -365,6 +366,7 @@ tr:nth-child(even) td{background:#f7f8fc;}
 /* Footnote and legend */
 .footnote{font-size:6.5pt;color:#444;border-top:1px dashed #ccc;padding-top:2px;margin-top:2px;}
 .legend{font-size:6.5pt;color:#555;margin-top:4px;border-top:1px solid #ccc;padding-top:3px;}
+.session-meta-timing{color:#666;}
 /* Print */
 @media print{body{padding:6px 8px;}@page{size:landscape;margin:.35in .3in;}}
 </style>
