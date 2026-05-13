@@ -28,6 +28,12 @@ This repository separates runtime and engineering materials:
 | engineering_only/BACKEND_PIPELINE_v3.0.md | T4 | reference | Backend pipeline reference |
 | engineering_only/TOOL_SURFACE_v3.0.md | T4 | reference | Tool-surface reference |
 
+### Current file inventory table
+
+| File | Tier | Status | Session |
+|---|---|---|---|
+| `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | T0 | draft | 12 |
+
 ## v2.3 -> v3.0 rule-ID migration table
 
 | Legacy ID | v3.0 destination file | Anchor name | Status |
