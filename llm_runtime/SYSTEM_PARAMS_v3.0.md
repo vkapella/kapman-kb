@@ -2,7 +2,7 @@
 system: KapMan
 doc_type: reference
 kb_version: 3.0.0-alpha
-file_last_updated: 2026-05-11
+file_last_updated: 2026-05-12
 status: draft
 tier: T3
 ---
@@ -24,7 +24,7 @@ Runtime files reference parameters as named quantities — "the swing DTE band p
 A parameter value change is a substantive content change, not a mechanical patch. It requires operator review in a Claude.ai session, a CHANGELOG entry noting the old and new value and the rationale, and a `kb_version` bump in this file's frontmatter. No parameter value is changed autonomously by a code agent.
 
 **Parameters have behavioral owners — this file has none.**
-SYSTEM_PARAMS defines values. It does not define what to do with them. The behavioral consequence of each parameter lives in the file that consumes it: DTE band enforcement belongs to PASS1 and PASS2; IV/HV threshold enforcement belongs to VOLATILITY and SIGNAL; near-flip band enforcement belongs to DEALER and GUARDRAILS. When a parameter's behavioral consequence and its numeric value appear to conflict, the consuming file's behavioral contract governs and the discrepancy is flagged for operator review.
+SYSTEM_PARAMS defines values. It does not define what to do with them. The behavioral consequence of each parameter lives in the file that consumes it: DTE band enforcement belongs to PASS1 and PASS2; IV/HV threshold enforcement belongs to VOLATILITY and SIGNAL; near-flip band enforcement belongs to DEALER and GUARDRAILS; DTE decay warning enforcement belongs to PORTFOLIO_MGMT. When a parameter's behavioral consequence and its numeric value appear to conflict, the consuming file's behavioral contract governs and the discrepancy is flagged for operator review.
 
 ## Parameter table
 
@@ -36,6 +36,7 @@ SYSTEM_PARAMS defines values. It does not define what to do with them. The behav
 | `IV_HV_ELEVATED_THRESHOLD` | 1.20 | ratio (IV ÷ HV) | VOLATILITY, SIGNAL | The IV/HV ratio at or above which the spread-mandate fires for new directional entries. Boundary value resolves to elevated (conservative) per VOLATILITY heuristics. |
 | `IV_RANK_EXTREME_FLOOR` | 75 | IV rank score [0–100] | VOLATILITY, SIGNAL | The IV rank score at or above which the extreme tier activates, reinforcing the spread-mandate even when IV/HV reads neutral. |
 | `NEAR_FLIP_BAND_PCT` | 0.25 | percent of spot (±) | DEALER, GUARDRAILS | The symmetric percentage band around the gamma flip level that defines the near-flip zone. Applies identically to SPY (macro layer) and per-ticker. |
+| `DTE_DECAY_WARNING_THRESHOLD` | 21 | calendar days | PORTFOLIO_MGMT | The remaining DTE at or below which PORTFOLIO_MGMT surfaces a DTE decay warning for an open position. Signals that the operator may want to roll or close rather than hold to expiration. Operator-configurable; 21 days is the default, corresponding to the point where theta decay accelerates materially for most structures. |
 
 ## Workflow integration
 
@@ -46,6 +47,7 @@ This file is consumed by:
 - `SIGNAL_v3.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` for spread-mandate trigger specification; reads `SWING_DTE_BAND` and `CSP_DTE_BAND` for anti-hallucination label text
 - `VOLATILITY_v3.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` as the Appendix band boundary values
 - `DEALER_v3.0.md` — reads `NEAR_FLIP_BAND_PCT` as the near-flip zone Appendix band value
+- `PORTFOLIO_MGMT_v3.0.md` — reads `DTE_DECAY_WARNING_THRESHOLD` for DTE decay warning evaluation at Step 5 of the Portfolio mode workflow
 
 This file does not consume any other runtime file. It has no upstream dependencies within `llm_runtime/`.
 
@@ -61,3 +63,4 @@ Changes to individual parameter values are recorded here in addition to the top-
 |---|---|---|---|---|
 | 2026-05-11 | `SWING_DTE_BAND` | 45–60 days (hardcoded in PASS1, SIGNAL) | 60–120 days | Corrects a v3.0 authoring error; 45–60 DTE was carried from a v2.3 scaffold without operator validation and conflicts with actual operator practice of 60–120 DTE for swing trades |
 | 2026-05-11 | `CSP_DTE_BAND` | 45–60 days (implied, same hardcode as swing) | 45–60 days | Value is correct; CSP band is now explicitly separated from swing band and defined independently in SYSTEM_PARAMS rather than implied by the swing band default |
+| 2026-05-12 | `DTE_DECAY_WARNING_THRESHOLD` | (not previously defined) | 21 days | New parameter added in session 9 for PORTFOLIO_MGMT. 21 days is the default threshold at which theta decay accelerates materially for most structures; operator may recalibrate based on their roll/close discipline |
