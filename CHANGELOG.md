@@ -1,5 +1,35 @@
 # KapMan KB Changelog
 
+## [REPORT_FORMAT 3.0.3] — 2026-05-13
+### Changed
+- Clarified that `session-meta-timing` CSS class is reserved for legend/footer element #5
+  only; ticker-count summary data belongs in the report subtitle, not the legend/footer.
+- Added explicit subtitle spec for Screening mode: session date, mode, watchlist name,
+  tickers evaluated, and optional count breakdown belong in the subtitle line.
+- Added note to legend/footer element #5 table clarifying class usage and placement rule.
+### Rationale
+Operator observed that production reports were rendering ticker-count summary data inside
+a session-meta-timing span in the legend/footer instead of in the subtitle, and were
+omitting the required 2-line run timing / token estimate block (element #5). The spec was
+correct in the KB; the disambiguation note closes the interpretation gap that caused the
+rendering error.
+### Files changed
+- llm_runtime/REPORT_FORMAT_v3.0.md (3.0.2 → 3.0.3)
+
+## [KAPMAN_GUARDRAILS 3.0.1] — 2026-05-13
+### Added
+- New rule: Report format immutability. Section order, column sequence, color coding,
+  data granularity, notes discipline, field caps, and legend/footer structure are fixed
+  between runs unless the operator invokes an explicit recognized override (Summary,
+  Top-N, or Section exclusion). Unilateral format changes by Claude are a guardrail
+  violation.
+### Rationale
+Operator observed session-to-session format drift with no operator instruction. No KB
+rule previously prohibited this. The new rule closes the gap and defines the three
+recognized override types with required subtitle acknowledgment.
+### Files changed
+- llm_runtime/KAPMAN_GUARDRAILS_v3.0.md (3.0.0 → 3.0.1)
+
 ## [3.0.2] — 2026-05-13
 ### Changed
 - REPORT_FORMAT_v3.0.md: Wyckoff Phase field #4 Notes cell replaced. Previous spec collapsed all non-pipeline-accepted states to "Unconfirmed", discarding the phase label. New spec always renders [Phase] ([status]) using a six-state rendering contract: pipeline-accepted (phase only or phase + event), confirmed, declared, pipeline-flagged (phase? suffix), unconfirmed (phase? suffix), UNKNOWN. Phase abbreviations defined to fit 20-char cap.

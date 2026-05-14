@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.2
+kb_version: 3.0.3
 file_last_updated: 2026-05-13
 status: active
 tier: T3
@@ -23,6 +23,8 @@ A KapMan report is a decision surface, not a compliance document. It is designed
 - Portfolio mode: Report header → Portfolio view table → Per-position detail → Exited positions summary (when present) → Expired positions requiring acknowledgment (when present) → Legend/footer.
 - Hybrid mode: Full Screening section (titled) → Full Portfolio section (titled) → Shared legend/footer. Screening comes first, always. The two sections are not interleaved.
 - A section that is absent because mode doesn't call for it leaves no placeholder, no blank space, and no explanatory note. Absent means absent.
+
+The subtitle line for Screening mode carries, at minimum: session date, mode label, watchlist name, and tickers-evaluated count. Format: "Session: YYYY-MM-DD | Mode: Screening | Watchlist: [name] | Tickers evaluated: N". Ticker-count breakdown (eligible, blocked, caution-gated, NO_TRADE counts) may also appear in the subtitle when space permits; it must not appear in the legend/footer session metadata element.
 
 **The Macro Regime card appears above the screening table when hostile macro is active — and only then.**
 
@@ -89,7 +91,7 @@ The legend/footer is the only section that may expand without a hard cap — foo
 
 **Run timing and token estimate are recorded at two fixed points — not reconstructed at render time.**
 
-The run start timestamp is the moment the first MCP call of the run fires: the SPY macro gate fetch for Pass 1, or the first live chain fetch for Pass 2 when Pass 2 begins as a standalone run. The render timestamp is the moment Claude begins assembling the final HTML output. Both are noted inline during the session as they occur and carried into the session metadata block — they are never back-calculated or approximated. If no reliable clock signal is present in context, the timestamp renders as `--:-- ET (unavailable)`; timestamps are never fabricated. The token estimate uses the runtime formula `(N_tickers × 4,000) + 60,000`, where N_tickers is the count of candidates that received a Pass 1 determination (Eligible, NO_TRADE, or WAIT) in the current run. Round to the nearest 1,000 and label `~NNNk tokens est.` This is a planning estimate, not a metered API count. When Pass 2 has also run, append `+ P2 chain validation` to the label without adjusting the formula.
+The run start timestamp is the moment the first MCP call of the run fires: the SPY macro gate fetch for Pass 1, or the first live chain fetch for Pass 2 when Pass 2 begins as a standalone run. The render timestamp is the moment Claude begins assembling the final HTML output. Both are noted inline during the session as they occur and carried into the session metadata block — they are never back-calculated or approximated. If no reliable clock signal is present in context, the timestamp renders as `--:-- ET (unavailable)`; timestamps are never fabricated. The token estimate uses the runtime formula `(N_tickers × 4,000) + 60,000`, where N_tickers is the count of candidates that received a Pass 1 determination (Eligible, NO_TRADE, or WAIT) in the current run. Round to the nearest 1,000 and label `~NNNk tokens est.` This is a planning estimate, not a metered API count. When Pass 2 has also run, append `+ P2 chain validation` to the label without adjusting the formula. The `session-meta-timing` CSS class is reserved for the session metadata block only. It must not be used for ticker-count summary lines or any other content. Ticker-count summary data (tickers evaluated, eligible count, blocked count) belongs in the subtitle line of the report header, not in the legend/footer session metadata element.
 
 ---
 
@@ -289,6 +291,8 @@ Multiple degradation flags are comma-separated on the source bar line. When flag
 | 3 | Chain quality badge key | 3 lines | "Full chain: complete OI and volume data / Limited chain: partial data, floor sizing applied / Invalid chain: dropped from Pass 2" |
 | 4 | Footnotes | No cap — determined by overflow volume | Each footnote on its own line; format: "¹ [Full overflow content, self-contained]" |
 | 5 | Session metadata | 2 lines | Line 1: `Run: HH:MM ET → HH:MM ET (Xh Ym) \| ~NNNk tokens est.` Line 2: `Date: YYYY-MM-DD \| Mode: [Screening / Portfolio / Hybrid] \| Passes: [Pass 1 / Pass 1 + Pass 2 / Portfolio / Both]` |
+
+The session-meta-timing CSS class applies to both lines of element #5. Element #5 is always the last item in the legend/footer. It is never used as a container for ticker-count summary data; that data belongs in the report subtitle.
 
 ---
 
