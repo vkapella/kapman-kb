@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.1
-file_last_updated: 2026-05-13
+kb_version: 3.0.2
+file_last_updated: 2026-05-14
 status: active
 tier: T1
 ---
@@ -90,7 +90,7 @@ Three event data structures appear in the `get_wyckoff_proposal_context` payload
 
 When the MCP path is not available or is not taken, the estimation path runs. The propose-confirm protocol is the mechanism by which estimation-path readings become authoritative.
 
-The runtime reads available metrics for the ticker from `get_metrics` (preferred) or from `Marketdata-MCP:get_price_metrics` / `Polygon MCP Server:get_options_metrics` with `include=['price']` (fallback), assembles a phase-and-event reading with explicit reasoning stated in plain language, presents the reading to the operator with a confirmation prompt, and waits. The operator confirms, corrects, or declines. A confirmed reading — whether the operator accepts the proposal or substitutes a correction — is immediately authoritative for the session with status `confirmed`. A declined or skipped propose-confirm leaves the ticker in UNKNOWN state with conservative defaults.
+The runtime reads available metrics for the ticker from `get_metrics` (preferred) or from `Polygon MCP Server:get_options_metrics` with `include=['price']` (fallback), assembles a phase-and-event reading with explicit reasoning stated in plain language, presents the reading to the operator with a confirmation prompt, and waits. The operator confirms, corrects, or declines. A confirmed reading — whether the operator accepts the proposal or substitutes a correction — is immediately authoritative for the session with status `confirmed`. A declined or skipped propose-confirm leaves the ticker in UNKNOWN state with conservative defaults.
 
 The runtime does not infer confirmation from context, from prior-session memory, or from the operator's acceptance of a trade recommendation that depended on a Wyckoff reading. Confirmation on the estimation path requires an explicit exchange in the current conversation.
 
@@ -147,9 +147,9 @@ WYCKOFF is tier T1 — a principle file. It owns the phase and event vocabulary 
 |---|---|---|---|
 | Pipeline regime reading | `kapman-mcp:get_wyckoff_proposal_context` | — (no fallback; estimation path runs if unavailable) | Phase label, primary event, regime-setting event, confirmation status, quality flags |
 | Historical event context | `kapman-mcp:get_wyckoff_proposal_context` | — | `wyckoff_context_events`, `canonical_sequences`, `snapshot_evidence` for event history reasoning |
-| Price metrics (RVOL, VSI, HV) | `kapman-mcp:get_metrics` | `Marketdata-MCP:get_price_metrics` or `Polygon MCP Server:get_options_metrics` with `include=['price']` | Volume contraction/expansion; directional volume pressure; regime volatility context |
+| Price metrics (RVOL, VSI, HV) | `kapman-mcp:get_metrics` | `Polygon MCP Server:get_options_metrics` with `include=['price']` | Volume contraction/expansion; directional volume pressure; regime volatility context |
 | Technical metrics (RSI, MACD, ADX) | `kapman-mcp:get_metrics` | — (not available on estimation path) | Technical contradiction check for pipeline-flagged gate; not used in proposal assembly |
-| Volatility metrics (HV, IV rank, average IV) | `kapman-mcp:get_metrics` | Same Marketdata/Polygon fallback | HV-IV spread for confidence language; IV context qualifier |
+| Volatility metrics (HV, IV rank, average IV) | `kapman-mcp:get_metrics` | Same Polygon fallback (`get_options_metrics` with `include=['price']`) | HV-IV spread for confidence language; IV context qualifier |
 | Dealer metrics (DGPI, gamma flip, walls) | `kapman-mcp:get_metrics` | `kapman-mcp:get_dealer_metrics` or Polygon/Schwab equivalents | Not a WYCKOFF input directly; consumed by DEALER in parallel |
 | Price candle data | `kapman-mcp:get_wyckoff_proposal_context` (OHLCV block) | `Schwab MCP Server:get_price_history_every_day` or equivalent | Support and resistance shelf identification; Spring and Upthrust candidacy; climax bar identification |
 

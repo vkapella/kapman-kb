@@ -57,7 +57,7 @@ This repository separates runtime and engineering materials:
 | SYSTEM_PARAMS_v3.0.md | 3.0.1 | active |
 | SIGNAL_v3.0.md | 3.0.1 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.1 | active |
-| WYCKOFF_v3.0.md | 3.0.1 | active |
+| WYCKOFF_v3.0.md | 3.0.2 | active |
 
 ### v3.0.1 report metadata patch
 
@@ -66,7 +66,7 @@ This repository separates runtime and engineering materials:
 | REPORT_FORMAT_v3.0.md | 3.0.3 | 2026-05-13 |
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.1 | 2026-05-13 |
 | REPORT_STYLE_v3.0.md | 3.0.1 | 2026-05-13 |
-| WYCKOFF_v3.0.md | 3.0.1 | 2026-05-13 |
+| WYCKOFF_v3.0.md | 3.0.2 | 2026-05-14 |
 | PASS1_SCREENING_v3.0.md | 3.0.1 | 2026-05-13 |
 
 ### Session 14 llm_runtime inventory verification
