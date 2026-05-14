@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.0
+kb_version: 3.0.1
 file_last_updated: 2026-05-13
 status: active
 tier: T1
@@ -26,7 +26,7 @@ A confirmed reading — by any path — is scoped to the current session and is 
 
 **The two-path runtime entry sequence.**
 
-At the start of any Wyckoff read for a ticker, the runtime calls both `get_wyckoff_proposal_context` and `get_metrics`. These are complementary, not redundant: `get_wyckoff_proposal_context` delivers the pipeline's regime reading, event history, and structural context; `get_metrics` delivers the full technical, dealer, volatility, and price metric payload and is the authoritative data-quality gate. Both calls are required for a full single-ticker session. `screen_watchlist` is a batch triage tool that returns lightweight per-symbol fields (regime, primary event, DGPI, IV rank, RVOL, snapshot date); it does not replace per-ticker `get_wyckoff_proposal_context` and is not a Wyckoff runtime entry point.
+At the start of any Wyckoff read for a ticker, the runtime calls both `get_wyckoff_proposal_context` and `get_metrics`. These are complementary, not redundant: `get_wyckoff_proposal_context` delivers the pipeline's regime reading, event history, and structural context; `get_metrics` delivers the full technical, dealer, volatility, and price metric payload and is the authoritative data-quality gate. Both calls are required for a full single-ticker session. `screen_watchlist` is a batch triage tool that returns lightweight per-symbol fields (regime, primary event, DGPI, IV rank, RVOL, snapshot date); it does not replace per-ticker `get_wyckoff_proposal_context` and is not a Wyckoff runtime entry point. `screen_symbols` provides the same lightweight field scope against a caller-supplied symbol list (rather than the stored watchlist) under the same 30-symbol batch cap; it carries the same constraint — triage only, not a Wyckoff runtime entry point, not a replacement for per-ticker `get_wyckoff_proposal_context`. The full Wyckoff read per ticker remains required before trigger evaluation regardless of which batch triage tool is used.
 
 **The MCP validity gate.**
 
@@ -152,6 +152,8 @@ WYCKOFF is tier T1 — a principle file. It owns the phase and event vocabulary 
 | Volatility metrics (HV, IV rank, average IV) | `kapman-mcp:get_metrics` | Same Marketdata/Polygon fallback | HV-IV spread for confidence language; IV context qualifier |
 | Dealer metrics (DGPI, gamma flip, walls) | `kapman-mcp:get_metrics` | `kapman-mcp:get_dealer_metrics` or Polygon/Schwab equivalents | Not a WYCKOFF input directly; consumed by DEALER in parallel |
 | Price candle data | `kapman-mcp:get_wyckoff_proposal_context` (OHLCV block) | `Schwab MCP Server:get_price_history_every_day` or equivalent | Support and resistance shelf identification; Spring and Upthrust candidacy; climax bar identification |
+
+[Note: `get_metrics_batch` is available on the kapman-mcp tool surface to fetch price, technical, dealer, and volatility fields across multiple tickers in a single call, subject to the 30-symbol batch cap; callers must chunk larger lists. It reduces round trips for the initial data pull across a candidate list. Per-ticker `get_metrics` (or `get_wyckoff_proposal_context`) is still required before trigger evaluation for each individual ticker.]
 
 **Confirmation-status vocabulary and downstream behavioral consequences.**
 

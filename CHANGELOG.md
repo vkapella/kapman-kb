@@ -1,5 +1,10 @@
 # KapMan KB Changelog
 
+## [Unreleased]
+### Changed
+- WYCKOFF_v3.0.md (v3.0.1): Extended two-path runtime entry sequence to include screen_symbols as a batch triage tool alongside screen_watchlist (30-symbol cap; not a replacement for per-ticker get_wyckoff_proposal_context). Added bracketed table note for get_metrics_batch availability on the Inputs table.
+- PASS1_SCREENING_v3.0.md (v3.0.1): Updated Step 3 workflow table to note get_metrics_batch availability for initial candidate-list metric fetch. Updated PIPELINE_010 legacy anchor to reference new kapman-mcp batch tools (get_metrics_batch, screen_symbols) as preferred full-payload batch surface; Polygon batch endpoint unchanged as avg_iv source.
+
 ## [REPORT_FORMAT 3.0.3] — 2026-05-13
 ### Changed
 - Clarified that `session-meta-timing` CSS class is reserved for legend/footer element #5
