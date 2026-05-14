@@ -1,5 +1,18 @@
 # KapMan KB Changelog
 
+## 2026-05-14
+
+**Fixed.** Print/PDF rendering of Pass 1 reports — Rationale column collapse to vertical text.
+**Added.** Pre-render checklist comments in REPORT_TEMPLATE_PASS1_v3.0.html (screening-table tbody and per-ticker detail section) — Option B template-internal enforcement.
+
+- `REPORT_TEMPLATE_PASS1_v3.0.html` — CSS fix: changed nine `.col-*` rules in /* Template extensions */ block from `width:Npx` to `min-width:Npx`. Added `.screening-table{table-layout:auto;width:100%;}` rule.
+- `REPORT_TEMPLATE_PASS1_v3.0.html` — added pre-render checklist comment inside screening-table `<tbody>` covering column structure (Rule 6), rationale 20-word cap, and NO_TRADE/WAIT row structure.
+- `REPORT_TEMPLATE_PASS1_v3.0.html` — added pre-render checklist comment at top of per-ticker detail section covering eligibility filter (Eligible-only) and seven-subsection structure with word caps.
+
+Rationale (CSS fix): fixed widths summed to ~822px across columns 1–11, exceeding the ~750px usable width of a landscape Letter print area at the configured 0.35"/0.3" margins. Rationale column was getting starved of horizontal space and rendering one character per line in print/PDF. Switching to `min-width` lets empty-cell columns collapse when content is "—" and gives the slack to Rationale.
+
+Rationale (checklist comments): existing template comments are descriptive ("X is required") and have been observed to not prevent content-discipline violations at render time under content pressure. Imperative pre-render checklists with binary checks ("Verify X before emitting") are more likely to fire as procedural steps during template fill. Spec authority is unchanged (REPORT_FORMAT_v3.0.md); the checklists reference the spec, they do not duplicate it.
+
 ## [Unreleased]
 ### Added
 - New file added: `llm_runtime/REPORT_TEMPLATE_PASS1_v3.0.html` (tier T3, doc_type template).
