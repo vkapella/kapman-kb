@@ -1,5 +1,37 @@
 # KapMan KB Changelog
 
+## [3.0.5] — 2026-05-14
+
+### Added
+- **Alternatives Summary section** (REPORT_FORMAT, template, PASS1_SCREENING)
+  Option B implementation: new sanctioned report section between the
+  screening table and per-ticker detail, authorized exclusively for
+  NO_TRADE and WAIT candidates. Provides six subsections per block
+  (Refusal/deferral reason 20w · Wyckoff read 25w · Dealer read 25w ·
+  Volatility read 25w · Alternatives 30w · Recheck trigger 20w;
+  aggregate cap 145w). Eligible candidates are unaffected.
+  Resolves the content-loss tradeoff surfaced in Mag-7 Pass 1 testing
+  (session 12, 2026-05-14): NO_TRADE and WAIT candidates now have a
+  compliant, sanctioned home for extended regime context and
+  alternative structures, without violating the 20-word Rationale
+  cell cap or producing non-compliant detail blocks.
+
+### Changed
+- REPORT_FORMAT_v3.0.md: section-order definition updated to include
+  Alternatives Summary; new section spec added with subsection table
+  and aggregate word cap.
+- REPORT_TEMPLATE_PASS1_v3.0.html: new `.alt-summary` skeleton block
+  with pre-render checklist; per-ticker detail checklist updated to
+  reference Alternatives Summary as the correct home for NO_TRADE/WAIT
+  content.
+- PASS1_SCREENING_v3.0.md: NO_TRADE and WAIT output-state definitions
+  updated with cross-reference to Alternatives Summary section.
+
+### Files changed
+- llm_runtime/REPORT_FORMAT_v3.0.md (3.0.4 → 3.0.5)
+- llm_runtime/REPORT_TEMPLATE_PASS1_v3.0.html (3.0.4 → 3.0.5)
+- llm_runtime/PASS1_SCREENING_v3.0.md (3.0.4 → 3.0.5)
+
 ## 2026-05-14
 
 **Fixed.** Pass 1 report PDF/print rendering — Rationale column collapse in print mode despite previous min-width fix.
