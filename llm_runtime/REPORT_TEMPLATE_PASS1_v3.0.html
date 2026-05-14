@@ -330,6 +330,112 @@ th.action-col, th.col-type, th.rationale-col{text-align:left;}
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════
+     ALTERNATIVES SUMMARY
+     Emit this entire section ONLY when at least one NO_TRADE or WAIT
+     candidate is present in the screening table.
+     When all candidates are Eligible: omit entirely — no heading,
+     no placeholder, no blank space.
+     One .alt-summary block per NO_TRADE or WAIT candidate, in
+     screening-table order. Do NOT render a block for Eligible
+     candidates — those get a per-ticker detail block below.
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="section-title">ALTERNATIVES SUMMARY</div>
+
+<!-- ─────────────────────────────────────────────────────────────
+     PRE-RENDER CHECKLIST — verify before emitting blocks:
+     ☐ Emit section heading + blocks ONLY when ≥1 NO_TRADE or WAIT
+       candidate exists — omit section entirely otherwise
+     ☐ One block per NO_TRADE or WAIT candidate; none for Eligible
+     ☐ Six subsections in spec order per block (see caps below)
+     ☐ Subsection 5 (Alternatives) omitted entirely when SIGNAL
+       produced no alternatives for this candidate
+     ☐ Subsection 6 (Recheck trigger) always present
+     ☐ Aggregate word cap per block: 145w; overflow → footnote
+     ☐ Block order matches screening-table candidate order
+     Authority: REPORT_FORMAT_v3.0.md § Alternatives Summary
+     ───────────────────────────────────────────────────────────── -->
+
+<!-- ═════════════════════════════════════════════════════════════════
+     TEMPLATE — ships with no blocks.
+     Claude adds one .alt-summary per NO_TRADE or WAIT candidate.
+     ─────────────────────────────────────────────────────────────────
+     EXAMPLE BLOCK (NO_TRADE candidate — TSLA):
+
+     <div class="alt-summary">
+       <div class="ticker-detail-hdr">TSLA &#8212; NO_TRADE</div>
+       <div class="two-col">
+
+         <div class="detail-field full-width">
+           <span class="detail-lbl">Refusal reason <span class="wc">(20w):</span></span>
+           {{TICKER_REFUSAL_REASON}}
+         </div>
+
+         <div class="detail-field">
+           <span class="detail-lbl">Wyckoff phase read <span class="wc">(25w):</span></span>
+           {{TICKER_WYCKOFF_READ}}
+         </div>
+
+         <div class="detail-field">
+           <span class="detail-lbl">Dealer regime read <span class="wc">(25w):</span></span>
+           {{TICKER_DEALER_READ}}
+         </div>
+
+         <div class="detail-field">
+           <span class="detail-lbl">Volatility regime read <span class="wc">(25w):</span></span>
+           {{TICKER_VOL_READ}}
+         </div>
+
+         <div class="detail-field">
+           <span class="detail-lbl">Alternatives <span class="wc">(30w &#8212; omit when absent):</span></span>
+           {{TICKER_ALTERNATIVES}}
+         </div>
+
+         <div class="detail-field">
+           <span class="detail-lbl">Recheck trigger <span class="wc">(20w):</span></span>
+           {{TICKER_RECHECK_TRIGGER}}
+         </div>
+
+       </div>
+     </div>
+
+     EXAMPLE BLOCK (WAIT candidate — GOOGL):
+
+     <div class="alt-summary">
+       <div class="ticker-detail-hdr">GOOGL &#8212; WAIT</div>
+       <div class="two-col">
+
+         <div class="detail-field full-width">
+           <span class="detail-lbl">Deferral reason <span class="wc">(20w):</span></span>
+           {{TICKER_DEFERRAL_REASON}}
+         </div>
+
+         <div class="detail-field">
+           <span class="detail-lbl">Wyckoff phase read <span class="wc">(25w):</span></span>
+           {{TICKER_WYCKOFF_READ}}
+         </div>
+
+         <div class="detail-field">
+           <span class="detail-lbl">Dealer regime read <span class="wc">(25w):</span></span>
+           {{TICKER_DEALER_READ}}
+         </div>
+
+         <div class="detail-field">
+           <span class="detail-lbl">Volatility regime read <span class="wc">(25w):</span></span>
+           {{TICKER_VOL_READ}}
+         </div>
+
+         <!-- Alternatives subsection omitted here — none produced by SIGNAL -->
+
+         <div class="detail-field">
+           <span class="detail-lbl">Recheck trigger <span class="wc">(20w):</span></span>
+           {{TICKER_RECHECK_TRIGGER}}
+         </div>
+
+       </div>
+     </div>
+     ═════════════════════════════════════════════════════════════════ -->
+
+<!-- ═══════════════════════════════════════════════════════════════════
      PER-TICKER DETAILED ANALYSIS
      One .ticker-detail block per eligible ticker (ACT TODAY or MONITOR).
      NO_TRADE and WAIT candidates do not receive a detail block.
@@ -347,14 +453,15 @@ th.action-col, th.col-type, th.rationale-col{text-align:left;}
      ☐ Render a block ONLY for Eligible candidates
        (Action = ACT TODAY or MONITOR)
      ☐ Do NOT render blocks for NO_TRADE or WAIT candidates —
-       their full rationale lives in screening-table Rationale
-       cell with footnote overflow
+       those candidates receive an .alt-summary block in the
+       Alternatives Summary section above, not a detail block here
      ☐ Each rendered block contains all seven subsections in
        spec order (Setup 40w · Wyckoff 25w · Dealer 25w ·
        Volatility 25w · Exit 60w · Alternatives 30w · Caveats 20w)
      ☐ Alternatives subsection omitted entirely when absent
      ☐ Caveats subsection omitted entirely when nothing to flag
-     Authority: REPORT_FORMAT_v3.0.md § Appendix per-ticker
+     Authority: REPORT_FORMAT_v3.0.md § Alternatives Summary +
+                REPORT_FORMAT_v3.0.md § Appendix per-ticker
      ───────────────────────────────────────────────────────────── -->
 
 <!-- ═════════════════════════════════════════════════════════════════

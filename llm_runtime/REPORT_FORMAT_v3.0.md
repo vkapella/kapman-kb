@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.4
+kb_version: 3.0.5
 file_last_updated: 2026-05-14
 status: active
 tier: T3
@@ -19,7 +19,7 @@ A KapMan report is a decision surface, not a compliance document. It is designed
 
 **The report has three modes, each with a fixed section order. Mode determines structure — structure does not adapt to content.**
 
-- Screening mode: Macro Regime card (when active) → Report header → Screening table → Per-ticker detailed analysis → Legend/footer.
+- Screening mode: Macro Regime card (when active) → Report header → Screening table → Alternatives Summary (when NO_TRADE or WAIT candidates present) → Per-ticker detailed analysis → Legend/footer.
 - Portfolio mode: Report header → Portfolio view table → Per-position detail → Exited positions summary (when present) → Expired positions requiring acknowledgment (when present) → Legend/footer.
 - Hybrid mode: Full Screening section (titled) → Full Portfolio section (titled) → Shared legend/footer. Screening comes first, always. The two sections are not interleaved.
 - A section that is absent because mode doesn't call for it leaves no placeholder, no blank space, and no explanatory note. Absent means absent.
@@ -237,6 +237,46 @@ One block per screened candidate, appearing below the screening table in the sam
 | 7 | Caveats | 20 words | Data gaps, near-event risk, degraded inputs, chain quality issues; omitted when nothing to flag |
 
 Overflow from any subsection goes to the footnote sequence. The subsection label remains in the block with a superscript; the full text appears in the numbered footnote.
+
+---
+
+**Alternatives Summary section.**
+
+Present when the screening run contains at least one NO_TRADE or WAIT
+candidate. Appears after the screening table and before the per-ticker
+detailed analysis section. Omitted entirely when all candidates are
+Eligible — no placeholder, no blank space, no heading.
+
+One block per NO_TRADE or WAIT candidate, in the same order as the
+candidate appears in the screening table. Each block is a labeled
+`.alt-summary` div (see template). No block is rendered for Eligible
+candidates — Eligible candidates receive a per-ticker detail block
+instead.
+
+Subsection sequence per block:
+
+| # | Subsection | Cap | Notes |
+|---|---|---|---|
+| 1 | Refusal / deferral reason | 20 words | Restatement from Rationale cell; names the veto or missing input |
+| 2 | Wyckoff phase read | 25 words | Current phase, confirming events, proposed-confirm status |
+| 3 | Dealer regime read | 25 words | DGPI tier, flip-zone, near-flip flag if active, dealer-status label |
+| 4 | Volatility regime read | 25 words | IV/HV band, IV rank tier, spread-mandate outcome, volatility-status label |
+| 5 | Alternatives | 30 words | Named structure + direction + candidate zone + confidence, descending confidence order; omit subsection entirely when no alternatives exist |
+| 6 | Recheck trigger | 20 words | What specific input change would flip this candidate to Eligible; names the blocking condition |
+
+Aggregate word cap per block: 145 words (sum of subsection caps).
+Overflow from any subsection goes to the footnote sequence using the
+standard superscript convention. The subsection label remains in the
+block with a superscript; the full text appears in the numbered
+footnote.
+
+The Alternatives subsection is omitted entirely when SIGNAL produced
+no alternatives for the candidate. The Recheck trigger subsection is
+always present for both NO_TRADE and WAIT candidates — it is the
+forward-looking close of the block.
+
+The section heading reads "ALTERNATIVES SUMMARY" and uses the
+`.section-title` class, consistent with adjacent section headings.
 
 ---
 

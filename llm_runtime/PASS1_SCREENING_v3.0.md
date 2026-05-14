@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.1
-file_last_updated: 2026-05-13
+kb_version: 3.0.5
+file_last_updated: 2026-05-14
 status: active
 tier: T2
 ---
@@ -160,8 +160,8 @@ Before per-candidate evaluation begins, three conditions must hold:
 | Output state | Meaning | What it carries | Pass 2 disposition |
 |---|---|---|---|
 | Eligible | Candidate passed all applicable trigger gates; a structure and direction are determined | Structure, direction, candidate zone (strike range + DTE band), sizing band note, confidence, data-quality labels | Enters Pass 2 queue |
-| NO_TRADE | Candidate refused for this screening run on a named basis | Named refusal reason, eligible alternatives with lower confidence, structure = NONE for primary | Does not enter Pass 2; alternatives may re-enter as separate candidates if operator directs |
-| WAIT | Candidate is structurally screenable but a required input is degraded or absent | Named degraded input, recheck instruction, WAIT confidence below primary NO_TRADE | Does not enter Pass 2 until input is refreshed and candidate is re-screened |
+| NO_TRADE | Candidate refused for this screening run on a named basis | Named refusal reason, eligible alternatives with lower confidence, structure = NONE for primary. Full detail (Wyckoff read, dealer read, volatility read, alternatives, recheck trigger) renders in the Alternatives Summary section per REPORT_FORMAT_v3.0.5. | Does not enter Pass 2; alternatives may re-enter as separate candidates if operator directs |
+| WAIT | Candidate is structurally screenable but a required input is degraded or absent | Named degraded input, recheck instruction, WAIT confidence below primary NO_TRADE. Full detail (Wyckoff read, dealer read, volatility read, recheck trigger) renders in the Alternatives Summary section per REPORT_FORMAT_v3.0.5. | Does not enter Pass 2 until input is refreshed and candidate is re-screened |
 | WAIT — near event risk (block) | Earnings within EARNINGS_BLOCK_DAYS | Named earnings date and days remaining | Does not enter Pass 2; re-screens fresh in next session after earnings pass |
 | WAIT — near event risk (caution) | Earnings within EARNINGS_CAUTION_DAYS, outside block window | Named earnings date, days remaining, operator-approval gate | Does not enter Pass 2 unless operator explicitly redirects in current session |
 
