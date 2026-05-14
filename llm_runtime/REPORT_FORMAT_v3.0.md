@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.3
-file_last_updated: 2026-05-13
+kb_version: 3.0.4
+file_last_updated: 2026-05-14
 status: active
 tier: T3
 ---
@@ -116,6 +116,8 @@ When REPORT_FORMAT and a T1 or T2 file appear to conflict on a structural questi
 | `PASS2_VALIDATION_v3.0.md` (T2) | Validated/Flagged/Rejected states; exact strikes and expirations; chain quality label; dealer-status label; entry price range; sizing band | REPORT_FORMAT renders exact values for Pass 2 validated candidates; renders Flagged and Rejected states with named reasons; renders chain quality badge in source bar |
 | `PORTFOLIO_MGMT_v3.0.md` (T2) | Position context schema; lifecycle state labels (Open/Advisory/Exited/Expired); advisory flag format; DTE decay warning format; Regime exit advisory decay reasons | REPORT_FORMAT renders the portfolio view table and per-position detail from position context; renders advisory flag with named decay reason; renders DTE decay warning when active; renders Exited and Expired summary sections when present |
 | `SYSTEM_PARAMS_v3.0.md` | DTE band values (SWING_DTE_BAND, CSP_DTE_BAND, DTE_DECAY_WARNING_THRESHOLD) | REPORT_FORMAT uses DTE band values as the canonical expiration-band labels in Pass 1 zone rendering; uses DTE_DECAY_WARNING_THRESHOLD to determine when the decay warning renders in the portfolio detail |
+
+The HTML render artifact for Pass 1 reports is `REPORT_TEMPLATE_PASS1_v3.0.html` — the executable expression of the screening table column spec in this file's Appendix. The template fills at render time; this file remains the authoritative column-spec source. When the spec changes, the template is updated to match; the template never overrides the spec.
 
 **What REPORT_FORMAT does not own.**
 

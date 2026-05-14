@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 3.0.0
-file_last_updated: 2026-05-13
+kb_version: 3.0.1
+file_last_updated: 2026-05-14
 status: active
 tier: T0
 ---
@@ -33,6 +33,7 @@ The table below is the authoritative map of all files in `llm_runtime/`. Read it
 | `PORTFOLIO_MGMT_v3.0.md` | T2 | runbook | draft | Open position monitoring, exit trigger evaluation, DTE decay warnings, P/L reporting |
 | `REPORT_FORMAT_v3.0.md` | T3 | format | draft | Report section order, field caps, footnote overflow mechanics, mode-specific layout |
 | `REPORT_STYLE_v3.0.md` | T3 | style | draft | Visual presentation, HTML/CSS spec, typography, color |
+| `REPORT_TEMPLATE_PASS1_v3.0.html` | T3 | template | active | Canonical HTML skeleton for Pass 1 screening report; column structure, section order, legend/footer pre-built per REPORT_FORMAT and REPORT_STYLE; consumed by Runtime Rule 6 at render time |
 | `SYSTEM_PARAMS_v3.0.md` | T3 | reference | draft | Operator-configurable numeric parameters consumed by name across runtime files |
 | `SIC_SECTOR_MAP_v3.0.md` | T3 | reference | draft | SIC code to sector ETF benchmark mapping |
 

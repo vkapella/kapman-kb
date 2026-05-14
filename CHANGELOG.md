@@ -1,6 +1,17 @@
 # KapMan KB Changelog
 
 ## [Unreleased]
+### Added
+- New file added: `llm_runtime/REPORT_TEMPLATE_PASS1_v3.0.html` (tier T3, doc_type template).
+### Rationale
+- Eliminates Pass 1 report format drift across runs by replacing prose-derived rendering with template-fill rendering.
+- Companion runtime rule: Runtime Rule 6 added to session-opener runtime rules (not in this commit; operator-managed).
+### Files changed
+- llm_runtime/REPORT_TEMPLATE_PASS1_v3.0.html (new)
+- INDEX.md (inventory row added)
+- llm_runtime/REPORT_FORMAT_v3.0.md (cross-reference added; 3.0.3 → 3.0.4)
+- llm_runtime/KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md (KB inventory updated; 3.0.0 → 3.0.1)
+
 ### Changed
 - WYCKOFF_v3.0.md (v3.0.2): Removed Marketdata-MCP:get_price_metrics as a fallback source. Polygon MCP Server:get_options_metrics with include=['price'] is now the sole external fallback in the estimation-path prose and MCP inputs table fallback rows (Price metrics and Volatility metrics).
 - WYCKOFF_v3.0.md (v3.0.1): Extended two-path runtime entry sequence to include screen_symbols as a batch triage tool alongside screen_watchlist (30-symbol cap; not a replacement for per-ticker get_wyckoff_proposal_context). Added bracketed table note for get_metrics_batch availability on the Inputs table.
