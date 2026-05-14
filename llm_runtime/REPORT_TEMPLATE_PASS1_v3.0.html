@@ -68,15 +68,16 @@ tr:nth-child(even) td{background:#f7f8fc;}
 /* ── Template extensions — structural additions not in reference CSS ─ */
 
 /* Screening table: additional column width helpers (derived from char caps) */
-.col-ticker    {width:42px; text-align:center;}
-.col-type      {width:88px; text-align:left;}
-.col-wyckoff   {width:100px;text-align:center;}
-.col-dgpi      {width:90px; text-align:center;}
-.col-strike    {width:112px;text-align:center;}
-.col-exp       {width:72px; text-align:center;}
-.col-entry     {width:80px; text-align:center;}
-.col-exit      {width:80px; text-align:center;}
-.col-confidence{width:88px; text-align:center;}
+.col-ticker    {min-width:42px; text-align:center;}
+.col-type      {min-width:88px; text-align:left;}
+.col-wyckoff   {min-width:100px;text-align:center;}
+.col-dgpi      {min-width:90px; text-align:center;}
+.col-strike    {min-width:112px;text-align:center;}
+.col-exp       {min-width:72px; text-align:center;}
+.col-entry     {min-width:80px; text-align:center;}
+.col-exit      {min-width:80px; text-align:center;}
+.col-confidence{min-width:88px; text-align:center;}
+.screening-table{table-layout:auto;width:100%;}
 
 /* th left-align overrides for text-heavy columns */
 th.action-col, th.col-type, th.rationale-col{text-align:left;}
@@ -204,6 +205,16 @@ th.action-col, th.col-type, th.rationale-col{text-align:left;}
     </tr>
   </thead>
   <tbody>
+    <!-- ─────────────────────────────────────────────────────────────
+         PRE-RENDER CHECKLIST — verify before emitting rows:
+         ☐ Exactly 12 columns in spec order (Rule 6 (a))
+         ☐ Exactly one <table class="screening-table"> (Rule 6 (b))
+         ☐ Column headers verbatim — no rename/split/addition (Rule 6)
+         ☐ Rationale cells ≤20 words; overflow → numbered footnote
+         ☐ NO_TRADE row: Type=NONE, Action=NO_TRADE, cols 4–11 = "—"
+         ☐ WAIT row:     Type=NONE, Action=WAIT,     cols 4–11 = "—"
+         Authority: REPORT_FORMAT_v3.0.md § Appendix
+         ───────────────────────────────────────────────────────────── -->
     <!-- ═════════════════════════════════════════════════════════════
          TEMPLATE BODY — ships empty.
          Claude fills rows at render time from Pass 1 output.
@@ -298,6 +309,21 @@ th.action-col, th.col-type, th.rationale-col{text-align:left;}
      Content exceeding a cap → numbered footnote; superscript in cell.
      ═══════════════════════════════════════════════════════════════════ -->
 <div class="section-title">PER-TICKER DETAILED ANALYSIS</div>
+
+<!-- ─────────────────────────────────────────────────────────────
+     PRE-RENDER CHECKLIST — verify before emitting blocks:
+     ☐ Render a block ONLY for Eligible candidates
+       (Action = ACT TODAY or MONITOR)
+     ☐ Do NOT render blocks for NO_TRADE or WAIT candidates —
+       their full rationale lives in screening-table Rationale
+       cell with footnote overflow
+     ☐ Each rendered block contains all seven subsections in
+       spec order (Setup 40w · Wyckoff 25w · Dealer 25w ·
+       Volatility 25w · Exit 60w · Alternatives 30w · Caveats 20w)
+     ☐ Alternatives subsection omitted entirely when absent
+     ☐ Caveats subsection omitted entirely when nothing to flag
+     Authority: REPORT_FORMAT_v3.0.md § Appendix per-ticker
+     ───────────────────────────────────────────────────────────── -->
 
 <!-- ═════════════════════════════════════════════════════════════════
      TEMPLATE — ships with no blocks.
