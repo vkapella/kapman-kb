@@ -106,6 +106,38 @@ th.action-col, th.col-type, th.rationale-col{text-align:left;}
 
 /* Screen-only: let table scroll horizontally */
 @media screen{.table-wrap{overflow-x:auto;}}
+/* Print-only override — prevents Rationale collapse in PDF/print.
+   See CHANGELOG entry dated 2026-05-14 for diagnosis. */
+@media print {
+  .table-wrap{overflow-x:visible !important;}
+  .screening-table{table-layout:auto !important;}
+  .screening-table .col-ticker,
+  .screening-table .col-type,
+  .screening-table .col-wyckoff,
+  .screening-table .col-dgpi,
+  .screening-table .col-strike,
+  .screening-table .col-exp,
+  .screening-table .col-entry,
+  .screening-table .col-exit,
+  .screening-table .col-confidence,
+  .screening-table .scale-col{
+    min-width:0 !important;
+    width:auto !important;
+  }
+  .screening-table .rationale-col{
+    max-width:none !important;
+    width:auto !important;
+    min-width:140px;
+    word-break:normal !important;
+    overflow-wrap:anywhere;
+  }
+  .screening-table th,
+  .screening-table td{
+    font-size:6pt !important;
+    padding:1px 2px !important;
+  }
+  .screening-table tr{page-break-inside:avoid;}
+}
 </style>
 </head>
 <body>

@@ -2,6 +2,14 @@
 
 ## 2026-05-14
 
+**Fixed.** Pass 1 report PDF/print rendering — Rationale column collapse in print mode despite previous min-width fix.
+
+- `llm_runtime/REPORT_TEMPLATE_PASS1_v3.0.html` — added new `@media print` override block immediately after the existing `@media screen{.table-wrap{overflow-x:auto;}}` rule. The print override clears `min-width` to zero and `width:auto` on the nine `.col-*` columns plus `.scale-col`, removes `max-width:180px` and `word-break:break-word` on `.rationale-col`, shrinks `th`/`td` font to 6pt and padding to 1px/2px in print, and adds `page-break-inside:avoid` on screening rows.
+
+Rationale: the previous min-width change (commit bb897e2) was necessary but insufficient. The screen path uses `@media screen{.table-wrap{overflow-x:auto;}}` which allows the table to exceed its container width — that masked the column-overflow problem on screen. In print, no equivalent override existed, so the browser compressed the only flexible column (Rationale) to fit, and the `word-break:break-word` rule produced single-character vertical text. The new `@media print` block strips the column floors and rationale caps under print only, leaving the screen path unchanged.
+
+## 2026-05-14
+
 **Fixed.** Print/PDF rendering of Pass 1 reports — Rationale column collapse to vertical text.
 **Added.** Pre-render checklist comments in REPORT_TEMPLATE_PASS1_v3.0.html (screening-table tbody and per-ticker detail section) — Option B template-internal enforcement.
 
