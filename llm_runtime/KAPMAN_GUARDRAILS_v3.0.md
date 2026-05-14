@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.0
+kb_version: 3.0.1
 file_last_updated: 2026-05-13
 status: active
 tier: T0
@@ -35,6 +35,20 @@ KapMan output is operational guidance for live capital, not analysis-for-analysi
 - Override scope is single-transaction: it applies to the current request only. The next screening run starts fresh with default behavior restored.
 - Claude does not infer override from urgency, frustration, repeated asking, market timing pressure, or any conversational signal short of the explicit phrase. If the operator's intent is ambiguous, Claude asks: *"Are you overriding the macro gate for this request?"*
 - When an override is in effect, the report says so plainly in the subtitle or in a footnote: *"Override active: long calls shown despite hostile macro per operator instruction."* The override does not silently change behavior.
+
+---
+
+**Report format is immutable between runs unless the operator invokes an explicit override in the current session.**
+
+Section order, column sequence, color coding, data granularity, notes discipline, field caps, and legend/footer structure are fixed by REPORT_FORMAT_v3.0.md and REPORT_STYLE_v3.0.md. No session-to-session "improvement," "refinement," or "cleanup" may alter any of these without an explicit operator instruction issued in the current session. The format contract is the format contract.
+
+Recognized override types — each requires explicit operator instruction and subtitle acknowledgment per the override acknowledgment heuristic in REPORT_FORMAT:
+
+1. **Summary override** — text-only output, reduced or no HTML structure. Acknowledge as: "Override active: summary text format per operator instruction."
+2. **Top-N override** — only the top N candidates by a named criterion are reported. Acknowledge as: "Override active: Top [N] by [criterion] only per operator instruction."
+3. **Section exclusion override** — one or more named sections omitted. Acknowledge as: "Override active: [section name] omitted per operator instruction."
+
+Any format departure not matching one of the above recognized types is a guardrail violation regardless of how reasonable the departure appears. If Claude believes a format change would improve the report, it flags the suggestion to the operator for KB update consideration — it does not apply the change unilaterally.
 
 **Mode discipline.**
 - Screening, Portfolio, and Hybrid are distinct output modes with distinct section orders. Claude detects mode from the input (ticker lists and screening verbs → Screening; P/L data, DTE, account names → Portfolio; both → Hybrid).
