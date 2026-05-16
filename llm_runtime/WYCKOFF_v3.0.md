@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.2
-file_last_updated: 2026-05-14
+kb_version: 3.0.3
+file_last_updated: 2026-05-16
 status: active
 tier: T1
 ---
@@ -147,7 +147,7 @@ WYCKOFF is tier T1 — a principle file. It owns the phase and event vocabulary 
 |---|---|---|---|
 | Pipeline regime reading | `kapman-mcp:get_wyckoff_proposal_context` | — (no fallback; estimation path runs if unavailable) | Phase label, primary event, regime-setting event, confirmation status, quality flags |
 | Historical event context | `kapman-mcp:get_wyckoff_proposal_context` | — | `wyckoff_context_events`, `canonical_sequences`, `snapshot_evidence` for event history reasoning |
-| Price metrics (RVOL, VSI, HV) | `kapman-mcp:get_metrics` | `Polygon MCP Server:get_options_metrics` with `include=['price']` | Volume contraction/expansion; directional volume pressure; regime volatility context |
+| Price metrics (RVOL, VSI, HV) | `kapman-mcp:get_metrics` (single-ticker) or `Polygon MCP Server:get_batch_wyckoff_scan` (batch triage) | `Polygon MCP Server:get_options_metrics` with `include=['price']` | Volume contraction/expansion; directional volume pressure; regime volatility context. `historical_volatility` is surfaced in `features.historical_volatility` in the batch scan response as of 2026-05-16 patch. |
 | Technical metrics (RSI, MACD, ADX) | `kapman-mcp:get_metrics` | — (not available on estimation path) | Technical contradiction check for pipeline-flagged gate; not used in proposal assembly |
 | Volatility metrics (HV, IV rank, average IV) | `kapman-mcp:get_metrics` | Same Polygon fallback (`get_options_metrics` with `include=['price']`) | HV-IV spread for confidence language; IV context qualifier |
 | Dealer metrics (DGPI, gamma flip, walls) | `kapman-mcp:get_metrics` | `kapman-mcp:get_dealer_metrics` or Polygon/Schwab equivalents | Not a WYCKOFF input directly; consumed by DEALER in parallel |
@@ -296,6 +296,39 @@ The following table translates v2.3 event detection logic into the qualitative p
 | Sign of Weakness (SOW) | Close below the established support shelf (AR_TOP low area) on a range-expansion bar | Above-average range expansion | Distribution or Markup prior regime strengthens eligibility; SOW in an Accumulation or Markdown prior regime is a contradictory signal | Regime-setting: → Markdown. Closes the distribution phase. Required for Markdown — soft markdown without SOW is not active. SOW confirmation is a directional fallback input for SIGNAL heuristic 11 (BEARISH) |
 | Secondary Test (ST) | Low-volume revisit of the SC or BC area without breaking the prior extreme | Volume noticeably below the SC or BC bar — contraction is the signal | SC (for accumulation ST) or BC (for distribution ST) must be established | Not delivered by the MCP tool surface — no active detection branch. May appear in proposal reasoning as supporting context only; never proposed as a confirmed event |
 
+**`get_wyckoff_scan` and `get_batch_wyckoff_scan` — features block output fields.**
+
+The following fields are returned in the `features` block of the scan response. This is
+the authoritative field list for the Polygon MCP scan surface. All fields are computed
+from the OHLCV DataFrame; none require a live options chain.
+
+| Field | Type | Description | Pass 1 use |
+|---|---|---|---|
+| `latest_price` | float | Last close price | Spot anchor for regime context |
+| `sma_20` | float | 20-day simple moving average | Markup/markdown classification input |
+| `sma_50` | float | 50-day simple moving average | Markup/markdown classification input |
+| `sma_200` | float | 200-day simple moving average | Markup/markdown classification input |
+| `adx_14` | float | 14-day Average Directional Index | Trend strength gate (≥20 hard markup, 15–19 soft markup) |
+| `plus_di` | float | +DI (positive directional indicator) | Directional dominance check (+DI > −DI required for markup) |
+| `minus_di` | float | −DI (negative directional indicator) | Directional dominance check |
+| `atr_14` | float | 14-day Average True Range | Volatility context; event detection input |
+| `bbw_percentile` | float | Bollinger Band Width percentile rank (200-bar trailing) | Range compression context; low percentile = range-bound behavior |
+| `obv` | float | On-Balance Volume (cumulative) | Volume trend context |
+| `obv_slope_20` | float | OBV change over trailing 20 bars | Directional volume pressure; distribution classification input |
+| `vol_z_score` | float | Volume z-score (20-bar) — alias for `vsi_20` | Volume surge context |
+| `close_position` | float | Close location within bar range (0=low, 1=high) | Event candidacy (Spring, Upthrust, climax bars) |
+| `vwap_offset_pct` | float | Percent deviation of close from 14-day VWAP | Price vs. volume-weighted mean context |
+| `force_index` | float | Force Index (13-bar) | Buying/selling pressure magnitude |
+| `cmf_20` | float | Chaikin Money Flow (20-bar) | Accumulation/distribution money flow context |
+| `rvol_20` | float | Relative volume vs. 20-day average | Volume conviction context (>1.0 = above average) |
+| `vsi_20` | float | Volume Surge Index — z-score of current volume (20-bar) | Directional volume pressure qualifier for SOS/SOW proposals |
+| `historical_volatility` | float | Annualized 20-day historical volatility from log returns | Regime volatility context; IV/HV signal numerator denominator in triage report |
+
+`historical_volatility` was added in `kapman-trader` patch `feat: add historical_volatility
+to compute_wyckoff_snapshot()` (2026-05-16). Prior scan responses will not contain this
+field. Triage report IV/HV Signal column requires this field to be non-null; the column
+renders `—` when the field is absent or null.
+
 **Structural levels owned by WYCKOFF.**
 
 Wyckoff structural levels are the price anchors that emerge from the phase and event structure. They are candidate inputs to SIGNAL's Stop alert and Profit target alert when dealer walls are absent or farther than the Wyckoff level. These are identified from named events in `wyckoff_context_events` and OHLCV history — not from the `structural_levels` candidates block in `get_wyckoff_proposal_context`, which contains generic OHLCV-derived levels only.
@@ -336,6 +369,6 @@ How each MCP-delivered metric informs the phase and event proposal on the estima
 |---|---|---|---|
 | RVOL (relative volume vs. period average) | Volume drying up — consistent with accumulation or distribution range behavior; low-conviction price moves | Volume picking up — consistent with climax events (SC, BC), breakout events (SOS, SOW), or Spring/UT reversals | Primary volume context for all event proposals |
 | VSI (volume strength index) | Near zero: balanced buying/selling pressure — supports range-phase reading (accumulation or distribution) | Directional: positive on up-moves supports SOS candidacy; negative on down-moves supports SOW candidacy | Directional volume pressure qualifier for SOS/SOW proposals |
-| HV (historical volatility) | Contracting HV in a range: consistent with accumulation or distribution character | Expanding HV on a directional move: consistent with markup or markdown character | Regime-context qualifier; reinforces phase reading but not a primary event signal |
+| HV (historical volatility) | Contracting HV in a range: consistent with accumulation or distribution character | Expanding HV on a directional move: consistent with markup or markdown character | Regime-context qualifier; reinforces phase reading but not a primary event signal. Source on batch scan path: `features.historical_volatility` in `get_batch_wyckoff_scan` response (annualized 20-day, log-returns). Source on single-ticker path: `get_metrics` price block or `get_options_metrics` with `include=['price']`. |
 | HV-IV spread | Narrow or negative spread: vol premium not elevated; neutral options-context | Wide positive spread: elevated vol premium; informs confidence language when IV is extreme relative to realized vol | Options-context qualifier only; does not affect phase or event reading directly |
 | Price candle behavior | Tight range, price respecting a shelf: supports range-phase reading | Wide-range bar closing away from its extreme in the recovery direction: SC or Spring candidacy (recovery off low); BC or UT candidacy (failure off high) | Primary pattern input for climax and reversal event proposals |
