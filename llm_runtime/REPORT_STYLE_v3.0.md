@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: style
-kb_version: 3.0.1
-file_last_updated: 2026-05-13
+kb_version: 3.0.2
+file_last_updated: 2026-05-16
 status: active
 tier: T3
 ---
@@ -33,9 +33,14 @@ The badge vocabulary has a fixed mapping to conditions: chain quality labels go 
 
 Row color uniformity is required — partial row highlighting is not a valid state. If a cell's content warrants emphasis within a row, use a semantic text color class (`.red`, `.orange`, etc.) or a badge, not a second row-class applied to a `<td>`.
 
-**The rationale column is left-aligned. All short data columns are center-aligned. This is not optional.**
+**All column headers and all data cells are left-aligned. No exceptions.**
 
-Left-alignment on rationale, action, note, and flags cells is required because word-wrapped text becomes unreadable when center-aligned. Center-alignment on data cells (spot, DGPI score, DTE, confidence label, ticker, strike, expiration) is required because numeric comparison across rows depends on alignment. The column-alignment rules in the Appendix are hard specifications, not defaults.
+- `th` elements: `text-align: left` always. Center-aligned headers with left-aligned data causes visible column drift — the header sits over the wrong part of the cell.
+- `td` elements: `text-align: left` always, including numeric data columns (DGPI, price, strike, confidence score). Left-alignment on data cells is required for header-data alignment to be preserved regardless of cell content width.
+- The rationale, action, note, and flags columns remain left-aligned as previously specified.
+- The prior rule permitting `text-align: center` on short numeric data columns is rescinded. Column drift reported in browser rendering is caused by mixed alignment — this patch eliminates the mixing.
+- Markdown output uses `:---` (left) separators for all columns. No `:---:` (center) separators anywhere in any KapMan markdown table.
+- No inline `style=` attributes on any `th` or `td`. All alignment is governed by the class-based stylesheet only. Inline styles are prohibited — they inflate token output and override the stylesheet unpredictably.
 
 **Print output suppresses background color unless `-webkit-print-color-adjust: exact` is declared.**
 
@@ -112,8 +117,8 @@ REPORT_STYLE_v3.0.md is the direct successor to `KAPMAN_REPORT_STYLE_GLOSSARY_v2
 | title (h1) | 10.5pt | bold | center | letter-spacing .5px |
 | subtitle (.subtitle) | 7pt | normal | center | color #444 |
 | section header | 8pt | bold | left | white on dark bg |
-| table header (th) | 6.8pt | bold | center | white on blue bg, nowrap |
-| table cell (td) | 7pt | normal | — | line-height 1.25 |
+| table header (th) | 6.8pt | bold | left | white on blue bg, nowrap |
+| table cell (td) | 7pt | normal | left | line-height 1.25 |
 | badge (.tag) | 6.5pt | bold | — | inline-block, nowrap |
 | legend/footer | 6.5pt | normal | — | color #555 |
 | footnote | 6.5pt | normal | — | color #444 |
@@ -325,8 +330,8 @@ h1{font-size:10.5pt;font-weight:bold;text-align:center;letter-spacing:.5px;margi
 .source-bar{font-size:6.5pt;color:#444;background:#f0f7f0;border-left:3px solid #2c5e2c;padding:2px 6px;margin:0 0 2px 0;}
 .section-title{font-size:8pt;font-weight:bold;background:#1a1a2e;color:#fff;padding:2px 6px;margin:5px 0 2px 0;letter-spacing:.4px;}
 table{width:100%;border-collapse:collapse;margin-bottom:4px;}
-th{background:#2c3e6b;color:#fff;font-size:6.8pt;font-weight:bold;padding:2px 3px;text-align:center;white-space:nowrap;}
-td{font-size:7pt;padding:1.5px 3px;border-bottom:1px solid #e0e0e0;vertical-align:middle;line-height:1.25;}
+th{background:#2c3e6b;color:#fff;font-size:6.8pt;font-weight:bold;padding:2px 3px;text-align:left;white-space:nowrap;}
+td{font-size:7pt;padding:1.5px 3px;border-bottom:1px solid #e0e0e0;vertical-align:middle;line-height:1.25;text-align:left;}
 tr:nth-child(even) td{background:#f7f8fc;}
 /* Semantic row classes — ordered by urgency tier */
 .monitor{background:#f0f4ff!important;}
