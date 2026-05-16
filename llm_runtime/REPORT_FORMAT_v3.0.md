@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.5
-file_last_updated: 2026-05-14
+kb_version: 3.0.6
+file_last_updated: 2026-05-16
 status: active
 tier: T3
 ---
@@ -92,6 +92,21 @@ The legend/footer is the only section that may expand without a hard cap — foo
 **Run timing and token estimate are recorded at two fixed points — not reconstructed at render time.**
 
 The run start timestamp is the moment the first MCP call of the run fires: the SPY macro gate fetch for Pass 1, or the first live chain fetch for Pass 2 when Pass 2 begins as a standalone run. The render timestamp is the moment Claude begins assembling the final HTML output. Both are noted inline during the session as they occur and carried into the session metadata block — they are never back-calculated or approximated. If no reliable clock signal is present in context, the timestamp renders as `--:-- ET (unavailable)`; timestamps are never fabricated. The token estimate uses the runtime formula `(N_tickers × 4,000) + 60,000`, where N_tickers is the count of candidates that received a Pass 1 determination (Eligible, NO_TRADE, or WAIT) in the current run. Round to the nearest 1,000 and label `~NNNk tokens est.` This is a planning estimate, not a metered API count. When Pass 2 has also run, append `+ P2 chain validation` to the label without adjusting the formula. The `session-meta-timing` CSS class is reserved for the session metadata block only. It must not be used for ticker-count summary lines or any other content. Ticker-count summary data (tickers evaluated, eligible count, blocked count) belongs in the subtitle line of the report header, not in the legend/footer session metadata element.
+
+**Default output format is markdown. HTML is produced only on explicit operator request.**
+
+- The default output for all Pass 1 triage reports, Pass 2 validation reports, and portfolio reports is markdown (pipe-delimited tables with GitHub Flavored Markdown syntax).
+- HTML output is produced only when the operator explicitly requests it: "give me the HTML report", "render as HTML", or equivalent.
+- When markdown is the output mode, REPORT_TEMPLATE_PASS1_v3.0.html is not used. The section order, field caps, footnote convention, and all content rules in this file still apply — only the rendering surface changes.
+- Markdown column alignment follows REPORT_STYLE column-alignment rules: left-align for text/rationale columns, left-align for all headers (`:---` separator syntax).
+- When switching from markdown to HTML mid-session on operator request, Claude produces the full HTML block in one pass from already-computed intermediate data. Claude does not re-run MCP calls to produce the HTML version of a report already computed in markdown.
+
+**HTML rendering discipline — generate in two stages, never inline.**
+
+- Stage 1 (compute): Run all MCP calls, collect all structured data, resolve all field values, apply all KB rules. Save intermediate results to a structured scratch representation before emitting any output. Do not begin HTML emission until all data is resolved.
+- Stage 2 (render): Emit the complete HTML block in one pass from the resolved data. No MCP calls, no rule evaluation, no field resolution during Stage 2.
+- Violating the two-stage discipline — emitting partial HTML while still fetching data — is the primary cause of slow rendering. The operator sees an incomplete table growing incrementally, which is slower to scan than a complete table appearing at once.
+- The HTML block must use the class-based stylesheet from REPORT_STYLE. No inline `style=` attributes on any `<td>` or `<tr>` element. Inline styles double the token output of the table and are the secondary cause of slow rendering.
 
 ---
 
