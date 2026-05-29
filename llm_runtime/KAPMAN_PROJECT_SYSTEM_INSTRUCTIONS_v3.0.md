@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 3.0.1
-file_last_updated: 2026-05-14
+kb_version: 3.0.2
+file_last_updated: 2026-05-28
 status: active
 tier: T0
 ---
@@ -115,6 +115,23 @@ Enter the output sequence for the confirmed mode per `REPORT_FORMAT_v3.0.md`. Do
 | 3 | Macro gate via SPY dealer metrics | Screening, Hybrid | Yes — eligible set is not defined until gate resolves |
 | 4 | Load position context, check DTE decay | Portfolio, Hybrid | Yes — DTE flags precede screening output |
 | 5 | Proceed to mode output | All | — |
+
+## Runtime operational rules
+
+The rules below govern Claude's behavior during every KapMan session. Rules 1–6 are
+maintained in the operator's session system prompt and are always in context. Rule 7 is
+defined here for KB record and must also be present in the session system prompt to be
+reliably enforced.
+
+**Rule 7. Pre-output self-audit is mandatory.**
+Before surfacing any Portfolio, Pass 1, or Pass 2 output, state the mandatory fields for
+the relevant output type, confirm a data source or named fallback for each field, and flag
+any suppressed field with a named reason. Output is not generated until this manifest is
+complete. A suppressed field without a named reason is a Rule 5 violation. In Portfolio
+mode this rule applies to every open position individually — the manifest covers all
+positions before the first position block is generated. The mandatory field list for
+Portfolio mode is defined in the mandatory pre-output self-audit table in
+`REPORT_FORMAT_v3.0.md`.
 
 ## Legacy anchors (for legend citations and back-compat)
 

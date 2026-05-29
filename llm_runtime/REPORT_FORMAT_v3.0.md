@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.6
-file_last_updated: 2026-05-16
+kb_version: 3.0.7
+file_last_updated: 2026-05-28
 status: active
 tier: T3
 ---
@@ -292,6 +292,32 @@ forward-looking close of the block.
 
 The section heading reads "ALTERNATIVES SUMMARY" and uses the
 `.section-title` class, consistent with adjacent section headings.
+
+---
+
+**Mandatory pre-output self-audit — Portfolio mode.**
+
+Before generating any portfolio output, Claude executes the checklist below for every open
+position and states the result inline. Output is not generated until the checklist is
+complete for all positions. A field is suppressed only when its fallback cannot be
+computed — for example, Greeks absent from both broker screenshot and live chain pull, and
+no prior-session record. Suppression requires a named reason stated inline in the
+per-position block. A suppressed field without a named reason is a Rule 5 self-report
+violation.
+
+| Field | Required | Fallback when entry-time data absent |
+|---|---|---|
+| Current regime summary | Yes | Always computable from current-session MCP dealer + Wyckoff data |
+| Stop alert — underlying level | Yes | Schwab dealer flip (Stop anchor per SIGNAL) |
+| Stop alert — est. option price | Yes | Delta-gamma approximation using current-session Greeks |
+| Stop alert — trail mark basis | Yes | SIGNAL trail-stop reference band applied to current mark |
+| Stop alert — trail bid/ask basis | Yes | SIGNAL trail-stop reference band applied to current bid/ask |
+| Profit target alert — underlying level | Yes | Nearest call wall above spot (Profit anchor per SIGNAL) |
+| Profit target alert — est. option price | Yes | Delta-gamma approximation using current-session Greeks |
+| Profit target alert — trail mark basis | Yes | SIGNAL trail-stop reference band applied to current mark |
+| Profit target alert — trail bid/ask basis | Yes | SIGNAL trail-stop reference band applied to current bid/ask |
+| DTE decay warning | Yes | Always evaluable from expiration date and DTE_DECAY_WARNING_THRESHOLD |
+| Regime exit advisory | Yes — all four branches | Label each branch data-absent with named reason when entry-time snapshot missing |
 
 ---
 
