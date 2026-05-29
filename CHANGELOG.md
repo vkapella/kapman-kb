@@ -332,3 +332,18 @@ Mechanical scaffolding complete. Directory structure, file skeletons,
 legacy anchor extraction, and migration table generated per
 MIGRATION_v2_to_v3.md. No rule content rewritten yet. v2.3 files
 preserved in archive/v2.3/.
+
+## 2026-05-29
+
+### KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md — v3.0.2 → v3.0.3
+- KB file inventory table: Status column updated from `draft` to `active`
+  for all 13 .md file entries. No behavioral changes; documentation
+  accuracy fix only. (REPORT_TEMPLATE row was already `active`.)
+
+### REPORT_TEMPLATE_PASS1_v3.0.html
+- Banner comment updated: Style v3.0.1 → v3.0.2, Format v3.0.3 → v3.0.7
+- Reference CSS comment label updated to v3.0.2
+- `th` text-align corrected: `center` → `left` (aligns with REPORT_STYLE
+  v3.0.2 reference block and REPORT_FORMAT left-align mandate)
+- `td` text-align added: `left` (same source)
+- No changes to HTML structure, placeholder tokens, or template extensions

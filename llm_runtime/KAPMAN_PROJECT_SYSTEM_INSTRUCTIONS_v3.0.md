@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 3.0.2
-file_last_updated: 2026-05-28
+kb_version: 3.0.3
+file_last_updated: 2026-05-29
 status: active
 tier: T0
 ---
@@ -21,21 +21,21 @@ The table below is the authoritative map of all files in `llm_runtime/`. Read it
 
 | File | Tier | Doc type | Status | Owns |
 |---|---|---|---|---|
-| `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | T0 | orientation | draft | KB organization, tier model, mode detection, session entry sequence |
-| `KAPMAN_GUARDRAILS_v3.0.md` | T0 | principle | draft | Runtime behavioral rules, refusals, override discipline, data-honesty floor |
-| `DEALER_v3.0.md` | T1 | principle | draft | Dealer regime interpretation, gamma flip bands, DGPI tiers, macro and ticker-layer regime reads |
-| `RISK_v3.0.md` | T1 | principle | draft | Position sizing bands, regime-conditional size caps, absolute ceiling, CSP sizing denominator |
-| `SIGNAL_v3.0.md` | T1 | principle | draft | Entry and exit trigger contracts, Wyckoff veto, dealer-timing veto, spread mandate |
-| `VOLATILITY_v3.0.md` | T1 | principle | draft | IV source authority by pass, IV/HV regime tiers, spread-mandate reinforcement, FULL/LIMITED/INVALID volatility label |
-| `WYCKOFF_v3.0.md` | T1 | principle | draft | Phase classification, event detection, propose-confirm protocol, Wyckoff veto inputs |
-| `PASS1_SCREENING_v3.0.md` | T2 | runbook | draft | Macro gate sequencing, per-candidate eligibility determination, candidate zone assembly |
-| `PASS2_VALIDATION_v3.0.md` | T2 | runbook | draft | Live chain validation, exact strike and expiration selection, spread-mandate enforcement |
-| `PORTFOLIO_MGMT_v3.0.md` | T2 | runbook | draft | Open position monitoring, exit trigger evaluation, DTE decay warnings, P/L reporting |
-| `REPORT_FORMAT_v3.0.md` | T3 | format | draft | Report section order, field caps, footnote overflow mechanics, mode-specific layout |
-| `REPORT_STYLE_v3.0.md` | T3 | style | draft | Visual presentation, HTML/CSS spec, typography, color |
+| `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | T0 | orientation | active | KB organization, tier model, mode detection, session entry sequence |
+| `KAPMAN_GUARDRAILS_v3.0.md` | T0 | principle | active | Runtime behavioral rules, refusals, override discipline, data-honesty floor |
+| `DEALER_v3.0.md` | T1 | principle | active | Dealer regime interpretation, gamma flip bands, DGPI tiers, macro and ticker-layer regime reads |
+| `RISK_v3.0.md` | T1 | principle | active | Position sizing bands, regime-conditional size caps, absolute ceiling, CSP sizing denominator |
+| `SIGNAL_v3.0.md` | T1 | principle | active | Entry and exit trigger contracts, Wyckoff veto, dealer-timing veto, spread mandate |
+| `VOLATILITY_v3.0.md` | T1 | principle | active | IV source authority by pass, IV/HV regime tiers, spread-mandate reinforcement, FULL/LIMITED/INVALID volatility label |
+| `WYCKOFF_v3.0.md` | T1 | principle | active | Phase classification, event detection, propose-confirm protocol, Wyckoff veto inputs |
+| `PASS1_SCREENING_v3.0.md` | T2 | runbook | active | Macro gate sequencing, per-candidate eligibility determination, candidate zone assembly |
+| `PASS2_VALIDATION_v3.0.md` | T2 | runbook | active | Live chain validation, exact strike and expiration selection, spread-mandate enforcement |
+| `PORTFOLIO_MGMT_v3.0.md` | T2 | runbook | active | Open position monitoring, exit trigger evaluation, DTE decay warnings, P/L reporting |
+| `REPORT_FORMAT_v3.0.md` | T3 | format | active | Report section order, field caps, footnote overflow mechanics, mode-specific layout |
+| `REPORT_STYLE_v3.0.md` | T3 | style | active | Visual presentation, HTML/CSS spec, typography, color |
 | `REPORT_TEMPLATE_PASS1_v3.0.html` | T3 | template | active | Canonical HTML skeleton for Pass 1 screening report; column structure, section order, legend/footer pre-built per REPORT_FORMAT and REPORT_STYLE; consumed by Runtime Rule 6 at render time |
-| `SYSTEM_PARAMS_v3.0.md` | T3 | reference | draft | Operator-configurable numeric parameters consumed by name across runtime files |
-| `SIC_SECTOR_MAP_v3.0.md` | T3 | reference | draft | SIC code to sector ETF benchmark mapping |
+| `SYSTEM_PARAMS_v3.0.md` | T3 | reference | active | Operator-configurable numeric parameters consumed by name across runtime files |
+| `SIC_SECTOR_MAP_v3.0.md` | T3 | reference | active | SIC code to sector ETF benchmark mapping |
 
 ---
 
