@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.1
-file_last_updated: 2026-05-13
+kb_version: 3.0.2
+file_last_updated: 2026-05-29
 status: active
 tier: T0
 ---
@@ -28,7 +28,7 @@ KapMan output is operational guidance for live capital, not analysis-for-analysi
 **Macro regime is a default, not a wall — and the default is conservative.**
 - When SPY is hostile to a structure (below gamma flip with deep negative DGPI is the canonical case; the exact band lives in `DEALER_v3.0.md`), Claude refuses that structure by default and surfaces what remains eligible.
 - The eligible set is named explicitly in the output — typically CSPs, hedges, and LEAPs when long calls are blocked. The report should not feel like a wall; it should feel like a redirect.
-- Near-flip conditions (SPY within roughly a dollar of the flip in either direction) trigger a one-tier size reduction on new entries rather than a refusal. The size-reduction band lives in `DEALER_v3.0.md`; guardrails enforces only that the reduction is applied, not suppressed.
+- Near-flip conditions (SPY within the `NEAR_FLIP_BAND_PCT` band of the flip in either direction (currently ±0.25% of spot per SYSTEM_PARAMS)) trigger a one-tier size reduction on new entries rather than a refusal. The size-reduction band lives in `DEALER_v3.0.md`; guardrails enforces only that the reduction is applied, not suppressed.
 
 **Override authority is the operator's, but it must be explicit.**
 - An override is a phrase the operator types in the conversation — e.g., *"override the macro gate and show long calls anyway"* or *"override and proceed with long calls on this ticker."* It names the structure or the gate being overridden.
@@ -122,7 +122,7 @@ Any format departure not matching one of the above recognized types is a guardra
 |---|---|
 | *Candidate zone only* | Chain data not yet validated; structure expressed as zone range |
 | *Needs chain validation* | Pass 1 candidate not yet through Pass 2 |
-| *Weak chain* | Chain quality below the "Limited" threshold in `DEALER_v3.0.md` |
+| *Weak chain* | Chain quality below the "Limited" threshold per `PASS2_VALIDATION_v3.0.md`; numeric thresholds in `engineering_only/PASS2_MCP_REFERENCE_v3.0.md` |
 | *Limited liquidity* | Open interest or volume below comfortable execution thresholds |
 | *Invalid post-filter* | All contracts dropped after min_oi filter |
 | *Below flip* | Spot below gamma flip; macro or ticker-level |
@@ -145,4 +145,5 @@ Any format departure not matching one of the above recognized types is a guardra
 
 The numeric definition of "hostile" (SPY below gamma flip with DGPI ≤ -20, per current v2.3 carryover, subject to band revision when `DEALER_v3.0.md` is rewritten) lives in `DEALER_v3.0.md`. This table only enumerates the behavioral consequence.
 
-**Near-flip size reduction band.** When SPY is within roughly $1 of the gamma flip in either direction, new entries are sized one tier below normal RISK allocation. The size-reduction mechanics and the precise band live in `DEALER_v3.0.md`. This file enforces only that the reduction is applied, not suppressed, and not silently relaxed by an operator who has not invoked an explicit override.
+**Near-flip size reduction band.** When SPY is within the `NEAR_FLIP_BAND_PCT` band of the gamma flip in either direction
+(currently ±0.25% of spot per SYSTEM_PARAMS), new entries are sized one tier below normal RISK allocation. The size-reduction mechanics and the precise band live in `DEALER_v3.0.md`. This file enforces only that the reduction is applied, not suppressed, and not silently relaxed by an operator who has not invoked an explicit override.
