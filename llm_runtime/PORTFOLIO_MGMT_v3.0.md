@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.0
-file_last_updated: 2026-05-13
+kb_version: 3.0.1
+file_last_updated: 2026-05-28
 status: active
 tier: T2
 ---
@@ -32,8 +32,14 @@ In Portfolio mode, the operator is asking about existing positions only. PORTFOL
 - Step 3: Fetch current spot price and option chain snapshot for each open position, for exit-trigger context and DTE calculation.
 - Step 4: Evaluate the Regime exit advisory per position — compare the entry-time regime snapshot to the current regime across all four decay branches. Surface named decay reasons for any branch that fires.
 - Step 5: Evaluate DTE decay warnings — flag any open position whose remaining DTE has fallen below `DTE_DECAY_WARNING_THRESHOLD` per SYSTEM_PARAMS.
-- Step 6: Evaluate exit-trigger proximity — compare current spot and current option price to the Stop alert and Profit target alert levels carried in position context. Surface proximity language when either level is imminently relevant.
-- Step 7: Assemble and surface the portfolio view — Open positions, Advisory positions flagged, Exited positions summary, Expired positions requiring acknowledgment.
+- Step 6: Evaluate exit-trigger proximity. When entry-time Stop and Profit target alert levels are present in position context, compare current spot and current option price to those levels and surface proximity language when either level is imminently relevant. When entry-time alert levels are absent from position context, do not suppress this step — instead apply the SIGNAL approximation formula fresh from current-session data: use current-session Greeks (from broker screenshot or live chain pull), Schwab dealer flip as Stop anchor, nearest call wall above spot as Profit target anchor, and the SIGNAL trail-stop reference band (20–30% mark for long calls and long puts; 15–25% mark for LEAPs; 25–35% bid/ask for long calls and long puts; 20–30% bid/ask for LEAPs). Surface all four mandatory fields per position with an inline note: "Current-session computed — entry-time levels not supplied."
+- Step 7: Assemble and surface the portfolio view. Execute the sub-sequence below in order — do not skip steps.
+
+  - Step 7a: State the mandatory per-position field list from REPORT_FORMAT before generating any output. For every open position, confirm a data source or named fallback exists for each field. This manifest is stated inline before the first position block is written.
+  - Step 7b: For each open position, confirm each of the following has a data source or a named fallback reason: (1) current regime summary — DGPI tier, flip-zone, Wyckoff if confirmed this session; (2) Stop alert — anchor identified (Schwab dealer flip), estimated option price computable via delta-gamma approximation, trail mark and trail bid/ask values computable from SIGNAL reference band; (3) Profit target alert — same four fields as Stop alert; (4) DTE decay warning — checked against DTE_DECAY_WARNING_THRESHOLD per SYSTEM_PARAMS; (5) Regime exit advisory — all four branches evaluated or labeled data-absent with named reason. Any field without a data source and without a named fallback reason is a Rule 5 self-report violation and must be surfaced before output is generated.
+  - Step 7c: Generate the portfolio view table and per-position detail blocks.
+  - Step 7d: After all positions are generated, state the output self-audit result: number of positions processed, number of fields computed fresh from current-session data, number of named fallbacks applied.
+  - Step 7e: Surface Exited positions summary and Expired positions requiring acknowledgment where applicable.
 
 **Position lifecycle has four states: Open, Advisory, Exited, Expired.**
 

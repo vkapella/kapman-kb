@@ -1,5 +1,41 @@
 # KapMan KB Changelog
 
+## [3.0.7] — 2026-05-28
+
+### Fixed
+- **PORTFOLIO_MGMT_v3.0.md** — Step 6: Added explicit fallback path when entry-time
+  Stop/Profit alert levels are absent from position context. Previously, absence caused
+  full suppression of exit-trigger output. Now: apply SIGNAL delta-gamma approximation
+  and trail-stop reference band from current-session data (Schwab dealer flip as Stop
+  anchor, nearest call wall as Profit target anchor, SIGNAL band for trail values).
+  Surface all four mandatory fields with inline note. (kb_version 3.0.0 → 3.0.1)
+- **PORTFOLIO_MGMT_v3.0.md** — Step 7: Replaced single-line assembly step with numbered
+  sub-sequence 7a–7e. Step 7a requires a pre-output field manifest before any position
+  block is generated. Step 7b requires per-position field confirmation with named
+  fallbacks. Step 7d requires a post-generation self-audit result statement.
+- **REPORT_FORMAT_v3.0.md** — Added mandatory pre-output self-audit checklist table to
+  Appendix, immediately before the per-position detail subsection sequence. Enumerates
+  all 11 required per-position fields with fallback paths. Suppression without a named
+  reason is a Rule 5 violation per this table. (kb_version 3.0.6 → 3.0.7)
+
+### Added
+- **KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md** — New section "Runtime operational
+  rules" added before Legacy anchors. Contains Rule 7 (pre-output self-audit mandate)
+  with reference to REPORT_FORMAT mandatory field table as the Portfolio mode checklist
+  authority. (kb_version 3.0.1 → 3.0.2)
+
+### Root cause
+Portfolio management session 2026-05-28 identified that PORTFOLIO_MGMT Step 6 correctly
+noted absent entry-time context but incorrectly suppressed exit-trigger output entirely
+rather than applying SIGNAL fallback mechanics. The pre-output manifest pattern was
+identified as the highest-reliability catch mechanism. All content approved in Claude.ai
+session 2026-05-28.
+
+### Post-merge operator action required
+Rule 7 (above) must be appended to the Rules 1–6 block in the Claude.ai session system
+prompt settings. The KB record alone is retrieval-based and does not guarantee
+always-in-context enforcement.
+
 ## [3.0.5] — 2026-05-14
 
 ### Added
