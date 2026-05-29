@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.7
-file_last_updated: 2026-05-28
+kb_version: 3.0.8
+file_last_updated: 2026-05-29
 status: active
 tier: T3
 ---
@@ -371,7 +371,7 @@ Multiple degradation flags are comma-separated on the source bar line. When flag
 |---|---|---|---|
 | 1 | Rules applied | 1 line | "Rules applied: VALIDATION_001, PIPELINE_011, RISK_005" — comma-separated rule IDs only |
 | 2 | Data sources | 2 lines | MCP tool surfaces used; matches source bar but may include additional detail |
-| 3 | Chain quality badge key | 3 lines | "Full chain: complete OI and volume data / Limited chain: partial data, floor sizing applied / Invalid chain: dropped from Pass 2" |
+| 3 | Chain quality badge key | 3 lines | "Full chain: complete OI and volume data / Limited chain: partial data, floor sizing applied / Weak chain: insufficient liquidity; dropped from Pass 2" |
 | 4 | Footnotes | No cap — determined by overflow volume | Each footnote on its own line; format: "¹ [Full overflow content, self-contained]" |
 | 5 | Session metadata | 2 lines | Line 1: `Run: HH:MM ET → HH:MM ET (Xh Ym) \| ~NNNk tokens est.` Line 2: `Date: YYYY-MM-DD \| Mode: [Screening / Portfolio / Hybrid] \| Passes: [Pass 1 / Pass 1 + Pass 2 / Portfolio / Both]` |
 

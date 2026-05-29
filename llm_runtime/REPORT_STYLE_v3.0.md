@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: style
-kb_version: 3.0.2
-file_last_updated: 2026-05-16
+kb_version: 3.0.3
+file_last_updated: 2026-05-29
 status: active
 tier: T3
 ---
@@ -33,12 +33,19 @@ The badge vocabulary has a fixed mapping to conditions: chain quality labels go 
 
 Row color uniformity is required — partial row highlighting is not a valid state. If a cell's content warrants emphasis within a row, use a semantic text color class (`.red`, `.orange`, etc.) or a badge, not a second row-class applied to a `<td>`.
 
-**All column headers and all data cells are left-aligned. No exceptions.**
+**Column headers (`th`) are left-aligned without exception. Data cells
+(`td`) are left-aligned by default; the eight named short numeric/date
+columns above are the only authorized exceptions.**
 
 - `th` elements: `text-align: left` always. Center-aligned headers with left-aligned data causes visible column drift — the header sits over the wrong part of the cell.
-- `td` elements: `text-align: left` always, including numeric data columns (DGPI, price, strike, confidence score). Left-alignment on data cells is required for header-data alignment to be preserved regardless of cell content width.
+- `td` elements: `text-align: left` by default. Exception: the eight
+  short numeric and date screening-table columns listed in the Column widths
+  table below use `text-align: center` — `.col-ticker`, `.col-wyckoff`,
+  `.col-dgpi`, `.col-strike`, `.col-exp`, `.col-entry`, `.col-exit`,
+  `.col-confidence`. These classes are defined in the template extension
+  block (not in the reference CSS) and their center alignment is explicitly
+  authorized here. All other `td` elements remain left-aligned.
 - The rationale, action, note, and flags columns remain left-aligned as previously specified.
-- The prior rule permitting `text-align: center` on short numeric data columns is rescinded. Column drift reported in browser rendering is caused by mixed alignment — this patch eliminates the mixing.
 - Markdown output uses `:---` (left) separators for all columns. No `:---:` (center) separators anywhere in any KapMan markdown table.
 - No inline `style=` attributes on any `th` or `td`. All alignment is governed by the class-based stylesheet only. Inline styles are prohibited — they inflate token output and override the stylesheet unpredictably.
 
@@ -228,7 +235,7 @@ All badges: `display: inline-block`, `padding: 0 4px`, `border-radius: 2px`, `fo
 | State = Expired (unacknowledged) | `Expired` | `.tag-critical` | Row class `.expired`; strongest signal in palette |
 | Chain quality: Full | `Full chain` | `.tag-green` | Source bar and chain quality badge key |
 | Chain quality: Limited | `Limited chain` | `.tag-orange` | Floor sizing applied |
-| Chain quality: Invalid | `INVALID` | `.tag-red` | Candidate dropped from Pass 2 |
+| Chain quality: Weak | `Weak chain` | `.tag-orange` | Insufficient liquidity; candidate dropped from Pass 2 |
 
 ---
 
@@ -257,6 +264,18 @@ All badges: `display: inline-block`, `padding: 0 4px`, `border-radius: 2px`, `fo
 | `.stop-col` | 50px | center | Underlying alert price only |
 | `.scale-col` | 70px | center | Two scale levels max |
 | `.flags-col` | 200px | left | Portfolio view Flags field — wider than rationale-col to accommodate dual-flag text (Advisory + DTE warning together without forcing footnote overflow) |
+| `.col-ticker`     | 42px min  | center | Screening table col 1 — short symbol |
+| `.col-wyckoff`    | 100px min | center | Screening table col 4 — short label |
+| `.col-dgpi`       | 90px min  | center | Screening table col 5 — short numeric |
+| `.col-strike`     | 112px min | center | Screening table col 6 — zone or price |
+| `.col-exp`        | 72px min  | center | Screening table col 7 — date or band |
+| `.col-entry`      | 80px min  | center | Screening table col 8 — price range |
+| `.col-exit`       | 80px min  | center | Screening table col 9 — alert level |
+| `.col-confidence` | 88px min  | center | Screening table col 11 — band label |
+
+Note: These classes are defined in the template extension block in
+`REPORT_TEMPLATE_PASS1_v3.0.html`, not in the reference CSS block below.
+They are listed here as the authoritative column-width and alignment spec.
 
 ---
 

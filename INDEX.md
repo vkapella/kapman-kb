@@ -65,12 +65,12 @@ This repository separates runtime and engineering materials:
 | File | kb_version | file_last_updated |
 |---|---|---|
 | REPORT_TEMPLATE_PASS1_v3.0.html | 3.0.5 | 2026-05-14 |
-| KAPMAN_GUARDRAILS_v3.0.md | 3.0.1 | 2026-05-13 |
-| REPORT_STYLE_v3.0.md | 3.0.1 | 2026-05-13 |
+| KAPMAN_GUARDRAILS_v3.0.md | 3.0.2 | 2026-05-29 |
+| REPORT_STYLE_v3.0.md | 3.0.3 | 2026-05-29 |
 | WYCKOFF_v3.0.md | 3.0.2 | 2026-05-14 |
 | PASS1_SCREENING_v3.0.md | 3.0.5 | 2026-05-14 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.1 | 2026-05-28 |
-| REPORT_FORMAT_v3.0.md | 3.0.7 | 2026-05-28 |
+| REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.2 | 2026-05-28 |
 
 ### Session 14 llm_runtime inventory verification

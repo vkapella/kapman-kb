@@ -1,5 +1,52 @@
 # KapMan KB Changelog
 
+## [3.0.8] — 2026-05-29
+
+### Fixed — KB audit conflicts (Claude.ai session 2026-05-29)
+
+- **REPORT_STYLE_v3.0.md** — Alignment heuristic: removed "no exceptions" and
+  "prior rule rescinded" language; explicitly authorized `text-align: center` for
+  the eight named short numeric/date screening-table columns (`.col-ticker`,
+  `.col-wyckoff`, `.col-dgpi`, `.col-strike`, `.col-exp`, `.col-entry`,
+  `.col-exit`, `.col-confidence`). Added all eight classes to the Column widths
+  table with alignment noted. This resolves the conflict between the heuristic's
+  blanket left-align mandate and the template extension classes that have always
+  rendered those columns centered. The centering remains authoritative in the
+  template extensions; REPORT_STYLE now explicitly permits it.
+  Badge vocabulary: "Chain quality: Invalid / INVALID / .tag-red" row updated to
+  "Chain quality: Weak / Weak chain / .tag-orange" to match PASS2's vocabulary.
+  (kb_version 3.0.2 → 3.0.3)
+
+- **KAPMAN_GUARDRAILS_v3.0.md** — Near-flip heuristic and appendix: replaced
+  fixed-dollar approximation ("roughly a dollar", "roughly $1") with a named
+  parameter reference (`NEAR_FLIP_BAND_PCT`, currently ±0.25% of spot per
+  SYSTEM_PARAMS). Eliminates drift between the guardrail prose and the
+  authoritative parameter definition.
+  Data-quality vocabulary table: "Weak chain" row pointer updated from
+  `DEALER_v3.0.md` (incorrect) to `PASS2_VALIDATION_v3.0.md / engineering_only`
+  (correct — chain quality classification is a Pass 2 / engineering-only concept,
+  not a DEALER concept).
+  (kb_version 3.0.1 → 3.0.2)
+
+- **REPORT_TEMPLATE_PASS1_v3.0.html** — Legend/footer stale comment updated:
+  "REPORT_FORMAT_v3.0.3 Appendix" → "REPORT_FORMAT_v3.0.7 Appendix".
+  Chain quality badge key: third badge changed from
+  `<span class="tag tag-red">INVALID</span>` to
+  `<span class="tag tag-orange">Weak chain</span>` to match PASS2's
+  Full / Limited / Weak vocabulary. INVALID is dealer-status vocabulary, not
+  chain-quality vocabulary.
+
+- **REPORT_FORMAT_v3.0.md** — Legend/footer element #3 definition updated:
+  "Invalid chain: dropped from Pass 2" → "Weak chain: insufficient liquidity;
+  dropped from Pass 2". Aligns with PASS2 chain-quality vocabulary.
+  (kb_version 3.0.7 → 3.0.8)
+
+### Root cause
+Claude.ai KB audit session 2026-05-29 identified four confirmed conflicts against
+source files. All content changes reviewed and approved by operator in that session
+before this Codex prompt was issued.
+
+
 ## [3.0.7] — 2026-05-28
 
 ### Fixed
