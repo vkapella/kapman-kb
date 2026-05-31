@@ -56,7 +56,7 @@ This repository separates runtime and engineering materials:
 | File | kb_version | status |
 |---|---|---|
 | SYSTEM_PARAMS_v3.0.md | 3.0.1 | active |
-| SIGNAL_v3.0.md | 3.0.1 | active |
+| SIGNAL_v3.0.md | 3.0.2 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.5 | active |
 | WYCKOFF_v3.0.md | 3.0.2 | active |
 

@@ -1,5 +1,24 @@
 # KapMan KB Changelog
 
+## [3.0.9] — 2026-05-29
+
+### Changed — Mechanical KB hygiene pass
+
+- **REPORT_TEMPLATE_PASS1_v3.0.html** — Header comments only (CSS unchanged):
+  - Style citation updated: `REPORT_STYLE_v3.0.2` → `REPORT_STYLE_v3.0.3`
+  - Format citation updated: `REPORT_FORMAT_v3.0.7` → `REPORT_FORMAT_v3.0.8`
+  - Reference CSS comment label updated: `REPORT_STYLE_v3.0.2` → `REPORT_STYLE_v3.0.3`
+- **SIGNAL_v3.0.md** — Removed `(forthcoming)` qualifiers for now-active runtime files only:
+  - `PASS1_SCREENING_v3.0.md`
+  - `PASS2_VALIDATION_v3.0.md`
+  - `WYCKOFF_v3.0.md`
+  - `PORTFOLIO_MGMT_v3.0.md`
+  - `REPORT_FORMAT_v3.0.md`
+  - Preserved `(forthcoming)` on `engineering_only/*` references.
+- **SIGNAL_v3.0.md** frontmatter metadata updated:
+  - `kb_version: 3.0.1` → `3.0.2`
+  - `file_last_updated: 2026-05-13` → `2026-05-29`
+
 ## [3.0.8] — 2026-05-29
 
 ### Fixed — KB audit conflicts (Claude.ai session 2026-05-29)
