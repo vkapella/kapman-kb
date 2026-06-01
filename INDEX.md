@@ -19,13 +19,13 @@ This repository separates runtime and engineering materials:
 | llm_runtime/RISK_v3.0.md | T1 | principle | Risk management principles |
 | llm_runtime/SIGNAL_v3.0.md | T1 | principle | Signal entry/exit principles |
 | llm_runtime/PASS1_SCREENING_v3.0.md | T2 | runbook | Pass 1 screening workflow |
-| llm_runtime/PASS2_VALIDATION_v3.0.md | T2 | PASS2 validation runbook | Session 8 | Active |
-| llm_runtime/PORTFOLIO_MGMT_v3.0.md | T2 | runbook | Portfolio management workflow | Session 9 | Draft |
-| llm_runtime/REPORT_STYLE_v3.0.md | T3 | style | Report style guidance | Session 11 | Draft | Direct successor to `KAPMAN_REPORT_STYLE_GLOSSARY_v2.3.md` (full migration) |
-| llm_runtime/REPORT_TEMPLATE_PASS1_v3.0.html | T3 | template | Canonical HTML skeleton for Pass 1 screening report; column structure, section order, legend/footer pre-built per REPORT_FORMAT and REPORT_STYLE; consumed by Runtime Rule 6 at render time | Session 16 | Active |
-| llm_runtime/REPORT_FORMAT_v3.0.md | T3 | style | Report format guidance | Session 10 | Draft |
+| llm_runtime/PASS2_VALIDATION_v3.0.md | T2 | runbook | Pass 2 validation workflow |
+| llm_runtime/PORTFOLIO_MGMT_v3.0.md | T2 | runbook | Portfolio management workflow |
+| llm_runtime/REPORT_STYLE_v3.0.md | T3 | style | Report style guidance |
+| llm_runtime/REPORT_TEMPLATE_PASS1_v3.0.html | T3 | template | Canonical HTML skeleton for Pass 1 screening report; column structure, section order, legend/footer pre-built per REPORT_FORMAT and REPORT_STYLE; consumed by Runtime Rule 6 at render time |
+| llm_runtime/REPORT_FORMAT_v3.0.md | T3 | format | Report format guidance |
 | llm_runtime/SIC_SECTOR_MAP_v3.0.md | T3 | reference | SIC to sector map reference |
-| llm_runtime/SYSTEM_PARAMS_v3.0.md | T3 | Operator-configurable parameter reference; includes `DTE_DECAY_WARNING_THRESHOLD` (21 days) | Session 9 | Active |
+| llm_runtime/SYSTEM_PARAMS_v3.0.md | T3 | reference | Operator-configurable parameter reference; includes `DTE_DECAY_WARNING_THRESHOLD` (21 days) |
 | engineering_only/BACKEND_PIPELINE_v3.0.md | T4 | reference | Backend pipeline reference |
 | engineering_only/TOOL_SURFACE_v3.0.md | T4 | reference | Tool-surface reference |
 | engineering_only/DEALER_PIPELINE_v3.0.md | — | reference | Dealer pipeline formulas and parameters |
@@ -58,7 +58,7 @@ This repository separates runtime and engineering materials:
 | SYSTEM_PARAMS_v3.0.md | 3.0.1 | active |
 | SIGNAL_v3.0.md | 3.0.2 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.5 | active |
-| WYCKOFF_v3.0.md | 3.0.2 | active |
+| WYCKOFF_v3.0.md | 3.0.3 | active |
 
 ### v3.0.1 report metadata patch
 
@@ -66,12 +66,12 @@ This repository separates runtime and engineering materials:
 |---|---|---|
 | REPORT_TEMPLATE_PASS1_v3.0.html | 3.0.5 | 2026-05-14 |
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.2 | 2026-05-29 |
-| REPORT_STYLE_v3.0.md | 3.0.3 | 2026-05-29 |
-| WYCKOFF_v3.0.md | 3.0.2 | 2026-05-14 |
+| REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
+| WYCKOFF_v3.0.md | 3.0.3 | 2026-05-16 |
 | PASS1_SCREENING_v3.0.md | 3.0.5 | 2026-05-14 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.1 | 2026-05-28 |
 | REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |
-| KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.2 | 2026-05-28 |
+| KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.3 | 2026-05-29 |
 
 ### Session 14 llm_runtime inventory verification
 

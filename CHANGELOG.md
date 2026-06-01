@@ -19,6 +19,55 @@
   - `kb_version: 3.0.1` → `3.0.2`
   - `file_last_updated: 2026-05-13` → `2026-05-29`
 
+## 2026-05-31 — KB audit conflict sync (Claude.ai session 2026-05-31)
+
+### Fixed — version-tracking drift, stale cross-references, INDEX table hygiene
+
+- **WYCKOFF_v3.0.md** — Backfilled CHANGELOG and INDEX records for the
+  2026-05-16 content change (kb_version 3.0.2 → 3.0.3) committed without a
+  CHANGELOG entry or INDEX update. The 3.0.3 change added the
+  `get_wyckoff_scan` / `get_batch_wyckoff_scan` features-block field list to
+  the Appendix and the `historical_volatility` field (annualized 20-day,
+  log-returns; from the kapman-trader `feat: add historical_volatility to
+  compute_wyckoff_snapshot()` patch). No frontmatter change in this entry —
+  file was already at 3.0.3 / 2026-05-16; this documents it after the fact.
+
+- **REPORT_STYLE_v3.0.md** — Badge vocabulary table: removed the stale
+  `Weak chain` label from the `.tag-red` example-labels list. Chain-quality
+  `Weak chain` maps to `.tag-orange` per the Badge label mapping table, the
+  template legend, and REPORT_FORMAT 3.0.8 legend element #3; the `.tag-red`
+  listing was a leftover from the 3.0.3 edit that moved chain-quality Weak to
+  orange. `INVALID` (dealer-status) remains on `.tag-red`.
+  (kb_version 3.0.3 → 3.0.4)
+
+- **REPORT_TEMPLATE_PASS1_v3.0.html** — Comment-only: swept stale
+  REPORT_FORMAT version references to v3.0.8 (banner "Format:
+  REPORT_FORMAT_v3.0.7" → v3.0.8; SCREENING TABLE comment "Column order
+  (REPORT_FORMAT_v3.0.3 Appendix)" → v3.0.8; LEGEND/FOOTER comment
+  "(REPORT_FORMAT_v3.0.7 Appendix)" → v3.0.8). No structural, placeholder,
+  CSS, or Style-banner changes.
+
+- **INDEX.md** — Reconciled version-tracking tables to file frontmatter:
+  WYCKOFF_v3.0.md 3.0.2 → 3.0.3 (both tables; date 2026-05-14 → 2026-05-16);
+  KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md 3.0.2 / 2026-05-28 →
+  3.0.3 / 2026-05-29 (file and CHANGELOG were already at 3.0.3; INDEX row was
+  stale); REPORT_STYLE_v3.0.md 3.0.3 / 2026-05-29 → 3.0.4 / 2026-05-31.
+  Also normalized the "v3.0 file directory" table: six rows
+  (PASS2_VALIDATION, PORTFOLIO_MGMT, REPORT_STYLE, REPORT_TEMPLATE_PASS1,
+  REPORT_FORMAT, SYSTEM_PARAMS) carried stray Session/Status columns and, in
+  two cases, a wrong doc_type. Reconciled all to the 4-column
+  path|tier|doc_type|role schema; corrected REPORT_FORMAT doc_type
+  style → format, PASS2 doc_type to runbook, SYSTEM_PARAMS doc_type to
+  reference; dropped stale "Draft" labels (all files are active per the
+  Session-14 verification table and file frontmatter).
+
+### Root cause
+Claude.ai KB audit session 2026-05-31 found WYCKOFF 3.0.3 (2026-05-16) had
+been committed without the AGENTS.md housekeeping steps (INDEX row, CHANGELOG
+entry); residual cross-reference lag from the 2026-05-29 batch; and
+long-standing column drift in the INDEX directory table. All content changes
+reviewed and approved by operator before this prompt issued.
+
 ## [3.0.8] — 2026-05-29
 
 ### Fixed — KB audit conflicts (Claude.ai session 2026-05-29)

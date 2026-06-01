@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: style
-kb_version: 3.0.3
-file_last_updated: 2026-05-29
+kb_version: 3.0.4
+file_last_updated: 2026-05-31
 status: active
 tier: T3
 ---
@@ -216,7 +216,7 @@ All badges: `display: inline-block`, `padding: 0 4px`, `border-radius: 2px`, `fo
 
 | Class | Background | Text | Example labels |
 |---|---|---|---|
-| `.tag-red` | #fde8e8 | #c0392b | Below flip, EXIT, STOP, Weak chain, INVALID |
+| `.tag-red` | #fde8e8 | #c0392b | Below flip, EXIT, STOP, INVALID |
 | `.tag-green` | #eafaf1 | #1a7a3c | Above flip, ACT, Full chain, HOLD |
 | `.tag-orange` | #fff3cd | #a04000 | MONITOR, Near flip, CONDITIONAL, DTE Warning |
 | `.tag-gray` | #f0f0f0 | #555 | N/A, Low conf, Needs validation, Exited |
