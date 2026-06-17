@@ -136,23 +136,6 @@ Rationale (CSS fix): fixed widths summed to ~822px across columns 1–11, exceed
 
 Rationale (checklist comments): existing template comments are descriptive ("X is required") and have been observed to not prevent content-discipline violations at render time under content pressure. Imperative pre-render checklists with binary checks ("Verify X before emitting") are more likely to fire as procedural steps during template fill. Spec authority is unchanged (REPORT_FORMAT_v3.0.md); the checklists reference the spec, they do not duplicate it.
 
-## [Unreleased]
-### Added
-- New file added: `llm_runtime/REPORT_TEMPLATE_PASS1_v3.0.html` (tier T3, doc_type template).
-### Rationale
-- Eliminates Pass 1 report format drift across runs by replacing prose-derived rendering with template-fill rendering.
-- Companion runtime rule: Runtime Rule 6 added to session-opener runtime rules (not in this commit; operator-managed).
-### Files changed
-- llm_runtime/REPORT_TEMPLATE_PASS1_v3.0.html (new)
-- INDEX.md (inventory row added)
-- llm_runtime/REPORT_FORMAT_v3.0.md (cross-reference added; 3.0.3 → 3.0.4)
-- llm_runtime/KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md (KB inventory updated; 3.0.0 → 3.0.1)
-
-### Changed
-- WYCKOFF_v3.0.md (v3.0.2): Removed Marketdata-MCP:get_price_metrics as a fallback source. Polygon MCP Server:get_options_metrics with include=['price'] is now the sole external fallback in the estimation-path prose and MCP inputs table fallback rows (Price metrics and Volatility metrics).
-- WYCKOFF_v3.0.md (v3.0.1): Extended two-path runtime entry sequence to include screen_symbols as a batch triage tool alongside screen_watchlist (30-symbol cap; not a replacement for per-ticker get_wyckoff_proposal_context). Added bracketed table note for get_metrics_batch availability on the Inputs table.
-- PASS1_SCREENING_v3.0.md (v3.0.1): Updated Step 3 workflow table to note get_metrics_batch availability for initial candidate-list metric fetch. Updated PIPELINE_010 legacy anchor to reference new kapman-mcp batch tools (get_metrics_batch, screen_symbols) as preferred full-payload batch surface; Polygon batch endpoint unchanged as avg_iv source.
-
 ## [REPORT_FORMAT 3.0.3] — 2026-05-13
 ### Changed
 - Clarified that `session-meta-timing` CSS class is reserved for legend/footer element #5
