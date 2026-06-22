@@ -34,7 +34,7 @@ Execute end-to-end without stopping. Examples:
 - File moves, renames, and deletions per an explicit mapping
 - Setting up `.gitignore`, `README.md`, frontmatter fields
 - Running validation scripts and fixing structural failures
-- Git operations (branch, commit, push, PR)
+- Git operations (issue, commit, push to `main`, close issue)
 
 ### Substantive content work — HUMAN-IN-THE-LOOP
 
@@ -63,10 +63,12 @@ what content work remains.
 
 ## Git and GitHub workflow — FULLY AUTONOMOUS for mechanical work
 
-For every mechanical change, execute ALL of the following steps without
-stopping. For substantive content changes, the user drives — you only
-execute Git steps after the user has approved the content in a Claude.ai
-session.
+**Delivery model: direct-to-`main`.** This repo ships changes by committing
+straight to `main` — no feature branch, no pull request, no auto-merge. A
+GitHub issue is still created before and closed after every change. For
+mechanical changes, execute ALL of the steps below without stopping. For
+substantive content changes, the user drives — you only execute Git steps
+after the user has approved the content in a Claude.ai session.
 
 ### Step 1 — Create a GitHub issue before any change
 
@@ -74,29 +76,27 @@ session.
 gh issue create --title "<short title>" --body "<acceptance criteria>"
 ```
 
-Note the issue number returned. All subsequent commits and the PR must
+Note the issue number returned. Every commit for this change must
 reference this issue number.
 
-### Step 2 — Create a feature branch named after the issue
+### Step 2 — Implement on `main`, then commit with the issue reference
 
-```bash
-git checkout -b <prefix>/KMKB-NNN-short-description
-```
-
-Branch prefix conventions:
-- `refactor/` — major-version refactor work
-- `chore/` — tooling, scripts, validation infrastructure
-- `docs/` — non-refactor documentation edits
-- `fix/` — corrections to existing active content
-- `archive/` — archiving past major versions
-
-### Step 3 — Implement, then commit with issue reference in every commit
+Work directly on `main` (confirm with `git status -sb` first). Commit with
+a conventional-commit prefix and a `(closes #NNN)` trailer so merging the
+commit closes the issue:
 
 ```bash
 git commit -m "<prefix>: <description> (closes #NNN)"
 ```
 
-### Step 4 — Run the full validation suite yourself — do not skip any step
+Prefix conventions:
+- `refactor:` — major-version refactor work
+- `chore:` — tooling, scripts, validation infrastructure
+- `docs:` — non-refactor documentation edits
+- `fix:` — corrections to existing active content
+- `archive:` — archiving past major versions
+
+### Step 3 — Run the full validation suite yourself — do not skip any step
 
 ```bash
 # Verify no archive files were touched
@@ -108,79 +108,41 @@ git diff --name-only origin/main..HEAD | grep '^archive/' && \
 
 # Verify frontmatter integrity (if script exists)
 [ -x scripts/verify_frontmatter.sh ] && scripts/verify_frontmatter.sh
-
-# Optional: markdown lint if configured
-[ -f .markdownlint.json ] && markdownlint llm_runtime/ engineering_only/ \
-  INDEX.md README.md
 ```
 
 If any command exits non-zero, fix all failures before proceeding.
 Do not proceed with a broken state. Do not report failures to the human
 and ask what to do — fix them.
 
-### Step 5 — Push the branch
+### Step 4 — Push `main` to origin
 
 ```bash
-git push -u origin <branch-name>
+git push origin main
 ```
 
-### Step 6 — Open a PR and enable auto-merge in a single pipeline
+`main` is not branch-protected, so the push lands directly. If a push is
+ever rejected (protection added later, non-fast-forward, etc.), report the
+exact blocker and the exact command to resolve it — do not silently retry
+with force.
+
+### Step 5 — Confirm the issue closed; close it explicitly if not
+
+A pushed commit carrying `(closes #NNN)` closes the issue automatically.
+Verify, and close manually if the trailer was missed:
 
 ```bash
-gh pr create --title "<title>" --body "Closes #NNN" --base main
-gh pr merge --auto --squash
+gh issue view NNN --json state -q .state   # expect: CLOSED
+gh issue close NNN --comment "Resolved in <commit-sha>"   # only if still OPEN
 ```
 
-Both commands must succeed before continuing.
-
-### Step 7 — Verify auto-merge was accepted
+### Step 6 — Confirm a clean local checkout
 
 ```bash
-gh pr view --json autoMergeRequest
-```
-
-If `autoMergeRequest` is null, report the exact blocker and the exact
-`gh` command the human must run to unblock it. Do not say "please merge
-manually" without providing the specific unblocking command.
-
-### Step 8 — Close the GitHub issue with PR reference
-
-```bash
-gh issue close NNN --comment "Resolved in PR #<pr-number>"
-```
-
-### Step 9 — Clean up the local checkout after merge
-
-```bash
-git switch main
-git pull --ff-only origin main
 git status -sb
 ```
 
-The final status must show `main` tracking `origin/main` with no
-uncommitted changes. Do not leave the local checkout on a closed PR
-branch.
-
-### Definition of done — automated checklist for mechanical work
-
-Work on a mechanical issue is NOT complete unless ALL of the following
-are confirmed by you, not reported to the human for confirmation:
-
-- [ ] GitHub issue exists and is linked to the PR
-- [ ] No files in `archive/` were modified (verified via `git diff`)
-- [ ] Legacy anchor parity check passes (or is N/A for this change)
-- [ ] Frontmatter integrity check passes (or is N/A for this change)
-- [ ] PR is open and auto-merge is enabled (verified via
-      `gh pr view --json autoMergeRequest`)
-- [ ] GitHub issue is closed with PR reference
-- [ ] Local checkout is back on `main`, fast-forwarded from
-      `origin/main`, with a clean `git status -sb`
-
-Only after all checklist items are confirmed should you report completion
-to the human.
-
-Do not push directly to `main` unless the user explicitly requests
-direct-to-main delivery.
+The final status must show `main` tracking `origin/main`, up to date, with
+no uncommitted changes left behind.
 
 ## Repository layout
 
@@ -389,12 +351,12 @@ fields (`system`, `doc_type`, `kb_version`, `file_last_updated`,
 `status`, `tier`). Exits non-zero on missing fields.
 
 Both scripts must be executable (`chmod +x`). Both must pass before any
-PR is merged.
+commit is pushed to `main`.
 
 ### Manual validation checklist (per substantive content session)
 
 After the user reviews and approves a content draft in a Claude.ai
-session, before opening a PR:
+session, before pushing to `main`:
 
 - [ ] All legacy rule IDs that should migrate to this file appear in
       the `## Legacy anchors` section
@@ -413,18 +375,20 @@ Work is not complete unless all of the following are true and confirmed
 by you, not reported to the human for confirmation:
 
 For **mechanical work**:
-- GitHub issue is open, linked to the PR, and closed on completion
+- GitHub issue is open, referenced in the commit, and closed on completion
 - `git diff` confirms no files in `archive/` were touched
 - `scripts/verify_anchors.sh` exits 0 (or change does not affect anchors)
 - `scripts/verify_frontmatter.sh` exits 0 (or change does not affect frontmatter)
-- PR auto-merge is enabled and confirmed via `gh pr view --json autoMergeRequest`
-- Local checkout is back on `main`, fast-forwarded, with clean `git status -sb`
+- Commit is pushed to `main` (no PR); the issue is closed — verified via
+  `gh issue view NNN --json state`
+- Local checkout is on `main`, up to date with `origin/main`, with clean
+  `git status -sb`
 
 For **substantive content work**:
 - All items above, PLUS
 - The user has explicitly approved the content in the originating
-  Claude.ai session before the PR was opened
-- The session transcript or summary is referenced in the PR body
+  Claude.ai session before the changes were pushed
+- The session transcript or summary is referenced in the commit message
 - Manual validation checklist (above) is complete
 
 ## Off-limits
@@ -446,7 +410,7 @@ For **substantive content work**:
 - No per-file changelog tables. Use `CHANGELOG.md` and git log.
 - No clarifying-question loops for mechanical work when a conservative
   implementation path exists.
-- No instructing the human to run validation scripts, merge PRs, or
+- No instructing the human to run validation scripts, push commits, or
   close issues manually unless a true permission blocker exists and the
   exact unblocking command is provided.
 - No version numbers hardcoded into this file or into scripts that
