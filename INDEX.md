@@ -30,6 +30,16 @@ This repository separates runtime and engineering materials:
     (memory-not-authority + numeric-no-persist guardrail; `kb_version 3.0.3`). It keeps its
     `_v3.0` filename pending the coordinated `_v3.0 → _v4.0` rename + cross-reference sweep
     at the end of Stage 1. New v4.0-era content uses **version-less cross-references**.
+  - **Workflow 1 (viewer → Pass 1) ingest** (Stage 1b, Integration Plan §6/§A1/§A5):
+    `WYCKOFF_v3.0.md` (`kb_version 3.0.4`) repoints the pipeline-reading source from the
+    now-excised `kapman-mcp` surface to the live viewer/v2 (Polygon) source and adds the
+    confidence **tier gate** (`τ_high`/`τ_low` on `min(regime_confidence, phase_confidence)`);
+    `PASS1_SCREENING_v3.0.md` (`kb_version 3.0.6`) adds the viewer/v2 handoff candidate source
+    and the §A1 ingest map (dual-path: paste now, tool later), preserving the Pass 1 → Pass 2
+    Schwab-re-fetch boundary; `SYSTEM_PARAMS_v3.0.md` (`kb_version 3.0.2`) adds the provisional
+    `TIER_GATE_TAU_HIGH` / `TIER_GATE_TAU_LOW` parameters. The `kapman-mcp` tool surface and
+    name are fully excised from `llm_runtime/`. Files keep their `_v3.0` filenames pending the
+    end-of-Stage-1 rename.
 
 ## v3.0 file directory
 
@@ -79,20 +89,20 @@ This repository separates runtime and engineering materials:
 
 | File | kb_version | status |
 |---|---|---|
-| SYSTEM_PARAMS_v3.0.md | 3.0.1 | active |
+| SYSTEM_PARAMS_v3.0.md | 3.0.2 | active |
 | SIGNAL_v3.0.md | 3.0.2 | active |
-| PASS1_SCREENING_v3.0.md | 3.0.5 | active |
-| WYCKOFF_v3.0.md | 3.0.3 | active |
+| PASS1_SCREENING_v3.0.md | 3.0.6 | active |
+| WYCKOFF_v3.0.md | 3.0.4 | active |
 
 ### v3.0.1 report metadata patch
 
 | File | kb_version | file_last_updated |
 |---|---|---|
 | REPORT_TEMPLATE_PASS1_v3.0.html | 3.0.5 | 2026-05-14 |
-| KAPMAN_GUARDRAILS_v3.0.md | 3.0.2 | 2026-05-29 |
+| KAPMAN_GUARDRAILS_v3.0.md | 3.0.3 | 2026-06-26 |
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
-| WYCKOFF_v3.0.md | 3.0.3 | 2026-05-16 |
-| PASS1_SCREENING_v3.0.md | 3.0.5 | 2026-05-14 |
+| WYCKOFF_v3.0.md | 3.0.4 | 2026-06-26 |
+| PASS1_SCREENING_v3.0.md | 3.0.6 | 2026-06-26 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.1 | 2026-05-28 |
 | REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.3 | 2026-05-29 |

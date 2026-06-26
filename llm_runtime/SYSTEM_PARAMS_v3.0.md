@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.1
-file_last_updated: 2026-05-13
+kb_version: 3.0.2
+file_last_updated: 2026-06-26
 status: active
 tier: T3
 ---
@@ -39,6 +39,8 @@ SYSTEM_PARAMS defines values. It does not define what to do with them. The behav
 | `EARNINGS_BLOCK_DAYS` | 7 | calendar days | PASS1, SIGNAL | Hard WAIT. Earnings ≤ 7d from screening date: immediate WAIT output, no further regime evaluation, no override path. |
 | `EARNINGS_CAUTION_DAYS` | 21 | calendar days | PASS1, SIGNAL | Soft WAIT. Earnings 8–21d out: WAIT with named operator-approval gate. Candidate does not advance to Eligible until operator explicitly redirects in current session. |
 | `DTE_DECAY_WARNING_THRESHOLD` | 21 | calendar days | PORTFOLIO_MGMT | The remaining DTE at or below which PORTFOLIO_MGMT surfaces a DTE decay warning for an open position. Signals that the operator may want to roll or close rather than hold to expiration. Operator-configurable; 21 days is the default, corresponding to the point where theta decay accelerates materially for most structures. |
+| `TIER_GATE_TAU_HIGH` (`τ_high`) | 0.70 | confidence score [0–0.95] | WYCKOFF, PASS1 | **Provisional — calibrate in the Stage-1 pilot.** Auto-accept threshold for the viewer/v2 ingest tier gate. When the gating confidence — `min(regime_confidence, phase_confidence)`, or `regime_confidence` alone when `phase_confidence` is null — is at or above this value, the viewer reading is accepted as `pipeline-accepted` without a propose-confirm exchange (hard force-flags still apply per WYCKOFF). Viewer/v2 confidence is capped at 0.95, so `τ_high` must stay strictly below 0.95. Boundary value resolves to accept. |
+| `TIER_GATE_TAU_LOW` (`τ_low`) | 0.45 | confidence score [0–0.95] | WYCKOFF, PASS1 | **Provisional — calibrate in the Stage-1 pilot.** Flagged-vs-estimation boundary for the viewer/v2 ingest tier gate. When the gating confidence falls in `[τ_low, τ_high)` the reading is `pipeline-flagged` and surfaced for operator resolution; below `τ_low` the viewer reading is not usable as a pipeline reading and the ticker falls to the estimation path (propose-confirm) or UNKNOWN. Boundary value resolves to flagged (conservative). `τ_low ≤ τ_high` is an invariant. |
 
 ## Workflow integration
 
@@ -50,6 +52,8 @@ This file is consumed by:
 - `VOLATILITY_v3.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` as the Appendix band boundary values
 - `DEALER_v3.0.md` — reads `NEAR_FLIP_BAND_PCT` as the near-flip zone Appendix band value
 - `PORTFOLIO_MGMT_v3.0.md` — reads `DTE_DECAY_WARNING_THRESHOLD` for DTE decay warning evaluation at Step 5 of the Portfolio mode workflow
+- `WYCKOFF_v3.0.md` — reads `TIER_GATE_TAU_HIGH` and `TIER_GATE_TAU_LOW` as the viewer/v2 ingest tier-gate boundaries that resolve a pasted reading to `pipeline-accepted`, `pipeline-flagged`, or estimation-path
+- `PASS1_SCREENING_v3.0.md` — reads `TIER_GATE_TAU_HIGH` and `TIER_GATE_TAU_LOW` indirectly via WYCKOFF when ingesting a viewer/v2 handoff as the candidate source; PASS1 does not re-implement the gate, it consumes WYCKOFF's resolved confirmation status
 
 This file does not consume any other runtime file. It has no upstream dependencies within `llm_runtime/`.
 
@@ -66,3 +70,5 @@ Changes to individual parameter values are recorded here in addition to the top-
 | 2026-05-11 | `SWING_DTE_BAND` | 45–60 days (hardcoded in PASS1, SIGNAL) | 60–120 days | Corrects a v3.0 authoring error; 45–60 DTE was carried from a v2.3 scaffold without operator validation and conflicts with actual operator practice of 60–120 DTE for swing trades |
 | 2026-05-11 | `CSP_DTE_BAND` | 45–60 days (implied, same hardcode as swing) | 45–60 days | Value is correct; CSP band is now explicitly separated from swing band and defined independently in SYSTEM_PARAMS rather than implied by the swing band default |
 | 2026-05-12 | `DTE_DECAY_WARNING_THRESHOLD` | (not previously defined) | 21 days | New parameter added in session 9 for PORTFOLIO_MGMT. 21 days is the default threshold at which theta decay accelerates materially for most structures; operator may recalibrate based on their roll/close discipline |
+| 2026-06-26 | `TIER_GATE_TAU_HIGH` | (not previously defined) | 0.70 (provisional) | New parameter for the v4.0 viewer/v2 ingest tier gate (Integration Plan §A1/§A5). Provisional default pending Stage-1 pilot calibration; the pilot's viewer→Pass-1 dry-run exists specifically to catch a τ mis-set against a manual propose-confirm run on the same 10–15 tickers. Must stay below the 0.95 confidence cap |
+| 2026-06-26 | `TIER_GATE_TAU_LOW` | (not previously defined) | 0.45 (provisional) | New parameter for the v4.0 viewer/v2 ingest tier gate (Integration Plan §A1/§A5). Provisional default pending Stage-1 pilot calibration. Invariant: `τ_low ≤ τ_high` |

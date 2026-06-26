@@ -1,5 +1,50 @@
 # KapMan KB Changelog
 
+## 2026-06-26 — Stage 1b: viewer/v2 ingest — §A1 contract, WYCKOFF tier gate, kapman-mcp excision, τ params (closes #72)
+
+### Changed — Workflow 1 (viewer → Pass 1) ingest path (substantive; HITL, approved turn-by-turn in session)
+
+The Workflow-1 ingest unit of Integration Plan Stage 1b (§6, §A1, §A5, and the §12
+`kapman-mcp` reconciliation). Repoints the Wyckoff pipeline-reading source to the live
+viewer/v2 (Polygon) surface and excises the disconnected `kapman-mcp` tool surface and name.
+Design decisions taken with the operator: **repoint + excise** `kapman-mcp` as a non-entity;
+tier gate keys on **`min(regime_confidence, phase_confidence)`** (`regime_confidence` alone
+when `phase_confidence` is null); **provisional** `τ_high = 0.70` / `τ_low = 0.45` pending
+Stage-1 pilot calibration.
+
+- **`llm_runtime/WYCKOFF_v3.0.md`** (`kb_version 3.0.3 → 3.0.4`) — replaced the two-path "MCP
+  path / estimation path" runtime with **"viewer-ingest path / estimation path."** The viewer/v2
+  reading now feeds a **confidence tier gate**: `g = min(regime_confidence, phase_confidence)` →
+  `pipeline-accepted` at `g ≥ τ_high`, `pipeline-flagged` in `[τ_low, τ_high)` or on a hard
+  force-flag, estimation path below `τ_low`. Hard force-flags (`structure_conflict`,
+  `weekly_agrees:false`, stale snapshot, SOW-gated markdown) override a high confidence. Excised
+  all `kapman-mcp` tool/name references (`get_wyckoff_proposal_context`, `get_metrics`,
+  `get_metrics_batch`, `screen_watchlist`, `screen_symbols`); event/structural reads repointed to
+  the viewer `last_event`/`setup_tags`/`range` fields; estimation path repointed to the live
+  Polygon/Schwab surface. Reversed the prior "`regime_confidence` is not a validity criterion"
+  note — viewer/v2 confidence (genuine [0, 0.95], already nets dealer/volatility cross-checks) is
+  now the primary gate. Confirmation-status vocabulary preserved. Legacy anchors `WYCKOFF_PHASE_009`
+  and `WYCKOFF_EVENT_013` re-pointed to their renamed heuristics.
+- **`llm_runtime/PASS1_SCREENING_v3.0.md`** (`kb_version 3.0.5 → 3.0.6`) — added the **viewer/v2
+  handoff as a candidate source** plus the **§A1 ingest map** (dual-path: paste now, tool later);
+  a raw ticker list with no viewer fields remains valid (estimation path). Explicitly preserved the
+  Pass 1 → Pass 2 boundary: dealer fields re-fetched live from Schwab at Pass 2, IV fields labeled
+  *Needs chain validation*. Excised the `kapman-mcp` reference in the PIPELINE_010 anchor and the
+  Step-3 workflow row.
+- **`llm_runtime/SYSTEM_PARAMS_v3.0.md`** (`kb_version 3.0.1 → 3.0.2`) — added `TIER_GATE_TAU_HIGH`
+  (0.70) and `TIER_GATE_TAU_LOW` (0.45), both **provisional, pilot-calibrated**; wired WYCKOFF and
+  PASS1 into the consuming-files list; added two parameter-change-log rows. Invariant `τ_low ≤ τ_high`;
+  `τ_high` must stay below the 0.95 confidence cap.
+- **`INDEX.md`** — recorded the three version bumps in both version tables and added a Workflow-1
+  ingest bullet under "Version status."
+
+### Scope notes
+- `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` was **not** edited: its `get_dealer_metrics` call is a
+  live **Schwab** tool (`Schwab get_dealer_metrics(["SPY"])`), not the `kapman-mcp` surface.
+- `CHANGELOG.md` historical entries that mention `kapman-mcp` are left intact (history is not rewritten);
+  the Integration Plan §12 already records the reconciliation.
+- Files keep their `_v3.0` filenames pending the end-of-Stage-1 coordinated `_v3.0 → _v4.0` rename + cross-reference sweep.
+
 ## 2026-06-26 — Stage 1b spine: JOURNAL_MGMT_v4.0 runbook + memory/no-persist guardrail (closes #71)
 
 ### Added — journal persistence layer (substantive; HITL, approved turn-by-turn in session)
