@@ -7,6 +7,23 @@ This repository separates runtime and engineering materials:
 - engineering_only/ files are reference material for humans and engineering tools and are not uploaded to LLM projects.
 - archive/ stores historical version snapshots and is read-only.
 
+## Version status
+
+- **Active line: v4.0 (in progress).** Opened 2026-06-26 per the KapMan System
+  Integration Plan v1.0 (`docs/Kapman_System_Integration_Plan_v1.0.md`),
+  Stage 1a. The substantive v4.0 content — new `JOURNAL_MGMT` runbook, WYCKOFF
+  live-source tier gate, the §A1–A3 field contracts, the 4th (Calibration/Review)
+  mode, and the memory/no-persist guardrail — is authored in **Stage 1b
+  (human-in-the-loop)** and is not yet present. Until each runtime file is
+  rewritten to v4.0 content, the live `llm_runtime/`+`engineering_only/` files
+  remain at their `_v3.0` filenames and `kb_version` (filename bumps are coupled
+  to the substantive per-file rewrites, not to this cutover).
+- **Archived: v3.0** — frozen read-only snapshot at `archive/v3.0/`
+  (`llm_runtime/` + `engineering_only/` split preserved), with a `v3.0` git tag
+  at the cutover commit. The v3.0 inventory and v2.3→v3.0 migration tables below
+  remain authoritative for both the archived snapshot and the still-live `_v3.0`
+  working files.
+
 ## v3.0 file directory
 
 | path | tier | doc_type | role |

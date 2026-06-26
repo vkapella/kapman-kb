@@ -1,5 +1,31 @@
 # KapMan KB Changelog
 
+## 2026-06-26 — v3.0 archived; v4.0 line opened (Integration Plan Stage 1a) (closes #70)
+
+### Archived — v3.0 snapshot + version cutover (mechanical; autonomous half of Stage 1a)
+
+Mechanical archive + version-bookkeeping pass per the KapMan System Integration
+Plan v1.0 (`docs/Kapman_System_Integration_Plan_v1.0.md`) §10/§11. No content
+authoring — the substantive v4.0 work is Stage 1b (human-in-the-loop).
+
+- **`archive/v3.0/`** — froze a read-only, byte-identical snapshot of the current
+  v3.0 runtime, preserving the upload split: `archive/v3.0/llm_runtime/` (15 files,
+  incl. `REPORT_TEMPLATE_PASS1_v3.0.html`) + `archive/v3.0/engineering_only/`
+  (9 files). `archive/v2.3/` untouched.
+- **`v3.0` git tag** — placed at the cutover commit to mark the v3.0 line.
+- **`INDEX.md`** — added a "Version status" section: v4.0 is the active (in-progress)
+  line opened per Stage 1a; v3.0 is archived. The existing v3.0 inventory and
+  v2.3→v3.0 migration tables are left intact — they remain authoritative for both
+  the archived snapshot and the still-live `_v3.0` working files.
+
+### Deliberately deferred to Stage 1b (HITL — not in this pass)
+
+- No rename of live `_v3.0` files to `_v4.0` and no `kb_version` bumps. The
+  major-version filename bump is coupled to each file's substantive v4.0 rewrite,
+  not to this cutover; renaming byte-identical files now would assert false version
+  state and is the non-substantive rename the naming convention forbids.
+- No v3.0→v4.0 migration table (no v4.0 anchors exist yet).
+
 ## [3.0.9] — 2026-05-29
 
 ### Changed — Mechanical KB hygiene pass
