@@ -23,6 +23,13 @@ This repository separates runtime and engineering materials:
   at the cutover commit. The v3.0 inventory and v2.3→v3.0 migration tables below
   remain authoritative for both the archived snapshot and the still-live `_v3.0`
   working files.
+- **v4.0 files authored so far (Stage 1b, in progress):**
+  - `llm_runtime/JOURNAL_MGMT_v4.0.md` — new T2 runbook (journal persistence: memory
+    load, lineage derivation, three-log write, no-persist boundary). `kb_version 4.0.0`.
+  - Substantive v4.0 content has also been added to `llm_runtime/KAPMAN_GUARDRAILS_v3.0.md`
+    (memory-not-authority + numeric-no-persist guardrail; `kb_version 3.0.3`). It keeps its
+    `_v3.0` filename pending the coordinated `_v3.0 → _v4.0` rename + cross-reference sweep
+    at the end of Stage 1. New v4.0-era content uses **version-less cross-references**.
 
 ## v3.0 file directory
 

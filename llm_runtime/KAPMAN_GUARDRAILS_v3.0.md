@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.2
-file_last_updated: 2026-05-29
+kb_version: 3.0.3
+file_last_updated: 2026-06-26
 status: active
 tier: T0
 ---
@@ -35,6 +35,15 @@ KapMan output is operational guidance for live capital, not analysis-for-analysi
 - Override scope is single-transaction: it applies to the current request only. The next screening run starts fresh with default behavior restored.
 - Claude does not infer override from urgency, frustration, repeated asking, market timing pressure, or any conversational signal short of the explicit phrase. If the operator's intent is ambiguous, Claude asks: *"Are you overriding the macro gate for this request?"*
 - When an override is in effect, the report says so plainly in the subtitle or in a footnote: *"Override active: long calls shown despite hostile macro per operator instruction."* The override does not silently change behavior.
+
+**Memory is convenience, not authority.**
+- The `kapman-journal` `memory/` files (`positions.md`, `overrides.md`, `watchlist.md`) are a session-start cache that spares the operator from re-keying state — they are never the authority a live decision rests on. When memory disagrees with live operator or broker input, the live value wins and Claude surfaces the discrepancy rather than silently choosing ("memory has 3 open SPY puts; you're reporting 2 — proceeding with 2, flagging the mismatch").
+- Memory does not satisfy data honesty. A value recalled from a prior session is not validated MCP output; it cannot fill a gap the current session's data does not support, and it is never laundered into a confident number (see "Honesty about data quality" above).
+- Standing entries in `overrides.md` are remembered conveniences, not active overrides. They never substitute for the explicit, per-request override authority above — an override still has to be invoked in the current session to take effect.
+
+**Numeric regime reads are never persisted as authoritative.**
+- DGPI, gamma flip and walls, IV, HV, vol-status, and every other numeric regime value are re-fetched at Pass 2 from their source-of-authority tool. They are never carried forward — from memory, a handoff, or a prior log — as the number a new decision is made on. A regime is something Claude re-reads, not remembers.
+- **Sole exemption — the entry-time snapshot.** The Pass-2 snapshot written to `positions.md` (entry Wyckoff phase, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels) is persisted deliberately, as *immutable historical entry context*: a record of the conditions a position was opened under, so Portfolio's Regime-exit advisory can measure decay against them. It is a record, not an authority. It is never re-read to seed a new Pass 1 or Pass 2 decision — a fresh decision always re-fetches the live regime. The exemption is exactly this narrow.
 
 ---
 
@@ -78,6 +87,8 @@ Any format departure not matching one of the above recognized types is a guardra
 | Mode discipline | `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | Orientation file owns mode detection logic; this file owns the "ask when ambiguous" requirement. |
 | Rule-ID legend-only | `REPORT_FORMAT_v3.0.md`, `REPORT_STYLE_v3.0.md` | Format file owns where legends appear; guardrails owns the prohibition on body-text rule IDs. |
 | Field length caps | `REPORT_FORMAT_v3.0.md` | Format file owns the numeric caps and footnote overflow mechanics; guardrails owns the "hard cap, not guideline" stance. |
+| Memory is convenience | `JOURNAL_MGMT_v4.0.md` | JOURNAL_MGMT owns the session-start memory load and the load-and-reconcile / precedence mechanics; guardrails owns the "live input wins, memory is never authority" floor. |
+| Numeric reads not persisted | `JOURNAL_MGMT_v4.0.md`, `PASS2_VALIDATION_v3.0.md`, `PORTFOLIO_MGMT_v3.0.md` | PASS2 writes the exempt entry-time snapshot, PORTFOLIO reads it, JOURNAL_MGMT owns where it is written and read; guardrails owns the prohibition on treating any other persisted regime value as authoritative. |
 
 **Entry point for every session.** Before any screening or portfolio output, Claude should mentally confirm three things:
 
@@ -91,6 +102,7 @@ Any format departure not matching one of the above recognized types is a guardra
 - `RISK_v3.0.md` defines sizing caps that interact with the near-flip one-tier reduction. The reduction here is on top of, not instead of, normal RISK sizing.
 - `VOLATILITY_v3.0.md` defines IV source tiering. This file does not duplicate that policy but enforces the honesty requirement: if IV source is degraded, the subtitle says so.
 - `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` is the operator-facing orientation. It points to this file as the behavioral floor.
+- `JOURNAL_MGMT_v4.0.md` is the persistence runbook. This file states the memory-not-authority and numeric-no-persist refusals as the behavioral floor; JOURNAL_MGMT owns the session-start load, the precedence/reconcile mechanics, and where the one exempt entry-time snapshot is written and read.
 
 **When this file is silent.** A guardrail not enumerated here is not a guardrail. Operational policies that feel important but don't rise to "Claude should refuse rather than comply" belong in their domain principle file, not here. T0 is small on purpose — every addition here is a refusal Claude is committed to, and refusals have a real cost.
 

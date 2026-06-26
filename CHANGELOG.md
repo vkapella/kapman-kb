@@ -1,5 +1,41 @@
 # KapMan KB Changelog
 
+## 2026-06-26 — Stage 1b spine: JOURNAL_MGMT_v4.0 runbook + memory/no-persist guardrail (closes #71)
+
+### Added — journal persistence layer (substantive; HITL, approved turn-by-turn in session)
+
+Spine of Integration Plan Stage 1b. Content drafted and approved chunk-by-chunk with
+the operator before this commit.
+
+- **`llm_runtime/JOURNAL_MGMT_v4.0.md`** (new T2 runbook, `kb_version 4.0.0`, `status: active`) —
+  the public-instructions/private-data contract, session-start memory load + announce,
+  live-input-overrides-memory precedence, lineage-ID derivation from the export's
+  `exported_at` (`VS-`/`TL-` prefixes), the three logs (handoffs split by source; pass1/pass2
+  outputs; one file per run, never reopened), the memory write model (overwrite-in-place,
+  per-file triggers, write-once entry snapshot), the numeric-no-persist boundary with the
+  sole entry-snapshot exemption, and the Rule 7 log-manifest tie-in. §A4 record shapes in
+  the Appendix.
+- **`llm_runtime/KAPMAN_GUARDRAILS_v3.0.md`** (`kb_version 3.0.2 → 3.0.3`) — added two T0
+  guardrail blocks: *"Memory is convenience, not authority"* and *"Numeric regime reads are
+  never persisted as authoritative"* (with the narrow entry-time-snapshot exemption). Added
+  two downstream-enforcement rows and a cross-reference bullet pointing at `JOURNAL_MGMT_v4.0.md`.
+  No legacy anchor (new behavior).
+- **`docs/Kapman_System_Integration_Plan_v1.0.md`** §4 + §A4 — adopted **source-split handoffs**
+  (`handoffs/viewer/` + `handoffs/tradelog/`), superseding the single-`handoffs/` layout. The
+  `kind`/`source` frontmatter is retained for machine-parsing and now corroborates the path.
+- **`INDEX.md`** — recorded the new v4.0 file and the guardrail edit under "Version status."
+
+### Conventions adopted (Stage 1)
+- New v4.0-era content uses **version-less cross-references**; existing `_v3.0` files keep
+  their filenames until a **coordinated `_v3.0 → _v4.0` rename + cross-reference sweep at the
+  end of Stage 1**. This is why `KAPMAN_GUARDRAILS` gained v4.0 content while keeping its
+  `_v3.0` name and a v3-track `kb_version`.
+- Lineage prefixes: `VS-` viewer, `TL-` tradelog.
+
+### Companion change (separate repo)
+- `kapman-journal` handoffs scaffold reconciled to `handoffs/viewer/` + `handoffs/tradelog/`
+  (direct-to-`main` per that repo's model; no issue).
+
 ## 2026-06-26 — v3.0 archived; v4.0 line opened (Integration Plan Stage 1a) (closes #70)
 
 ### Archived — v3.0 snapshot + version cutover (mechanical; autonomous half of Stage 1a)

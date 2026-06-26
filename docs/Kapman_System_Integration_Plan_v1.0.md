@@ -73,7 +73,9 @@ kapman-journal/
 │   ├── positions.md        # open positions + entry-time regime snapshot  ← Portfolio entry-context
 │   ├── overrides.md        # standing operator overrides
 │   └── watchlist.md        # active universe
-├── handoffs/2026-06/       # LOG 1 — viewer/tradelog exports, lineage-stamped (INPUT)
+├── handoffs/               # LOG 1 — lineage-stamped exports (INPUT), split by source
+│   ├── viewer/2026-06/     #   viewer exports → Pass 1
+│   └── tradelog/2026-06/   #   tradelog positions snapshots → Portfolio
 └── log/
     ├── pass1/2026-06/      # LOG 2 — one file per run (lineage-stamped); every Pass 1 row incl NO_TRADE/WAIT (OUTPUT)
     │   └── VS-20260625-1335-01.md
@@ -266,7 +268,7 @@ When Stage 1 KB edits land: snapshot current v3.0 `llm_runtime/` + `engineering_
 > point D.)
 
 ## §A4 — Log record shapes (illustrative)
-**Handoff frontmatter (`handoffs/`):**
+**Handoff frontmatter** (written under `handoffs/viewer/<YYYY-MM>/` or `handoffs/tradelog/<YYYY-MM>/` — the input is partitioned by source; the `kind`/`source` fields are retained for machine-parsing and now corroborate the path):
 ```
 kind: pass1_handoff | portfolio_snapshot
 source: kapman-polygon-viewer | kapman-tradelog
