@@ -34,17 +34,17 @@ Design constraints locked with the operator:
 | **Knowledge base** | `kapman-kb` on GitHub — read (runbooks). |
 | **Journal** | **`kapman-journal`** — new **private GitHub repo**, read/write. Canonical copy lives on GitHub; pull locally when desired. |
 | **Transport** | **Clipboard copy/paste**. Operator copies the viewer (or tradelog) export and pastes it into the session. |
-| **Lineage ID** | **Claude mints a plain unique ID on paste** (zero app development for v1). All three logs for a run share that ID. |
-| **Logs** | **Three append-only logs** in `kapman-journal`: `handoffs/`, `log/pass1/`, `log/pass2/`. New files per run; nothing overwritten. |
+| **Lineage ID** | **Claude derives a unique ID from the payload's `exported_at` timestamp** (+ a per-day sequence suffix for collisions) on paste — *not* from Claude's own notion of "now," which has no reliable clock. The viewer/tradelog has the clock; Claude only reformats what the export already carries. Zero app development for v1. All three logs for a run share that ID. |
+| **Logs** | **Three append-only logs** in `kapman-journal`: `handoffs/`, `log/pass1/`, `log/pass2/`. **One file per run (never appended-to)**; nothing overwritten. |
 | **Inline echo** | Claude prints the lineage ID in the header of every Pass 1 / Pass 2 table it renders, so lineage is visible in-session, not just in the file. |
 | **Integrity** | Git commits provide tamper-evident, timestamped content hashes for every logged output — output integrity "for free," with no hashing asked of Claude. |
 
 ### Why this is low-fragility
 - The operator (a human) and Claude only ever **echo** the lineage ID — never compute a hash. Echoing a short unique ID is reliable; hashing in-chat is not.
-- Logs are **append-only with unique IDs**, so the GitHub clone→commit→push round-trip is **conflict-free** (each run adds new files).
+- Logs are **one file per run, keyed by unique ID**, so the GitHub clone→commit→push round-trip is **conflict-free** (each run adds a new file; no shared-file append, hence no read-modify-write to lose).
 - **Nothing depends on the operator's Mac** — KB, journal, viewer, tradelog, brokers are all cloud/web.
 - Two residual operational risks, both cheaply mitigated:
-  - *Echo fidelity* — keep the ID short and human-checkable (e.g., `VS-20260625-0935-7f3a`); runbook rule: *copy the lineage ID verbatim; never regenerate or reformat it.*
+  - *Echo fidelity* — keep the ID short and human-checkable (e.g., `VS-20260625-1335-01`, where `1335` mirrors the export's `exported_at` and `01` is the day's sequence); runbook rule: *copy the lineage ID verbatim; never regenerate or reformat it.*
   - *Paste integrity* — the payload header carries `row_count` + `as_of`; Claude echoes them back ("received `VS-…`, 47 rows, as_of 2026-06-25") so the operator eyeballs against what the viewer exported.
 
 ### Deferred / noted
@@ -75,9 +75,18 @@ kapman-journal/
 │   └── watchlist.md        # active universe
 ├── handoffs/2026-06/       # LOG 1 — viewer/tradelog exports, lineage-stamped (INPUT)
 └── log/
-    ├── pass1/2026-06.md    # LOG 2 — every Pass 1 row incl NO_TRADE/WAIT (OUTPUT)
-    └── pass2/2026-06.md    # LOG 3 — every Pass 2 trade w/ exact strike/exp/targets (OUTPUT)
+    ├── pass1/2026-06/      # LOG 2 — one file per run (lineage-stamped); every Pass 1 row incl NO_TRADE/WAIT (OUTPUT)
+    │   └── VS-20260625-1335-01.md
+    └── pass2/2026-06/      # LOG 3 — one file per run; every Pass 2 trade w/ exact strike/exp/targets (OUTPUT)
+        └── VS-20260625-1335-01.md
 ```
+
+> **Storage model:** logs are **one file per run, never appended-to** (month dir
+> is a partition for tidy diffs, not a shared file). This is what makes the
+> clone→commit→push round-trip literally conflict-free — there is no
+> read-modify-write on a shared monthly file, so two runs (or a stale clone) can
+> never collide. (Supersedes the monthly-append layout in the background docs'
+> `KB_4.0_DESIGN.md` §2 / `KB_4.x_EDGE_LAYER.md`.)
 
 **Lineage chain** (one shared ID + parent links):
 ```
@@ -90,7 +99,7 @@ handoff_id ──▶ Pass1 entry (records source_handoff_id + own rec_id)
 - Each entry carries a structured header block shadowing `REPORT_FORMAT_v3.0` — readable now, machine-parseable later. **No new schema invented.**
 - Join keys baked in now: `rec_id`, `{date, ticker, structure, pass}`, and for Pass 2 `{ticker, strike, expiration}`.
 - **Decision anchor:** `decided_at` + `underlying_ref` at decision (Pass 2 also logs `option_mid`) so the viewer forward-eval can later measure what a ticker did after a yes/no/refusal.
-- Reserved nullable arrays `attack_flags[]` / `invalidation_conditions[]` (empty until Stage 3) and `schema_version` on every record.
+- Reserved nullable arrays `attack_flags[]` / `invalidation_conditions[]` (empty until Stage 3) and `journal_schema_version` on every record. **(Name discipline:** the journal's own contract version is `journal_schema_version`; the viewer/v2 response contract has its *own* `schema_version` in a separate namespace — never conflate them. The export's v2 `schema_version` is echoed verbatim as `v2_schema_version` so a calibration run can pin both.)**
 
 **What this enables:**
 - **Backtest** — join the three logs by lineage; outcomes come from the viewer forward-log or tradelog marks.
@@ -105,7 +114,7 @@ Two rules keep the KB and the tools shipping locked together and prevent a recur
 
 1. **Dual-path clauses, one contract.** Every KB clause that consumes tool data is written once against a versioned field contract, with two execution paths:
    > "Consume the operator-pasted viewer export per the field contract" (Stage 1) — *and later* — "pull the same fields from the viewer export button" (Stage 2).
-   Same fields, same `schema_version`; only the fetcher changes. So Stage 1 KB edits already interlock with Stage 2 tooling.
+   Same fields, same `journal_schema_version`; only the fetcher changes. So Stage 1 KB edits already interlock with Stage 2 tooling.
 2. **No-dangling-capability rule.** No KB runbook may reference a tool field that the current contract does not provide. If it is not in the contract, the runbook falls back to operator-paste, explicitly labeled. The KB can never again point at a capability the runtime cannot reach.
 
 ---
@@ -136,7 +145,7 @@ Net KB change is small: PASS1 gains a viewer-ingest candidate source + the §A1 
 **Flow:**
 1. Pull open positions from tradelog (positions snapshot) → symbol, underlying, optionType, strike, expiration, netQty, costBasis, account + live mark/unrealized P&L; `LotExcursion` (`--include-open`) supplies **live MAE/MFE** per open lot.
 2. Map to the KB position-context schema (§A2).
-3. **Entry-context home = `kapman-journal/memory/positions.md`** (per KB 4.0), *not* a new tradelog table. At Pass 2 validation the session writes the entry-time regime snapshot (Wyckoff phase, DGPI tier, flip-zone, IV/HV band, vol-status) + the eight SIGNAL Stop/Profit alert levels into `positions.md`. This is the bridge that lets Portfolio's Regime-exit advisory evaluate decay.
+3. **Entry-context home = `kapman-journal/memory/positions.md`** (per KB 4.0), *not* a new tradelog table. At Pass 2 validation the session writes the entry-time regime snapshot (Wyckoff phase, DGPI tier, flip-zone, IV/HV band, vol-status) + the eight SIGNAL Stop/Profit alert levels into `positions.md`. This is the bridge that lets Portfolio's Regime-exit advisory evaluate decay. **(Boundary note:** this entry-time snapshot is *immutable historical context* — a record of conditions at entry — not a live regime read, and it is never re-read to seed a new Pass 1/Pass 2 decision. It is therefore the one persisted regime value the no-persist guardrail explicitly exempts; see §A5.)**
 4. Portfolio mode runs its sequence: current-regime re-fetch → four Regime-exit branches (now evaluable) → DTE decay → exit-trigger proximity → portfolio view.
 5. **MAE/MFE as a live input** (new): feed `LotExcursion.maePct/mfePct` into the advisory — e.g., "already taken −12% heat vs your −15% stop" / "gave back 8% from peak MFE."
 
@@ -156,6 +165,13 @@ Two complementary streams; using both is what makes the system self-correcting.
 
 **Concrete first correction:** the viewer's own research found **conviction does NOT rank edge**, yet the KB treats conviction as a first-class decision input. Stop letting conviction drive sizing; size to measured per-setup expectancy instead.
 
+> **Open (resolve in Stage 3):** removing conviction leaves a gap for setups whose
+> measured expectancy is still below the N≥20 readability floor — there is no
+> defined interim sizing rule (flat-minimum probe size vs pooled-cohort expectancy
+> are both candidates). Until the self-measuring loop is built and this is settled,
+> sub-readable setups stay at existing/manual sizing. Do **not** treat
+> expectancy-sizing as fully specified before this TODO is closed.
+
 ---
 
 ## 9. Relationship to KB 4.0 / KB 4.x (dependency map)
@@ -172,14 +188,19 @@ Therefore: build order is **4.0 (Stage 1) first**, *because* it was co-designed 
 
 ## 10. Build sequence + decision gates
 
-- **Stage 1 — Contracts & pilot (no new infra; fully remote).**
-  - KB hygiene (§12).
-  - Stand up `kapman-journal` private GitHub repo + `memory/`, `handoffs/`, `log/` scaffolding; connect GitHub to Claude Code on the web.
-  - New T2 runbook `JOURNAL_MGMT_v4.0.md` (session-start memory load; lineage-ID minting on paste; three-log write; inline echo; precedence: live/broker input always overrides memory; numeric regime reads never persisted).
-  - Author the §A1/§A2/§A3 contracts as dual-path clauses (paste now, tool later), all `schema_version`'d.
-  - Implement tiered auto-accept in WYCKOFF; define `τ_high`/`τ_low` in `SYSTEM_PARAMS`.
-  - Capture entry-context into `positions.md` (Gap closed via journal, not tradelog).
-  - **Pilot:** viewer→Pass 1 dry-run + tradelog→Portfolio dry-run, from a browser.
+- **Stage 1 — Contracts & pilot (no new infra; fully remote).** Split along the
+  repo's mechanical-vs-substantive autonomy boundary (see `kapman-kb` AGENTS.md):
+  **1a is autonomous; 1b is human-in-the-loop, drafted turn-by-turn.**
+  - **Stage 1a — Mechanical scaffolding (autonomous).**
+    - Stand up `kapman-journal` private GitHub repo + `memory/`, `handoffs/`, `log/` scaffolding; connect GitHub to Claude Code on the web.
+    - Archive current v3.0 + `v3.0` git tag and the INDEX/CHANGELOG bump to v4.0 (§11) — file moves and version bookkeeping only.
+  - **Stage 1b — Substantive authoring (HITL; never autonomous).**
+    - KB hygiene (§12).
+    - New T2 runbook `JOURNAL_MGMT_v4.0.md` (session-start memory load; lineage-ID derivation from `exported_at` on paste; three-log write; inline echo; precedence: live/broker input always overrides memory; numeric regime reads never persisted).
+    - Author the §A1/§A2/§A3 contracts as dual-path clauses (paste now, tool later), all `journal_schema_version`'d.
+    - Implement tiered auto-accept in WYCKOFF; define `τ_high`/`τ_low` in `SYSTEM_PARAMS`.
+    - Capture entry-context into `positions.md` (Gap closed via journal, not tradelog).
+  - **Pilot (after 1a + 1b):** viewer→Pass 1 dry-run + tradelog→Portfolio dry-run, from a browser.
   - **Gate:** auto-accept tiers feel right; entry-context captures what Portfolio needs; logging is complete end-to-end.
 - **Stage 2 — Smoother hand-offs.** Optional viewer "best-Wyckoff Pass-1 export" button + optional viewer-side ID minting; stand up the marks→excursions job so MAE/MFE stays fresh. **Gate:** one-click export replaces manual filtering; first calibration has fresh excursions.
 - **Stage 3 — Precision + closed loop.** 4.x adversarial verify (flag-don't-kill) + tradeability gate inside Pass 2; self-measuring loop + realized-perf feedback → `SYSTEM_PARAMS` tuning. **Gate:** first defensible parameter delta produced, N≥20-gated.
@@ -232,22 +253,35 @@ When Stage 1 KB edits land: snapshot current v3.0 `llm_runtime/` + `engineering_
 - Tradelog setups (winRate/expectancy/avgHoldDays), excursions (MAE/MFE), overview summary (profit factor, drawdown, return).
 - Calibration/Review mode joins both on `{ticker, decision date}` / `{ticker,strike,expiration,entry}` → proposes `SYSTEM_PARAMS` deltas, gated by N≥20 + operator approval.
 
+> **Build note (not zero-cost reuse):** the viewer's `forward_eval.evaluate` today
+> reconstructs onsets from *consecutive watchlist-panel rows*, not from arbitrary
+> `(ticker, decided_at)` anchors — and refused / off-watchlist tickers may never
+> appear on the panel at all. Scoring the journal's logged decision anchors
+> (especially refusals, for false-negative measurement) therefore requires a **new
+> anchor-driven eval entry point** in the viewer that takes an explicit
+> `(ticker, decided_at)` and runs the touch/MAE math forward from it. It can reuse
+> the existing v2-aggregates forward-OHLC path (`get_batch_symbol_data`,
+> `data_type="aggregates"`), so it is small — but it is **Stage 2/3 viewer work**,
+> not a free reuse of the panel machinery. (See `kapman-polygon-viewer` coupling
+> point D.)
+
 ## §A4 — Log record shapes (illustrative)
 **Handoff frontmatter (`handoffs/`):**
 ```
 kind: pass1_handoff | portfolio_snapshot
 source: kapman-polygon-viewer | kapman-tradelog
-lineage_id: VS-20260625-0935-7f3a   # minted by Claude on paste
-exported_at: 2026-06-25T13:35:03Z    # not part of identity
+lineage_id: VS-20260625-1335-01      # derived by Claude FROM exported_at (below) + per-day seq
+exported_at: 2026-06-25T13:35:03Z    # source-of-truth timestamp the lineage_id is derived from
 as_of: 2026-06-25
-schema_version: 4.0
+journal_schema_version: 4.0          # version of THIS journal record/contract
+v2_schema_version: <echoed from export>  # the viewer/v2 response-contract version — distinct namespace, carried for join reproducibility
 row_count: 47
 ```
-**Pass 1 entry header (`log/pass1/`):** `rec_id`, `source_handoff: <lineage_id>`, `{date,ticker,structure,pass}`, disposition (Eligible/NO_TRADE/WAIT) + reason, candidate zone, `decided_at`, `underlying_ref`, `schema_version`, reserved `attack_flags[]`/`invalidation_conditions[]`.
-**Pass 2 entry header (`log/pass2/`):** `rec_id`, `parent_pass1: <rec_id>`, `{ticker,strike,expiration}`, exact spec, entry price range, targets, `option_mid`, `decided_at`, `schema_version`.
+**Pass 1 entry header (`log/pass1/`):** `rec_id`, `source_handoff: <lineage_id>`, `{date,ticker,structure,pass}`, disposition (Eligible/NO_TRADE/WAIT) + reason, candidate zone, `decided_at`, `underlying_ref`, `journal_schema_version`, reserved `attack_flags[]`/`invalidation_conditions[]`.
+**Pass 2 entry header (`log/pass2/`):** `rec_id`, `parent_pass1: <rec_id>`, `{ticker,strike,expiration}`, exact spec, entry price range, targets, `option_mid`, `decided_at`, `journal_schema_version`.
 
 ## §A5 — KB edit list (Stage 1 unless noted)
-- **New T2 runbook** `JOURNAL_MGMT_v4.0.md` — memory load, lineage minting, three-log write, inline echo, precedence.
+- **New T2 runbook** `JOURNAL_MGMT_v4.0.md` — memory load, lineage derivation (from export `exported_at`), three-log write, inline echo, precedence.
 - **New T2 runbook** `PERFORMANCE_FEEDBACK`/`CALIBRATION` (Stage 3) — dual streams, attribution, param-delta proposals.
 - **`KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS`** — add 4th mode (Calibration/Review); session-start memory-load step; Rule 7 "log manifest" line.
 - **`WYCKOFF`** — re-point pipeline-reading source to live viewer/v2; define tier gate; decouple `pipeline-accepted` from the disconnected `kapman-mcp`.
@@ -256,7 +290,7 @@ row_count: 47
 - **`PORTFOLIO_MGMT`** — add §A2 ingestion contract; add MAE/MFE live input; read entry-context from `positions.md`.
 - **`SYSTEM_PARAMS`** — add `τ_high`/`τ_low`, readability N floor, calibration cadence, MAE/MFE stop/target tuning params.
 - **`SIGNAL`** — tie Stop/Profit bands to MAE/MFE feedback (Stage 3). **`RISK`** — tie sizing bands to per-setup expectancy (Stage 3).
-- **New guardrail** — "Memory is convenience, not authority; live operator/broker input and data-honesty always win; numeric regime reads are never persisted as authoritative."
+- **New guardrail** — "Memory is convenience, not authority; live operator/broker input and data-honesty always win; numeric regime reads are never persisted as authoritative. **Sole exemption:** the Pass-2 entry-time snapshot in `positions.md` is persisted as *immutable historical entry context* (a record, not an authority) and is never re-read to seed a new decision."
 
 ---
 
