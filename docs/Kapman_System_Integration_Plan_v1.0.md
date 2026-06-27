@@ -2,6 +2,7 @@
 
 **Status:** Approved direction, not yet built.
 **Date:** 2026-06-25
+**Last updated:** 2026-06-27 (§A2/§7 revised — `portfolio_snapshot` export now exists)
 **Owner:** vkapella
 **Consolidates:** `KB_4.0_DESIGN.md` (memory + logging) and `KB_4.x_EDGE_LAYER.md` (precision/verify) — this document is the canonical master; the other two remain as detailed design background.
 
@@ -145,11 +146,11 @@ Net KB change is small: PASS1 gains a viewer-ingest candidate source + the §A1 
 **Goal:** open positions flow from the tradelog into Portfolio advisories without re-keying, and the Regime-exit advisory actually runs (today it usually can't).
 
 **Flow:**
-1. Pull open positions from tradelog (positions snapshot) → symbol, underlying, optionType, strike, expiration, netQty, costBasis, account + live mark/unrealized P&L; `LotExcursion` (`--include-open`) supplies **live MAE/MFE** per open lot.
+1. Pull open positions from the tradelog `portfolio_snapshot` export (`GET /api/export/portfolio-snapshot`, open-positions-only) → per leg: `underlying_symbol`, `structure`/`spread_group_id`/`option_type`, `strike`, `expiration`, `net_qty`, `cost_basis`, `account_id`, `instrument_key`, plus live `mark`/`unrealized_pnl`; `mae_pct`/`mfe_pct` are computed on export from `HistoricalMark` (gated by `open_excursions_available`) and supply **advisory** daily-mark MAE/MFE per open leg.
 2. Map to the KB position-context schema (§A2).
 3. **Entry-context home = `kapman-journal/memory/positions.md`** (per KB 4.0), *not* a new tradelog table. At Pass 2 validation the session writes the entry-time regime snapshot (Wyckoff phase, DGPI tier, flip-zone, IV/HV band, vol-status) + the eight SIGNAL Stop/Profit alert levels into `positions.md`. This is the bridge that lets Portfolio's Regime-exit advisory evaluate decay. **(Boundary note:** this entry-time snapshot is *immutable historical context* — a record of conditions at entry — not a live regime read, and it is never re-read to seed a new Pass 1/Pass 2 decision. It is therefore the one persisted regime value the no-persist guardrail explicitly exempts; see §A5.)**
 4. Portfolio mode runs its sequence: current-regime re-fetch → four Regime-exit branches (now evaluable) → DTE decay → exit-trigger proximity → portfolio view.
-5. **MAE/MFE as a live input** (new): feed `LotExcursion.maePct/mfePct` into the advisory — e.g., "already taken −12% heat vs your −15% stop" / "gave back 8% from peak MFE."
+5. **MAE/MFE as an advisory display input** (now available): feed the export's `mae_pct`/`mfe_pct` (compute-on-export from `HistoricalMark`, gated by `open_excursions_available`) into the advisory as display only — never a gate or trigger — e.g., "already taken −12% heat vs your −15% stop" / "gave back 8% from peak MFE."
 
 ---
 
@@ -240,15 +241,20 @@ When Stage 1 KB edits land: snapshot current v3.0 `llm_runtime/` + `engineering_
 | `price`, `as_of` / `data_through` | decision anchor + freshness label | `price` = underlying_ref anchor |
 
 ## §A2 — Trade log → KB Portfolio position-context contract
+
+The structured producer now exists: `kapman-tradelog` emits `GET /api/export/portfolio-snapshot` (open-positions-only `portfolio_snapshot`, copy-pasteable via a "Copy snapshot JSON" button), consumed 1:1 by Portfolio mode. Per-leg fields below are the real `PortfolioSnapshotOpenLeg` keys; journal join key = `(instrument_key, account_id)`.
+
 | KB position-context field | Source | Status |
 |---|---|---|
-| ticker / structure / direction / strikes / expiration | tradelog OpenPosition | direct |
-| entry date / entry price / size | tradelog Execution/MatchedLot; costBasis, netQty | direct |
-| current option price / unrealized P&L | tradelog PositionSnapshot.mark | direct |
-| live MAE / MFE | tradelog LotExcursion.maePct/mfePct (`--include-open`) | **new KB input** |
+| ticker | `portfolio_snapshot` leg `underlying_symbol` (raw `symbol` for reference) | direct |
+| structure / direction | **derived** from leg `structure` + `spread_group_id` + `option_type` + DTE (`short_put`→CSP, long far-dated→LEAP, shared `spread_group_id`→spread; thesis from structure+option_type, **not** the LONG/SHORT `direction`) | derived |
+| strikes / expiration | `portfolio_snapshot` leg `strike`, `expiration` | direct |
+| entry date / entry price / size | `portfolio_snapshot` leg `entry_date`, `entry_price`, `net_qty`, `cost_basis` | direct |
+| current option price / unrealized P&L | `portfolio_snapshot` leg `mark`, `unrealized_pnl` (→ data-absent when `mark` is `null`) | direct |
+| live MAE / MFE | `portfolio_snapshot` leg `mae_pct`, `mfe_pct`, `excursion_as_of` — compute-on-export from `HistoricalMark`, gated by `open_excursions_available`; daily-mark, coverage-dependent | advisory display only (never gate/trigger) |
 | entry-time Wyckoff phase / DGPI tier / flip-zone / IV-HV band / vol-status | **`kapman-journal/memory/positions.md`** (written at Pass 2) | journal, not tradelog |
 | 8× Stop + Profit alert levels | **`positions.md`** (SIGNAL output captured at Pass 2) | journal, not tradelog |
-| exit date / exit price / realized P&L | tradelog MatchedLot / realizedPnl | direct (closed) |
+| exit date / exit price / realized P&L | not in `portfolio_snapshot` (open-only); from tradelog closed lots when a position closes | out of scope here (§A3) |
 
 ## §A3 — Feedback contract
 - Viewer forward-log evaluate → scorecards (`by_setup_tag/context/phase/conviction/adx/hv`), calibration, MAE/MFE, regime-flip returns, each with N + Wilson CI + readability.
@@ -289,7 +295,7 @@ row_count: 47
 - **`WYCKOFF`** — re-point pipeline-reading source to live viewer/v2; define tier gate; decouple `pipeline-accepted` from the disconnected `kapman-mcp`.
 - **`PASS1`** — add viewer-ingest candidate source + §A1 map; preserve Schwab-at-Pass-2 boundary.
 - **`PASS2`** — version bump; reconcile v2 price-targets/calibration; reaffirm Schwab IV/flip authority; chain-quality gate alignment; capture entry-context + `option_mid` at validation.
-- **`PORTFOLIO_MGMT`** — add §A2 ingestion contract; add MAE/MFE live input; read entry-context from `positions.md`.
+- **`PORTFOLIO_MGMT`** — add §A2 ingestion contract; add MAE/MFE advisory display input; read entry-context from `positions.md`.
 - **`SYSTEM_PARAMS`** — add `τ_high`/`τ_low`, readability N floor, calibration cadence, MAE/MFE stop/target tuning params.
 - **`SIGNAL`** — tie Stop/Profit bands to MAE/MFE feedback (Stage 3). **`RISK`** — tie sizing bands to per-setup expectancy (Stage 3).
 - **New guardrail** — "Memory is convenience, not authority; live operator/broker input and data-honesty always win; numeric regime reads are never persisted as authoritative. **Sole exemption:** the Pass-2 entry-time snapshot in `positions.md` is persisted as *immutable historical entry context* (a record, not an authority) and is never re-read to seed a new decision."

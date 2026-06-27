@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.1
-file_last_updated: 2026-05-28
+kb_version: 3.0.2
+file_last_updated: 2026-06-27
 status: active
 tier: T2
 ---
@@ -13,7 +13,7 @@ tier: T2
 
 Portfolio management is the position lifecycle layer: it takes operator-supplied position data — broker screenshots, CSV exports, or manually entered records — and evaluates whether each open position's original thesis still holds. The judgment portfolio management exercises is not re-screening — it does not re-evaluate whether a position should have been entered, and it does not re-validate strikes or chains. Its judgment is about the current state of a live position: whether the regime that authorized the entry has decayed materially enough to surface an advisory, whether the underlying has reached an alert level that warrants action, and whether the time remaining in the position warrants a roll or close decision before expiration pressure removes the choice.
 
-Position context is the bundle of fields that makes this judgment possible — strikes, expiration, entry date, entry price, actual size, the exit-trigger fields that SIGNAL computed at entry, and the entry-time regime snapshot that records the confirmed Wyckoff phase, DGPI tier, flip-zone relationship, dealer-status label, IV/HV band, and volatility-status label that were current when the trade was validated. Claude has no memory between sessions; the operator supplies position context at the start of every Portfolio mode session from whatever records they maintain. PORTFOLIO_MGMT defines the schema that context must conform to and degrades gracefully when fields are missing — but without the entry-time regime snapshot, the Regime exit advisory cannot evaluate decay, and without the exit-trigger fields, Stop and Profit target alert levels have no anchor. Position context is the precondition for everything else portfolio management produces.
+Position context is the bundle of fields that makes this judgment possible — strikes, expiration, entry date, entry price, actual size, the exit-trigger fields that SIGNAL computed at entry, and the entry-time regime snapshot that records the confirmed Wyckoff phase, DGPI tier, flip-zone relationship, dealer-status label, IV/HV band, and volatility-status label that were current when the trade was validated. This context now arrives from two sources with distinct authority. The live position fields — structure, strikes, expiration, entry date, entry price, actual size, current mark, and unrealized P&L — are ingested from the `kapman-tradelog` `portfolio_snapshot` export (the §A2 contract); a broker screenshot, CSV, or manual record is the fallback when the export is unavailable. The entry-time regime snapshot and the eight SIGNAL Stop/Profit alert levels are not in that export by design — they are read from `kapman-journal/memory/positions.md`, where they were written once at Pass 2 validation as immutable historical entry context. `JOURNAL_MGMT_v4.0` owns where that snapshot is written and read; `KAPMAN_GUARDRAILS` owns the sole no-persist exemption that permits it to be persisted at all. Claude still has no memory between sessions; what changed is that the operator no longer re-keys live position data — the export supplies it — while the entry-time baseline is recalled from the journal rather than re-supplied. PORTFOLIO_MGMT defines the schema this context must conform to and degrades gracefully when fields are missing — but without the entry-time regime snapshot, the Regime exit advisory cannot evaluate decay, and without the exit-trigger fields, Stop and Profit target alert levels have no anchor. Position context is the precondition for everything else portfolio management produces.
 
 ## Operational heuristics
 
@@ -27,7 +27,9 @@ In Portfolio mode, the operator is asking about existing positions only. PORTFOL
 
 **The Portfolio mode workflow runs in a fixed sequence for every session.**
 
-- Step 1: Load position context from operator-supplied data. Map to schema. Name any missing fields.
+- Step 1: Load position context. Execute the two sub-steps in order.
+  - Step 1a: Ingest the live position fields. Read the `kapman-tradelog` `portfolio_snapshot` export (the §A2 contract) and map each open leg to the position context schema — deriving Structure and Direction per the §A2 source map. A broker screenshot, CSV, or manual record is the fallback when no export is supplied. When both an export and a prior memory value exist for a leg, the live export value wins and any mismatch is surfaced, not silently resolved. Name any missing fields.
+  - Step 1b: Read entry-time context from `kapman-journal/memory/positions.md`, matched by `(instrument_key, account_id)` — the entry-time regime snapshot and the eight SIGNAL Stop/Profit alert levels. This is orientation only and is never re-read to seed a Pass 1 / Pass 2 decision. When entry-context is absent or partial, degrade per the Appendix subsection "When `positions.md` entry-context is absent or partial."
 - Step 2: Fetch current regime data — dealer metrics and volatility metrics for each open position's ticker. In Hybrid mode, consume screening-session regime data for overlapping tickers rather than re-fetching.
 - Step 3: Fetch current spot price and option chain snapshot for each open position, for exit-trigger context and DTE calculation.
 - Step 4: Evaluate the Regime exit advisory per position — compare the entry-time regime snapshot to the current regime across all four decay branches. Surface named decay reasons for any branch that fires.
@@ -88,6 +90,7 @@ When a validated trade specification arrives from Pass 2 and the operator confir
 | `WYCKOFF_v3.0.md` (T1) | Current session's confirmed Wyckoff phase per ticker, via propose-confirm protocol | Consumed for the Regime exit advisory Wyckoff phase succession branch; if no confirmed reading exists for a ticker in the current session, the Wyckoff branch is suppressed and labeled rather than fired conservatively |
 | `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Mode discipline (Portfolio / Hybrid); data-quality vocabulary; override discipline; Hybrid output section ordering | PORTFOLIO_MGMT confirms mode at session start per GUARDRAILS; applies data-quality labels to all degraded or missing fields; honors the Hybrid output discipline (Screening first, Portfolio second) |
 | `SYSTEM_PARAMS_v3.0.md` (T3) | `DTE_DECAY_WARNING_THRESHOLD` | Applied at Step 5 of the Portfolio mode workflow to surface DTE decay warnings for positions approaching expiration |
+| `JOURNAL_MGMT_v4.0.md` (T2) | The `positions.md` entry-time record per open position: the immutable entry-time regime snapshot and the eight SIGNAL Stop/Profit alert levels, written once at Pass 2 | Read at Step 1b, matched by `(instrument_key, account_id)`, as the baseline the Regime exit advisory measures decay against and the entry-time anchor for exit-trigger proximity; orientation only, never re-read to seed a new decision |
 
 **What PORTFOLIO_MGMT delivers to each downstream file.**
 
@@ -116,6 +119,9 @@ When a validated trade specification arrives from Pass 2 and the operator confir
 - `WYCKOFF_v3.0.md` owns the phase succession table. PORTFOLIO_MGMT reads phase succession against that table when evaluating the Wyckoff branch of the Regime exit advisory; it does not define its own succession logic.
 - `KAPMAN_GUARDRAILS_v3.0.md` owns mode discipline and the Hybrid output section ordering. PORTFOLIO_MGMT's Hybrid mode behavior is constrained by GUARDRAILS' Hybrid output discipline; PORTFOLIO_MGMT does not define its own Hybrid section ordering.
 - `SYSTEM_PARAMS_v3.0.md` is the single update point for `DTE_DECAY_WARNING_THRESHOLD`. PORTFOLIO_MGMT references the parameter by name; it does not hardcode the value.
+- `JOURNAL_MGMT_v4.0.md` owns where the `positions.md` entry-time snapshot is written and read, and the memory-load precedence. PORTFOLIO_MGMT reads that snapshot at Step 1b; it does not define the journal's write model or path.
+- `KAPMAN_GUARDRAILS_v3.0.md` owns the numeric-no-persist floor and its sole exemption — the Pass-2 entry-time snapshot in `positions.md`. PORTFOLIO_MGMT relies on exactly that exemption to read the entry-time baseline, and on no other persisted regime value.
+- The §A2 trade log → Portfolio position-context contract defines which `portfolio_snapshot` export fields populate each position-context field. PORTFOLIO_MGMT's Appendix §A2 source map implements that contract; the contract governs the field list, this runbook governs how the fields are used.
 
 ## Legacy anchors (for legend citations and back-compat)
 
@@ -129,38 +135,76 @@ No legacy rule IDs map to this file. Body-text references in legacy report legen
 
 | Field | Required? | Source | Notes |
 |---|---|---|---|
-| Ticker | Required | Operator-supplied | |
-| Structure | Required | Pass 2 / operator-supplied | Long call, long put, call debit spread, put debit spread, CSP, LEAP |
-| Direction | Required | Pass 2 / operator-supplied | BULLISH / BEARISH |
-| Strike(s) | Required | Pass 2 / operator-supplied | Both legs for spreads |
-| Expiration | Required | Pass 2 / operator-supplied | Calendar date |
-| Entry date | Required | Operator-supplied | Execution date |
-| Entry price (actual fill) | Required | Operator-supplied | Single-leg midpoint or net debit/credit for spreads |
+| Ticker | Required | Tradelog snapshot (§A2) | From `underlying_symbol` |
+| Structure | Required | Tradelog snapshot (§A2) | Derived from snapshot `structure` + `spread_group_id` + `option_type` + DTE — see §A2 source map. Long call, long put, call debit spread, put debit spread, CSP, LEAP |
+| Direction | Required | Tradelog snapshot (§A2) | Derived from structure + `option_type`, not the LONG/SHORT field. BULLISH / BEARISH |
+| Strike(s) | Required | Tradelog snapshot (§A2) | Both legs for spreads (via `spread_group_id`) |
+| Expiration | Required | Tradelog snapshot (§A2) | Calendar date |
+| Entry date | Required | Tradelog snapshot (§A2) | `entry_date` — earliest opening execution among the leg's opens |
+| Entry price (actual fill) | Required | Tradelog snapshot (§A2) | `entry_price` (weighted avg); single-leg midpoint or net debit/credit for spreads |
 | Entry price range (Pass 2 reference) | Recommended | Pass 2 output | Carried as reference; not required for minimum viable session |
-| Actual size entered | Required | Operator-supplied | Dollar amount or contract count |
+| Actual size entered | Required | Tradelog snapshot (§A2) | `net_qty` / `cost_basis` — dollar amount or contract count |
 | Pass 2 sizing band note | Recommended | Pass 2 output | Deviation from band noted when actual size differs |
 | Chain quality label at entry | Recommended | Pass 2 output | Full / Limited / Weak |
 | Dealer-status label at entry | Recommended | Pass 2 output | FULL / LIMITED / INVALID |
-| Entry-time Wyckoff phase | Advisory-required (Wyckoff branch) | Pass 2 / operator-supplied | Confirmed phase at entry session |
-| Entry-time DGPI tier | Advisory-required (DGPI branch) | Pass 2 / operator-supplied | Strongly supportive / Moderately supportive / Near-neutral / Weakening / Hostile |
-| Entry-time flip-zone relationship | Advisory-required (spot-vs-flip branch) | Pass 2 / operator-supplied | Well above flip / Near-flip / Well below flip |
-| Entry-time IV/HV band | Advisory-required (IV/HV branch) | Pass 2 / operator-supplied | Cheap / Neutral / Elevated |
-| Entry-time volatility-status label | Advisory-required (IV/HV branch) | Pass 2 / operator-supplied | FULL / LIMITED / INVALID |
-| Entry-time IV rank tier | Recommended | Pass 2 / operator-supplied | Supports IV/HV branch context |
-| Stop alert — underlying price | Exit-trigger-required | SIGNAL output at entry | Unfavorable-side alert level |
-| Stop alert — estimated option price | Exit-trigger-required | SIGNAL output at entry | Delta-gamma approximation; may be refreshed from current chain |
-| Stop alert — trail-stop bid/ask | Exit-trigger-required | SIGNAL output at entry | Fidelity-compatible |
-| Stop alert — trail-stop mark | Exit-trigger-required | SIGNAL output at entry | Schwab-compatible |
-| Profit target alert — underlying price | Exit-trigger-required | SIGNAL output at entry | Favorable-side alert level |
-| Profit target alert — estimated option price | Exit-trigger-required | SIGNAL output at entry | Delta-gamma approximation; may be refreshed from current chain |
-| Profit target alert — trail-stop bid/ask | Exit-trigger-required | SIGNAL output at entry | Fidelity-compatible |
-| Profit target alert — trail-stop mark | Exit-trigger-required | SIGNAL output at entry | Schwab-compatible |
+| Entry-time Wyckoff phase | Advisory-required (Wyckoff branch) | positions.md (journal; written at Pass 2) | Confirmed phase at entry session |
+| Entry-time DGPI tier | Advisory-required (DGPI branch) | positions.md (journal; written at Pass 2) | Strongly supportive / Moderately supportive / Near-neutral / Weakening / Hostile |
+| Entry-time flip-zone relationship | Advisory-required (spot-vs-flip branch) | positions.md (journal; written at Pass 2) | Well above flip / Near-flip / Well below flip |
+| Entry-time IV/HV band | Advisory-required (IV/HV branch) | positions.md (journal; written at Pass 2) | Cheap / Neutral / Elevated |
+| Entry-time volatility-status label | Advisory-required (IV/HV branch) | positions.md (journal; written at Pass 2) | FULL / LIMITED / INVALID |
+| Entry-time IV rank tier | Recommended | positions.md (journal; recommended rider) | Supports IV/HV branch context. Recommended rider only — not part of the guaranteed Pass-2 entry-time write (the exempt snapshot is the five advisory-required regime fields + the eight SIGNAL levels), so it may be absent even when the entry snapshot is present |
+| Stop alert — underlying price | Exit-trigger-required | positions.md (journal; written at Pass 2) | Unfavorable-side alert level |
+| Stop alert — estimated option price | Exit-trigger-required | positions.md (journal; written at Pass 2) | Delta-gamma approximation; may be refreshed from current chain |
+| Stop alert — trail-stop bid/ask | Exit-trigger-required | positions.md (journal; written at Pass 2) | Fidelity-compatible |
+| Stop alert — trail-stop mark | Exit-trigger-required | positions.md (journal; written at Pass 2) | Schwab-compatible |
+| Profit target alert — underlying price | Exit-trigger-required | positions.md (journal; written at Pass 2) | Favorable-side alert level |
+| Profit target alert — estimated option price | Exit-trigger-required | positions.md (journal; written at Pass 2) | Delta-gamma approximation; may be refreshed from current chain |
+| Profit target alert — trail-stop bid/ask | Exit-trigger-required | positions.md (journal; written at Pass 2) | Fidelity-compatible |
+| Profit target alert — trail-stop mark | Exit-trigger-required | positions.md (journal; written at Pass 2) | Schwab-compatible |
 | Position state | Required | PORTFOLIO_MGMT | Open / Advisory / Exited / Expired |
 | Advisory reason(s) | Present when state is Advisory | PORTFOLIO_MGMT | Named decay branch(es) that fired |
 | Exit date | Present when state is Exited | Operator-supplied | |
 | Exit price | Present when state is Exited | Operator-supplied | Labeled unknown if not supplied |
 | Realized P&L | Present when state is Exited and exit price supplied | PORTFOLIO_MGMT | Exit price minus entry price, dollar and percentage |
 | Expiration outcome | Present when state is Expired | PORTFOLIO_MGMT | Surfaced as failure state; requires operator acknowledgment |
+
+**Tradelog `portfolio_snapshot` ingest — §A2 source map.**
+
+The live position fields are ingested from the `kapman-tradelog` `portfolio_snapshot` export (open-positions-only; `GET /api/export/portfolio-snapshot` or the "Copy snapshot JSON" button). Each open leg maps as below.
+
+| `portfolio_snapshot` field (per open leg) | Position-context field | Mapping note |
+|---|---|---|
+| `underlying_symbol` | Ticker | Clean display ticker; raw `symbol` (possibly OCC-style) carried for reference only |
+| `instrument_key` + `account_id` | (join key) | Stable join key to the `positions.md` entry-time record; not a displayed field |
+| `asset_class` (`OPTION`/`EQUITY`) | (feeds Structure) | `EQUITY` → stock; `OPTION` → the option structures below |
+| `structure` + `spread_group_id` + `option_type` + DTE | Structure | Derived, not direct: `short_put` on an equity underlying → CSP; a long single leg with far-dated `expiration` → LEAP; legs sharing a `spread_group_id` → call/put debit (or credit) spread; otherwise the single-leg label maps directly (`long_call` → Long call, `long_put` → Long put) |
+| `structure` + `option_type` | Direction (BULLISH/BEARISH) | Thesis derived from structure + option type (`long_call` / call debit / CSP → BULLISH; `long_put` / put debit → BEARISH). The export's `direction` (LONG/SHORT) is position sidedness, not thesis — do not map it to Direction |
+| `strike` (per leg; both legs via `spread_group_id`) | Strike(s) | |
+| `expiration` | Expiration | Also the DTE input for Step 5 |
+| `entry_date` | Entry date | Earliest opening execution among the leg's opens |
+| `entry_price` | Entry price (actual fill) | Weighted avg = `cost_basis` ÷ (`net_qty` × multiplier) |
+| `net_qty` (signed) / `cost_basis` (multiplier-inclusive) | Actual size entered | Contract count / dollar basis |
+| `mark` | Current option price (Step 6 exit-trigger input) | Degrades to data-absent when `null` — do not infer a mark |
+| `unrealized_pnl` | Unrealized P&L (display) | `null` when `mark` is unavailable |
+| `mae_pct` / `mfe_pct` / `excursion_as_of` | Advisory display input only | Gated by snapshot `open_excursions_available`; daily-mark, coverage-dependent excursion since entry. Never a gate or trigger — display alongside the exit-trigger advisory (e.g. "−12% heat vs −15% stop"). Suppress when `open_excursions_available` is false or the leg value is `null` |
+
+Snapshot envelope: `exported_at` is the lineage clock (the `TL-` lineage_id derives from it per `JOURNAL_MGMT_v4.0`); `as_of` is the instant the open positions were priced (the as-of for `mark` / `unrealized_pnl` / excursions); `tradelog_schema_version` is echoed for join reproducibility; `account_ids` scopes the snapshot (`[]` = all accounts). The export is open-positions-only — closed lots, the entry-time regime snapshot, and the SIGNAL alert levels are not in it (closed lots are out of scope here; the regime snapshot and alert levels are journal-owned, read per the next subsection).
+
+**Entry-time context read — `positions.md`.**
+
+The entry-time regime snapshot and the eight SIGNAL Stop/Profit alert levels are not in the `portfolio_snapshot` export. They are read from `kapman-journal/memory/positions.md`, matched to each open leg by the `(instrument_key, account_id)` join key — entry context and excursions are account-dependent, so both components are required for a match. This read is orientation only: the snapshot is immutable historical entry context, recalled so the Regime exit advisory can measure decay against the conditions the position was opened under. It is never re-read to seed a new Pass 1 / Pass 2 decision, and current regime is always re-fetched fresh at Step 2. `KAPMAN_GUARDRAILS` states this as the sole no-persist exemption, and `JOURNAL_MGMT_v4.0` owns where the snapshot is written and read. The entry-time regime fields feed the four Regime exit advisory branches at Step 4; the eight alert levels read here are the entry-time levels for Step 6. (The entry-time IV rank tier rides as recommended context; the exempt snapshot proper is the five advisory-required regime fields plus the eight SIGNAL levels.)
+
+**When `positions.md` entry-context is absent or partial.**
+
+Two absence conditions are reported distinctly, never conflated:
+- **`positions.md` not loaded** — the journal memory file was unavailable this session (no memory-load step ran, or the file is missing). Every entry-time field is unavailable for every leg; state this once, globally, not per-leg.
+- **No record for this leg** — `positions.md` loaded but holds no entry-time record matching this leg's `(instrument_key, account_id)`. Reported per-leg, naming the missing join key.
+
+Degradation is per-branch and follows the field's role — and the two roles behave oppositely:
+- **Entry-time regime fields are suppressed, never reconstructed.** The entry snapshot is immutable; it cannot be rebuilt from current-session data. When a branch's entry-time field is absent — named explicitly (e.g. *entry-time DGPI tier not in `positions.md`*) — that Regime exit advisory branch is labeled **data-absent / not-evaluated**. It is not fired conservatively (an absent baseline is not a decayed baseline) and it is not reconstructed. This is the entry-time counterpart to the branch evaluability reference's current-session data-absent column.
+- **SIGNAL alert levels fall through to current-session reconstruction.** When the eight entry-time alert levels are absent, Step 6 does not suppress — it applies the current-session SIGNAL approximation already defined there (Schwab dealer flip as Stop anchor, nearest call wall above spot as Profit target anchor, the SIGNAL trail-stop reference band), surfacing the four mandatory fields per position with the existing note "Current-session computed — entry-time levels not supplied." The alert levels are reconstructable because they anchor to current, re-fetchable regime; the entry-time snapshot is not.
+
+In both cases the absence is a named fallback, not a silent gap — consistent with Step 7b's Rule 5 self-report discipline.
 
 **Position lifecycle state machine.**
 

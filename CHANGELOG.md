@@ -1,5 +1,53 @@
 # KapMan KB Changelog
 
+## 2026-06-27 — Stage 1b: Workflow 2 (trade log → Portfolio) §A2 ingest — PORTFOLIO_MGMT + PASS2 capture + plan §A2/§7 (closes #73)
+
+### Changed — Workflow 2 (trade log → Portfolio) §A2 ingest path (substantive; HITL, approved turn-by-turn in session)
+
+The Workflow-2 ingest unit of Integration Plan Stage 1b (§7, §A2, §A5). Wires the now-built/deployed
+`kapman-tradelog` `portfolio_snapshot` export (`GET /api/export/portfolio-snapshot`, open-positions-only)
+into Portfolio mode as the live §A2 producer, and captures the journal-owned entry-time baseline at Pass 2.
+Design decisions taken with the operator: **join key `(instrument_key, account_id)`**; structure/direction
+**derived** from the export's single-leg `structure` + `spread_group_id` + `option_type` + DTE (thesis from
+structure+option_type, not the LONG/SHORT sidedness field); **MAE/MFE advisory display only**, never a
+gate/trigger; absent/partial entry-context **degrades per-branch** — missing entry-time regime fields
+suppress the affected Regime-exit branch (data-absent, not fired conservatively, not reconstructed), missing
+SIGNAL alert levels fall through to current-session reconstruction.
+
+- **`llm_runtime/PORTFOLIO_MGMT_v3.0.md`** (`kb_version 3.0.1 → 3.0.2`) — reconciled the Principle to the
+  two-source model (live fields from the `portfolio_snapshot` export; entry-time snapshot + the eight SIGNAL
+  levels from `positions.md`, written once at Pass 2); split workflow Step 1 into **1a** (ingest snapshot;
+  live values override memory, surface mismatch; broker paste = fallback) and **1b** (read `positions.md`
+  entry-context by `(instrument_key, account_id)`, orientation only). Added three Appendix subsections —
+  "Tradelog `portfolio_snapshot` ingest — §A2 source map," "Entry-time context read — `positions.md`," and
+  "When `positions.md` entry-context is absent or partial." Re-pointed the position-context schema Source
+  column: live fields → **Tradelog snapshot (§A2)**; the five advisory-required entry-time regime rows + the
+  eight SIGNAL alert rows → **`positions.md` (journal; written at Pass 2)**, with the entry-time IV rank tier
+  re-pointed as a recommended journal rider (not part of the Pass-2 write). Added a `JOURNAL_MGMT_v4.0` upstream row and three
+  cross-references (`JOURNAL_MGMT_v4.0`, `KAPMAN_GUARDRAILS` sole exemption, the §A2 contract).
+- **`llm_runtime/PASS2_VALIDATION_v3.0.md`** (`kb_version 3.0.0 → 3.0.1`) — added the at-validation capture
+  heuristic: the entry-time regime snapshot + the eight SIGNAL Stop/Profit levels + `option_mid` are written
+  to `positions.md` (write-once; the regime snapshot + SIGNAL levels are the sole no-persist exemption,
+  `option_mid` rides as a position fact; PASS2 owns trigger/timing, JOURNAL_MGMT owns path/schema; the
+  Pass 1 → Pass 2 boundary and anti-hallucination floor are unchanged). Added a `JOURNAL_MGMT_v4.0`
+  cross-reference.
+- **`docs/Kapman_System_Integration_Plan_v1.0.md`** §A2 + §7 — corrected the source cells to the real
+  per-leg `PortfolioSnapshotOpenLeg` fields and noted the export now exists; the live MAE/MFE row now reads
+  **compute-on-export from `HistoricalMark`, gated by `open_excursions_available`, advisory** (was
+  mis-attributed to `LotExcursion --include-open`); split the structure/direction cell to mark it derived;
+  marked exit/realized fields out of scope (open-only export). Added a `**Last updated:** 2026-06-27` marker.
+- **`INDEX.md`** — recorded the two version bumps in both version tables and added a Workflow-2 ingest bullet
+  under "Version status."
+
+### Scope notes
+- `JOURNAL_MGMT_v4.0.md` and `KAPMAN_GUARDRAILS_v3.0.md` were **not** edited: they already own the
+  `positions.md` write model and the sole no-persist exemption; this unit cites them, it does not restate them.
+- MAE/MFE remains **advisory display only** — no gate, trigger, or sizing input (Stage-3 MAE/MFE tuning is
+  out of scope).
+- Out of scope (unchanged): closed-lot/§A3 feedback contract; Calibration/4th mode; §12 PASS2 hygiene; the
+  end-of-Stage-1 `_v3.0 → _v4.0` rename sweep. Files keep their `_v3.0` filenames.
+- New v4.0-era cross-references are version-less per the Stage-1 convention.
+
 ## 2026-06-26 — Stage 1b: viewer/v2 ingest — §A1 contract, WYCKOFF tier gate, kapman-mcp excision, τ params (closes #72)
 
 ### Changed — Workflow 1 (viewer → Pass 1) ingest path (substantive; HITL, approved turn-by-turn in session)

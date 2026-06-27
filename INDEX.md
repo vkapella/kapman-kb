@@ -40,6 +40,17 @@ This repository separates runtime and engineering materials:
     `TIER_GATE_TAU_HIGH` / `TIER_GATE_TAU_LOW` parameters. The `kapman-mcp` tool surface and
     name are fully excised from `llm_runtime/`. Files keep their `_v3.0` filenames pending the
     end-of-Stage-1 rename.
+  - **Workflow 2 (trade log → Portfolio) §A2 ingest** (Stage 1b, Integration Plan §7/§A2/§A5):
+    `PORTFOLIO_MGMT_v3.0.md` (`kb_version 3.0.2`) adds the tradelog `portfolio_snapshot` §A2 ingest
+    (Step 1 → 1a ingest / 1b entry-context read), the Appendix §A2 source map, structure/direction
+    derivation, MAE/MFE as advisory display only, re-points the position-context schema Source column
+    (live fields → tradelog snapshot; the 6 entry-time regime + 8 SIGNAL alert rows → `positions.md`),
+    and the absent/partial entry-context degradation; `PASS2_VALIDATION_v3.0.md` (`kb_version 3.0.1`)
+    adds the at-validation capture of the entry-time snapshot + the eight SIGNAL levels + `option_mid`
+    into `positions.md` (write-once, sole no-persist exemption). Join key `(instrument_key, account_id)`.
+    `docs/Kapman_System_Integration_Plan_v1.0.md` §A2/§7 corrected to the real per-leg export fields
+    (MAE/MFE = compute-on-export from `HistoricalMark`, advisory). Files keep their `_v3.0` filenames
+    pending the end-of-Stage-1 rename.
 
 ## v3.0 file directory
 
@@ -93,6 +104,8 @@ This repository separates runtime and engineering materials:
 | SIGNAL_v3.0.md | 3.0.2 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.6 | active |
 | WYCKOFF_v3.0.md | 3.0.4 | active |
+| PORTFOLIO_MGMT_v3.0.md | 3.0.2 | active |
+| PASS2_VALIDATION_v3.0.md | 3.0.1 | active |
 
 ### v3.0.1 report metadata patch
 
@@ -103,7 +116,8 @@ This repository separates runtime and engineering materials:
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
 | WYCKOFF_v3.0.md | 3.0.4 | 2026-06-26 |
 | PASS1_SCREENING_v3.0.md | 3.0.6 | 2026-06-26 |
-| PORTFOLIO_MGMT_v3.0.md | 3.0.1 | 2026-05-28 |
+| PORTFOLIO_MGMT_v3.0.md | 3.0.2 | 2026-06-27 |
+| PASS2_VALIDATION_v3.0.md | 3.0.1 | 2026-06-27 |
 | REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.3 | 2026-05-29 |
 
