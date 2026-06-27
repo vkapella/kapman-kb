@@ -51,6 +51,14 @@ This repository separates runtime and engineering materials:
     `docs/Kapman_System_Integration_Plan_v1.0.md` §A2/§7 corrected to the real per-leg export fields
     (MAE/MFE = compute-on-export from `HistoricalMark`, advisory). Files keep their `_v3.0` filenames
     pending the end-of-Stage-1 rename.
+  - **Session-layer wiring (KPSI)** (Stage 1b, Integration Plan §10/§A5): `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md`
+    (`kb_version 3.0.3 → 3.0.4`) adds `JOURNAL_MGMT_v4.0.md` to the KB file inventory + tier model, expands the
+    session entry sequence from five to seven steps (new step 2 session-start memory load + announce; new step 4
+    lineage derivation + handoff staging on paste), reconciles position-context load with the §A2 export +
+    `positions.md`, extends **Rule 7** with the log-manifest check, and reserves a 4th (Calibration/Review) mode
+    for Stage 3 (not active — no-dangling-capability). Closes the session-wiring blockers the Stage-1 pilot
+    dry-run surfaced (the §A1/§A2 ingest logic + `(instrument_key, account_id)` bridge themselves validated).
+    File keeps its `_v3.0` filename pending the end-of-Stage-1 rename.
 
 ## v3.0 file directory
 
@@ -106,6 +114,7 @@ This repository separates runtime and engineering materials:
 | WYCKOFF_v3.0.md | 3.0.4 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.2 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.1 | active |
+| KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
 
 ### v3.0.1 report metadata patch
 
@@ -119,7 +128,7 @@ This repository separates runtime and engineering materials:
 | PORTFOLIO_MGMT_v3.0.md | 3.0.2 | 2026-06-27 |
 | PASS2_VALIDATION_v3.0.md | 3.0.1 | 2026-06-27 |
 | REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |
-| KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.3 | 2026-05-29 |
+| KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | 2026-06-27 |
 
 ### Session 14 llm_runtime inventory verification
 

@@ -1,5 +1,41 @@
 # KapMan KB Changelog
 
+## 2026-06-27 — Stage 1b: KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS — wire the v4.0 journal session layer (closes #74)
+
+### Changed — session entry sequence + orientation wired to the v4.0 journal layer (substantive; HITL, approved turn-by-turn in session)
+
+KPSI predated the v4.0 journal layer (`kb_version 3.0.3`, 2026-05-29): it never loaded `kapman-journal`
+memory, never minted/echoed a lineage_id or staged a handoff, and did not list `JOURNAL_MGMT_v4.0.md` in
+its inventory — so the persistence layer #71/#72/#73 built was orphaned from the orientation file the
+session reads first. A Stage-1 pilot dry-run (Workflows 1+2 against realistic pastes) confirmed the ingest
+**logic is sound and the `(instrument_key, account_id)` `positions.md` bridge works**; every blocking gap
+was session-wiring in KPSI. This unit closes them. Decisions taken with the operator: **extend Rule 7**
+with the log-manifest sub-clause (preserving the rule number that JOURNAL_MGMT and §A5 cite); **reserve** the
+4th (Calibration/Review) mode rather than activate it (its runbook is Stage 3 — no-dangling-capability).
+
+- **`llm_runtime/KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md`** (`kb_version 3.0.3 → 3.0.4`) — added
+  `JOURNAL_MGMT_v4.0.md` to the KB file inventory and the T2 tier-model row; expanded the session entry
+  sequence from five to seven steps — new **step 2 "Load journal memory and announce"** (load `memory/`
+  files, announce, live-input-overrides-memory precedence; cite JOURNAL_MGMT mechanics + GUARDRAILS floor)
+  and new **step 4 "Derive lineage and stage the input handoff"** (lineage_id from `exported_at`,
+  source-partitioned handoff write, in-session echo); reconciled the position-context step with the §A2
+  export + `positions.md` Step 1a/1b and generalized "before screening output" → "before mode output";
+  extended **Rule 7** with a log-manifest sub-clause (a logged determination without a staged journal entry
+  is a Rule 7 failure); added a **reserved-mode note** for the Stage-3 Calibration/Review 4th mode. Keeps
+  its `_v3.0` filename.
+- **`INDEX.md`** — recorded the bump in both version tables and added a KPSI session-wiring bullet under
+  "Version status."
+
+### Scope notes
+- Rule 7 also lives in the operator's session system prompt; the log-manifest extension must be mirrored
+  there to be enforced (operator action, outside the KB).
+- The Stage-1 pilot also surfaced a §A2/§A1 **contract-hardening backlog** (spread debit/credit derivation,
+  LEAP DTE cutoff, standalone `short_put`→CSP, canonical `positions.md` grammar, entry-time Wyckoff phase
+  normalization, §A1 cross-check "gate/trim", viewer export field set) — **out of scope here**, proposed as
+  a separate follow-up.
+- Out of scope (unchanged): §12 PASS2 hygiene; the end-of-Stage-1 `_v3.0 → _v4.0` rename sweep.
+- New v4.0-era cross-references are version-less per the Stage-1 convention.
+
 ## 2026-06-27 — Stage 1b: Workflow 2 (trade log → Portfolio) §A2 ingest — PORTFOLIO_MGMT + PASS2 capture + plan §A2/§7 (closes #73)
 
 ### Changed — Workflow 2 (trade log → Portfolio) §A2 ingest path (substantive; HITL, approved turn-by-turn in session)

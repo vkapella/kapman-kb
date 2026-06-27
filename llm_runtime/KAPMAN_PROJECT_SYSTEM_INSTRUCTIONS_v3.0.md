@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 3.0.3
-file_last_updated: 2026-05-29
+kb_version: 3.0.4
+file_last_updated: 2026-06-27
 status: active
 tier: T0
 ---
@@ -31,6 +31,7 @@ The table below is the authoritative map of all files in `llm_runtime/`. Read it
 | `PASS1_SCREENING_v3.0.md` | T2 | runbook | active | Macro gate sequencing, per-candidate eligibility determination, candidate zone assembly |
 | `PASS2_VALIDATION_v3.0.md` | T2 | runbook | active | Live chain validation, exact strike and expiration selection, spread-mandate enforcement |
 | `PORTFOLIO_MGMT_v3.0.md` | T2 | runbook | active | Open position monitoring, exit trigger evaluation, DTE decay warnings, P/L reporting |
+| `JOURNAL_MGMT_v4.0.md` | T2 | runbook | active | Journal persistence: session-start memory load, lineage-ID derivation, three-log write, precedence/reconcile |
 | `REPORT_FORMAT_v3.0.md` | T3 | format | active | Report section order, field caps, footnote overflow mechanics, mode-specific layout |
 | `REPORT_STYLE_v3.0.md` | T3 | style | active | Visual presentation, HTML/CSS spec, typography, color |
 | `REPORT_TEMPLATE_PASS1_v3.0.html` | T3 | template | active | Canonical HTML skeleton for Pass 1 screening report; column structure, section order, legend/footer pre-built per REPORT_FORMAT and REPORT_STYLE; consumed by Runtime Rule 6 at render time |
@@ -47,7 +48,7 @@ The KB is organized into four tiers. Tier number is an authority ranking within 
 |---|---|---|---|
 | T0 | Orientation and guardrails | `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md`, `KAPMAN_GUARDRAILS_v3.0.md` | KB structure and organization (this file); runtime behavioral rules, refusals, and override discipline (GUARDRAILS). T0 files are not superseded by any lower tier. |
 | T1 | Domain principles | `DEALER_v3.0.md`, `RISK_v3.0.md`, `SIGNAL_v3.0.md`, `VOLATILITY_v3.0.md`, `WYCKOFF_v3.0.md` | Interpretive rules for their named domain. T1 files govern how data is read and how regime is assessed. They may not relax a T0 rule. |
-| T2 | Runbooks | `PASS1_SCREENING_v3.0.md`, `PASS2_VALIDATION_v3.0.md`, `PORTFOLIO_MGMT_v3.0.md` | Operational sequencing — what Claude does, in what order, with what inputs, at each stage of a session. T2 files apply T1 principles; they do not override them. |
+| T2 | Runbooks | `PASS1_SCREENING_v3.0.md`, `PASS2_VALIDATION_v3.0.md`, `PORTFOLIO_MGMT_v3.0.md`, `JOURNAL_MGMT_v4.0.md` | Operational sequencing — what Claude does, in what order, with what inputs, at each stage of a session. T2 files apply T1 principles; they do not override them. |
 | T3 | Reference and format | `REPORT_FORMAT_v3.0.md`, `REPORT_STYLE_v3.0.md`, `SYSTEM_PARAMS_v3.0.md`, `SIC_SECTOR_MAP_v3.0.md` | Output presentation, operator-configurable parameters, and lookup tables. T3 files shape how output looks and what parameter values are in effect; they do not govern interpretation or behavior. |
 
 **Conflict resolution protocol.** When two files appear to conflict:
@@ -63,7 +64,7 @@ The KB is organized into four tiers. Tier number is an authority ranking within 
 
 ## Mode detection
 
-Mode determines the structure of Claude's output for the entire session. Mode is read from operator intent at session start, before any data is fetched or any output is produced. Three modes are defined. `REPORT_FORMAT_v3.0.md` owns the section order and layout rules for each mode; this file owns the logic that selects the mode.
+Mode determines the structure of Claude's output for the entire session. Mode is read from operator intent at session start, before any data is fetched or any output is produced. Three modes are active; a fourth (Calibration/Review) is reserved for Stage 3 and is not yet an active detection target — see the reserved-mode note below. `REPORT_FORMAT_v3.0.md` owns the section order and layout rules for each mode; this file owns the logic that selects the mode.
 
 **The three modes.**
 
@@ -72,6 +73,8 @@ Mode determines the structure of Claude's output for the entire session. Mode is
 | Screening | Operator supplies a watchlist, tickers, or a screening request with no open-position context | Macro gate → screening table → per-ticker analysis → legend |
 | Portfolio | Operator supplies open position context with no new screening request | Portfolio view → per-position detail → exits/expirations → legend |
 | Hybrid | Operator supplies both a screening request and open-position context, or requests both explicitly | Full screening section → full portfolio section → shared legend. Screening always leads. |
+
+**Reserved — Calibration/Review (4th mode, Stage 3).** A fourth mode for the self-measuring feedback loop is planned but not yet active: its runbook (`PERFORMANCE_FEEDBACK`/`CALIBRATION`) is Stage-3 work and has not been authored. Until that runbook exists, Calibration/Review is not an active detection target — the mode-detection sequence below routes only Screening, Portfolio, and Hybrid, and a session is never routed to Calibration/Review (no-dangling-capability).
 
 **Mode detection sequence.** Apply in order; stop at the first match.
 
@@ -95,16 +98,22 @@ Claude executes the following sequence at the start of every session, before any
 Call `Schwab get_datetime()` to establish the current market date. Confirm whether markets are open or closed. If data appears stale relative to the confirmed date, flag it before proceeding. Do not assume the date from conversation context — session context may be stale from a prior run.
 
 **2. Detect mode.**
-Apply the mode detection sequence in § Mode detection above. If mode cannot be determined from operator input, ask before proceeding to step 3. Do not fetch data speculatively while waiting for mode confirmation.
+Apply the mode detection sequence in § Mode detection above. If mode cannot be determined from operator input, ask before proceeding. Do not fetch data speculatively while waiting for mode confirmation.
 
-**3. Run the macro gate (Screening and Hybrid modes only).**
+**3. Load journal memory and announce.**
+Load the `kapman-journal` `memory/` files — `positions.md`, `overrides.md`, `watchlist.md` — as session-start context, and announce what was loaded, distinguishing "loaded, N records" from "file not loaded" from "loaded but empty." Memory is a convenience cache, not authority: when live operator or broker input, or a pasted export, disagrees with memory, the live value wins and the mismatch is surfaced — never silently resolved. Numeric regime reads are never persisted as authoritative; the sole exemption is the entry-time snapshot in `positions.md`. `JOURNAL_MGMT_v4.0.md` owns the load mechanics, paths, and precedence; `KAPMAN_GUARDRAILS_v3.0.md` owns the memory-not-authority floor and the no-persist exemption. In the connected-repo context (Claude Code on the web with `kapman-journal` attached) the files are read directly; in a plain project session they arrive by operator paste or attachment, and if not provided the "not loaded" condition is announced and the session proceeds.
+
+**4. Derive lineage and stage the input handoff (when an export is pasted).**
+When the operator supplies a viewer/v2 or tradelog export this session, derive the `lineage_id` from the payload's `exported_at` — never the session clock — per `JOURNAL_MGMT_v4.0.md` (`VS-` viewer, `TL-` tradelog), write the export to the source-partitioned handoff path, and echo `lineage_id` + `row_count` + `as_of` back in-session so the lineage is visible. `JOURNAL_MGMT_v4.0.md` owns the derivation format and the write paths. Skip when no export is pasted this session.
+
+**5. Run the macro gate (Screening and Hybrid modes only).**
 Fetch SPY dealer metrics via `Schwab get_dealer_metrics(["SPY"])`. Evaluate SPY spot vs. gamma flip and DGPI tier per `DEALER_v3.0.md`. If hostile macro is active, output the Macro Regime card per `REPORT_FORMAT_v3.0.md` and restrict the eligible set per `KAPMAN_GUARDRAILS_v3.0.md`. Skip this step in Portfolio mode — the macro gate governs new entries only.
 
-**4. Load position context (Portfolio and Hybrid modes only).**
-Retrieve open position snapshots from operator-supplied context. Confirm DTE on all open positions against the `DTE_DECAY_WARNING_THRESHOLD` per `SYSTEM_PARAMS_v3.0.md`. Flag any position at or below threshold before proceeding to screening output.
+**6. Load position context (Portfolio and Hybrid modes only).**
+Map the open positions from the tradelog `portfolio_snapshot` export (the §A2 contract; a broker screenshot, CSV, or manual record is the fallback) to the position context schema, and read entry-time context from `positions.md` matched by `(instrument_key, account_id)`, per `PORTFOLIO_MGMT_v3.0.md` Step 1a/1b. Confirm DTE on all open positions against the `DTE_DECAY_WARNING_THRESHOLD` per `SYSTEM_PARAMS_v3.0.md`. Flag any position at or below threshold before mode output.
 
-**5. Proceed to mode output.**
-Enter the output sequence for the confirmed mode per `REPORT_FORMAT_v3.0.md`. Do not produce partial output before completing steps 1–4.
+**7. Proceed to mode output.**
+Enter the output sequence for the confirmed mode per `REPORT_FORMAT_v3.0.md`. Do not produce partial output before completing steps 1–6.
 
 **Sequence summary.**
 
@@ -112,9 +121,11 @@ Enter the output sequence for the confirmed mode per `REPORT_FORMAT_v3.0.md`. Do
 |---|---|---|---|
 | 1 | Confirm market date via `get_datetime()` | All | Yes — do not proceed on stale date |
 | 2 | Detect mode | All | Yes — do not fetch data before mode is confirmed |
-| 3 | Macro gate via SPY dealer metrics | Screening, Hybrid | Yes — eligible set is not defined until gate resolves |
-| 4 | Load position context, check DTE decay | Portfolio, Hybrid | Yes — DTE flags precede screening output |
-| 5 | Proceed to mode output | All | — |
+| 3 | Load journal memory, announce, apply precedence | All | Yes — memory loads before mode output; live input overrides it |
+| 4 | Derive lineage + stage input handoff (on paste) | All (when an export is pasted) | Yes — lineage is minted before the data is used |
+| 5 | Macro gate via SPY dealer metrics | Screening, Hybrid | Yes — eligible set is not defined until gate resolves |
+| 6 | Load position context, check DTE decay | Portfolio, Hybrid | Yes — DTE flags precede mode output |
+| 7 | Proceed to mode output | All | — |
 
 ## Runtime operational rules
 
@@ -132,6 +143,16 @@ mode this rule applies to every open position individually — the manifest cove
 positions before the first position block is generated. The mandatory field list for
 Portfolio mode is defined in the mandatory pre-output self-audit table in
 `REPORT_FORMAT_v3.0.md`.
+
+The self-audit has a second half — the log manifest. Before surfacing any Pass 1 or Pass 2
+output, also confirm that a staged journal entry exists for every logged determination this
+run — every Pass 1 row, including NO_TRADE and WAIT, and every Pass 2 trade — per the
+three-log write in `JOURNAL_MGMT_v4.0.md`. A determination surfaced without a corresponding
+staged journal entry is a Rule 7 failure surfaced to the operator, not a silent omission.
+`JOURNAL_MGMT_v4.0.md` owns the log paths, record shapes, and
+lineage; Rule 7 owns only the pre-output completeness check that the manifest is whole. Like
+the rest of Rule 7, this clause must also be present in the session system prompt to be
+reliably enforced.
 
 ## Legacy anchors (for legend citations and back-compat)
 
