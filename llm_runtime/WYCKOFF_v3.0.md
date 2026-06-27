@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.4
-file_last_updated: 2026-06-26
+kb_version: 3.0.5
+file_last_updated: 2026-06-27
 status: active
 tier: T1
 ---
@@ -15,7 +15,7 @@ Wyckoff phase identification is the regime-setting judgment that determines whet
 
 Phase identification follows a **two-path runtime**: the **viewer-ingest path** and the **estimation path**. The path taken depends on whether a current viewer/v2 reading is available for the ticker — in Stage 1 delivered as a pasted handoff row, by a direct export later — and on how confidently that reading is held.
 
-**Viewer-ingest path.** The KapMan viewer (Polygon-fed) is the live pipeline source. When a viewer reading is present and passes the validity gate (recognized regime, current snapshot, clean fields), the runtime applies the **confidence tier gate** to the reading's `regime_confidence` and `phase_confidence`. The gating confidence is `min(regime_confidence, phase_confidence)`, or `regime_confidence` alone when `phase_confidence` is null (the ticker is trending with no active phase). When the gating confidence is at or above `τ_high` (per SYSTEM_PARAMS) and no hard force-flag is present, the reading is accepted as authoritative for the session without a propose-confirm exchange; the confirmation status is `pipeline-accepted`. When it falls in `[τ_low, τ_high)` — or when a hard force-flag is present at any confidence — the reading is surfaced to the operator under the flagged-reading exchange; the status is `pipeline-flagged` until the operator resolves it. When it falls below `τ_low`, the viewer reading is not usable as a pipeline reading and the runtime falls to the estimation path. Viewer/v2 confidence already prices in dealer and volatility cross-check disagreement and is capped below certainty, so the value is itself a meaningful gate — unlike the prior pipeline, which pinned confidence to a constant and could not be gated on it.
+**Viewer-ingest path.** The KapMan viewer (Polygon-fed) is the live pipeline source. When a viewer reading is present and passes the validity gate (recognized regime, current snapshot, clean fields), the runtime applies the **confidence tier gate** to the reading's `regime_confidence` and `phase_confidence`. The gating confidence is `min(regime_confidence, phase_confidence)`, or `regime_confidence` alone when `phase_confidence` is null (the ticker is trending with no active phase). When the gating confidence is at or above `τ_high` (per SYSTEM_PARAMS), the force-flag inputs are present, and no hard force-flag is present, the reading is accepted as authoritative for the session without a propose-confirm exchange; the confirmation status is `pipeline-accepted`. When it falls in `[τ_low, τ_high)` — or when a hard force-flag is present at any confidence — the reading is surfaced to the operator under the flagged-reading exchange; the status is `pipeline-flagged` until the operator resolves it. When it falls below `τ_low`, the viewer reading is not usable as a pipeline reading and the runtime falls to the estimation path. Viewer/v2 confidence already prices in dealer and volatility cross-check disagreement and is capped below certainty, so the value is itself a meaningful gate — unlike the prior pipeline, which pinned confidence to a constant and could not be gated on it.
 
 **Estimation path.** When no viewer reading is available for the ticker, the reading falls below `τ_low`, or the reading fails the validity gate for reasons other than a flaggable quality condition, the runtime falls back to the estimation path: live price and volume metrics (RVOL, VSI, historical volatility, and candle price action — from the Polygon and Schwab tool surfaces) serve as building blocks; the runtime assembles those building blocks into a proposed phase-and-event reading with explicit reasoning; the operator confirms or corrects; and only the operator-confirmed reading is authoritative. When the operator declines to confirm or the propose-confirm protocol is not run, all Wyckoff-dependent triggers degrade to their conservative defaults: the Wyckoff veto fires, the sizing band ceiling closes to the conditional floor, and the directional fallback reads NEUTRAL.
 
@@ -43,7 +43,8 @@ A reading that passes the validity gate is then resolved by the **confidence tie
 
 | Gating confidence `g` | Status | Behavior |
 |---|---|---|
-| `g ≥ τ_high` and no hard force-flag | `pipeline-accepted` | Authoritative for the session; surfaced briefly, no propose-confirm |
+| `g ≥ τ_high`, force-flag inputs present, no force-flag firing | `pipeline-accepted` | Authoritative for the session; surfaced briefly, no propose-confirm |
+| `g ≥ τ_high` but a force-flag input field absent (or present-but-null) | `pipeline-flagged` | Flagged-reading exchange; reason: force-flags unevaluated |
 | `τ_low ≤ g < τ_high`, or any hard force-flag present | `pipeline-flagged` | Flagged-reading exchange; UNKNOWN until the operator resolves it |
 | `g < τ_low` | (no usable reading) | Estimation path runs |
 
@@ -58,7 +59,14 @@ A reading that passes the validity gate is then resolved by the **confidence tie
 | Stale snapshot | viewer `as_of` / `data_through` outside the run's freshness window |
 | SOW-gated markdown | `regime` is Markdown with no confirmed Sign of Weakness in `last_event` / `setup_tags` |
 
-**Viewer-ingest pipeline-accepted behavior.** When the validity gate passes, `g ≥ τ_high`, and no hard force-flag is present:
+**Force-flag input completeness.** A hard force-flag can override a high confidence only if the handoff carries the field it reads. Distinguish two states explicitly:
+
+- **Present and clear** — e.g. `weekly_agrees: true` (aligned with the regime's directional bias) and `structure_conflict: false`: the force-flag was evaluated and does not fire; a `g ≥ τ_high` reading proceeds on this dimension.
+- **Absent** — the `weekly_agrees` and/or `structure_conflict` key is not present in the handoff (a missing key is not a `false` value), or is present-but-null: the force-flag cannot be evaluated.
+
+When a force-flag input field is absent, a reading that would otherwise be `pipeline-accepted` is downgraded to `pipeline-flagged` and routed to the flagged-reading exchange, with the named reason "force-flags unevaluated — weekly_agrees/structure_conflict not in handoff" (naming whichever is missing). The reading remains UNKNOWN until the operator resolves it, exactly as for any other `pipeline-flagged` reading. Absence never fires a force-flag as if it were `true`; it only withholds auto-accept. This rule is scoped to `weekly_agrees` and `structure_conflict` — the stale-snapshot force-flag is already covered by the `as_of` / `data_through` freshness requirement, and SOW-gated markdown is itself an absence-detector.
+
+**Viewer-ingest pipeline-accepted behavior.** When the validity gate passes, `g ≥ τ_high`, every force-flag input field is present, and no hard force-flag is present:
 
 1. Extract `regime` as the authoritative phase for the session.
 2. Extract `last_event` (with `last_event_date`) and `setup_tags` as the primary confirmed event and setup class if non-null. The viewer's detector has already qualified the event; no additional runtime acceptance threshold is required.
@@ -70,7 +78,7 @@ A reading that passes the validity gate is then resolved by the **confidence tie
 
 A reading is `pipeline-flagged` whenever the gating confidence falls in the `[τ_low, τ_high)` band or a hard force-flag is present (per the tier gate above). Mid-confidence and force-flag are not mutually exclusive — a reading may be flagged for either or both, and the exchange names whichever applies. When `pipeline-flagged`, the runtime presents the operator with the following explicit exchange:
 
-*"Viewer reads [TICKER] as [phase] (as of [snapshot date], confidence [g]). Flagged because: [mid-confidence band and/or named force-flag(s)]. Options: (1) Accept as-is, (2) Override with your reading, (3) Request independent estimation from building-block metrics, (4) Defer — leave [TICKER] as UNKNOWN for this session."*
+*"Viewer reads [TICKER] as [phase] (as of [snapshot date], confidence [g]). Flagged because: [mid-confidence band, named force-flag(s), and/or unevaluated force-flag inputs]. Options: (1) Accept as-is, (2) Override with your reading, (3) Request independent estimation from building-block metrics, (4) Defer — leave [TICKER] as UNKNOWN for this session."*
 
 The default on a flagged reading is conservative: do not silently promote to `pipeline-accepted`. The ticker remains UNKNOWN until the operator responds. The operator's choice governs: accept → `pipeline-accepted`; override → `declared`; estimation → estimation path runs, propose-confirm follows; defer → UNKNOWN, conservative defaults.
 
@@ -160,10 +168,10 @@ On the viewer-ingest path the inputs arrive in the pasted handoff row; on the es
 
 | Status | How obtained | Downstream trigger engagement |
 |---|---|---|
-| `pipeline-accepted` | Viewer-ingest path; validity gate passed; `g ≥ τ_high`; no hard force-flag | Full — identical to `confirmed` |
+| `pipeline-accepted` | Viewer-ingest path; validity gate passed; `g ≥ τ_high`; force-flag inputs present; no hard force-flag firing | Full — identical to `confirmed` |
 | `confirmed` | Estimation path; operator accepted propose-confirm exchange | Full |
 | `declared` | Operator stated phase directly without propose-confirm; no viewer pipeline reading | Full; data-quality surface notes declared status |
-| `pipeline-flagged` | Viewer-ingest path; `g` in `[τ_low, τ_high)` or a hard force-flag present; operator has not yet resolved | UNKNOWN — conservative defaults until resolved; resolves to `pipeline-accepted`, `declared`, or estimation path `confirmed` |
+| `pipeline-flagged` | Viewer-ingest path; `g` in `[τ_low, τ_high)`, a hard force-flag present, or a force-flag input absent; operator has not yet resolved | UNKNOWN — conservative defaults until resolved; resolves to `pipeline-accepted`, `declared`, or estimation path `confirmed` |
 | `unconfirmed` | Estimation path; operator declined or propose-confirm not run | UNKNOWN — conservative defaults |
 
 **Where WYCKOFF outputs flow downstream.**

@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.1
+kb_version: 4.0.2
 file_last_updated: 2026-06-27
 status: active
 tier: T2
@@ -29,7 +29,7 @@ Memory is a convenience cache; it is never the authority a decision rests on. Wh
 
 **The lineage ID is derived from the export's own `exported_at` timestamp, copied verbatim everywhere, and echoed back in-session.**
 
-When the operator pastes a viewer or tradelog export, the session derives a single lineage ID from the payload's own `exported_at` timestamp plus a per-day sequence suffix — never from the session's notion of "now," which has no reliable clock. The format is `VS-YYYYMMDD-HHMM-NN`: a source prefix, the export date and time mirrored from `exported_at`, and a two-digit per-day sequence that disambiguates collisions. That ID is the shared spine of the run — written verbatim into the handoff record and copied, never reformatted or regenerated, into the Pass 1 and Pass 2 records that descend from it. On receipt the session echoes it back with the payload's `row_count` and `as_of` ("received VS-20260625-1335-01, 47 rows, as_of 2026-06-25") so the operator can eyeball it against what the viewer exported, and it prints the same ID in the header of every Pass 1 / Pass 2 table it renders, so lineage is visible in-session, not only in the file.
+When the operator pastes a viewer or tradelog export, the session derives a single lineage ID from the payload's own `exported_at` timestamp plus a per-day sequence suffix — never from the session's notion of "now," which has no reliable clock. The format is `VS-YYYYMMDD-HHMM-NN`: a source prefix, the export date and time mirrored from `exported_at`, and a two-digit per-day sequence that disambiguates collisions. That ID is the shared spine of the run — written verbatim into the handoff record and copied, never reformatted or regenerated, into the Pass 1 and Pass 2 records that descend from it. On receipt the session echoes it back with the payload's `row_count` and `as_of` ("received VS-20260625-1335-01, 47 rows, as_of 2026-06-25") so the operator can eyeball it against what the viewer exported, and it prints the same ID in the header of every Pass 1 / Pass 2 table it renders, so lineage is visible in-session, not only in the file. If a pasted export carries no `exported_at`, lineage cannot be derived — the session surfaces "lineage unavailable — export carries no `exported_at`" and proceeds with the run's logs flagged lineage-degraded; it never fabricates an ID from the session clock.
 
 **The journal holds three logs — the input split by source, the two outputs by pass — each written one file per run and never reopened.**
 

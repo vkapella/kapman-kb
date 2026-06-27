@@ -131,8 +131,8 @@ Two rules keep the KB and the tools shipping locked together and prevent a recur
 2. Copy the export to clipboard → paste into a Claude Code session.
 3. Claude mints the lineage ID, writes the handoff to `kapman-journal/handoffs/`, and treats the rows as the candidate list + pre-computed pipeline reading.
 4. **Tiered-by-confidence auto-accept** (the operator's chosen protocol) resolves each ticker's Wyckoff status from the viewer's confidence/cross-check columns — re-pointing WYCKOFF's existing `pipeline-accepted` / `pipeline-flagged` machinery at the live Polygon-v2/viewer engine:
-   - **Auto-accept** when `regime_confidence ≥ τ_high` AND `phase_confidence ≥ τ_high` AND `dealer_consistent` AND `volatility_consistent` AND flip unambiguous.
-   - **Propose-confirm** when confidence ∈ `[τ_low, τ_high)` OR any cross-check inconsistent.
+   - **Auto-accept** when `g = min(regime_confidence, phase_confidence) ≥ τ_high`, the force-flag inputs (`weekly_agrees`, `structure_conflict`) are present and clear, and the snapshot is fresh — per WYCKOFF's tier gate. (`dealer_consistent` / `volatility_consistent` are already priced into `regime_confidence`, not separate gates.)
+   - **Propose-confirm** (flagged-reading exchange) when `g ∈ [τ_low, τ_high)`, a hard force-flag fires (`structure_conflict`, `weekly_agrees:false`, stale snapshot, SOW-gated markdown), or a force-flag input is absent.
    - **Conservative/UNKNOWN** below `τ_low` or on degraded data.
 5. KB Pass 1 runs its trigger sequence (Wyckoff veto → dealer-timing veto → spread-mandate); the **earnings screen (FMP)** stays in the KB.
 6. Eligible set → **Pass 2 unchanged**: re-fetch **Schwab** dealer metrics (flip authority) and **Schwab ATM IV** (spread-mandate) and validate the live chain. The viewer's v2/Polygon flip & IV are **Pass-1 triage only** — the Schwab-at-Pass-2 boundary is preserved exactly as the KB already mandates.
@@ -236,7 +236,7 @@ When Stage 1 KB edits land: snapshot current v3.0 `llm_runtime/` + `engineering_
 | `invalidation_level` | SIGNAL Stop anchor | structural stop |
 | `dgpi`, `gamma_flip`, `position_vs_flip`, `net_gex`, `gex_slope`, `dealer_confidence` | dealer-timing veto (Pass-1 triage) | **Schwab re-fetch at Pass 2** |
 | `iv_skew_25delta`, `average_iv`, `historical_volatility` | IV/HV band + spread-mandate Pass-1 firing | labeled *Needs chain validation* |
-| `dealer_consistent`, `volatility_consistent` | cross-check gate / conviction trim | from v2 `cross_checks` |
+| `dealer_consistent`, `volatility_consistent` | informational — surfaced; no independent gate or trim (already priced into `regime_confidence`) | from v2 `cross_checks` |
 | `pt_up_*`, `pt_down_*` + `*_prob` | candidate zone + expectancy context | calibrated hit-rates |
 | `price`, `as_of` / `data_through` | decision anchor + freshness label | `price` = underlying_ref anchor |
 

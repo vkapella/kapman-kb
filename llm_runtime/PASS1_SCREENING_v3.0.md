@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.6
-file_last_updated: 2026-06-26
+kb_version: 3.0.7
+file_last_updated: 2026-06-27
 status: active
 tier: T2
 ---
@@ -41,11 +41,26 @@ In the v4.0 runtime the candidate list is most often a filtered viewer/v2 watchl
 | `invalidation_level` | SIGNAL Stop anchor | structural stop |
 | `dgpi`, `gamma_flip`, `position_vs_flip`, `net_gex`, `gex_slope`, `dealer_confidence` | dealer-timing veto (Pass-1 triage) | **Schwab re-fetch at Pass 2** |
 | `iv_skew_25delta`, `average_iv`, `historical_volatility` | IV/HV band + spread-mandate (Pass-1 firing) | labeled *Needs chain validation* |
-| `dealer_consistent`, `volatility_consistent` | cross-check gate / conviction trim | from v2 `cross_checks` |
+| `dealer_consistent`, `volatility_consistent` | informational — surfaced in the reading; no independent gate or trim | from v2 `cross_checks`; already priced into `regime_confidence` per WYCKOFF, so re-gating or trimming on them double-counts. A `false` is visible context only — it has already pulled `regime_confidence` down and may push the tier gate to the flagged-reading exchange |
 | `pt_up_*`, `pt_down_*` + `*_prob` | candidate zone + expectancy context | calibrated hit-rates |
 | `price`, `as_of` / `data_through` | decision anchor + freshness label | `price` = underlying_ref anchor |
 
 The viewer handoff is Pass-1 triage context, not Pass-2 truth: dealer fields are re-fetched live from Schwab at Pass 2 and the IV fields carry the *Needs chain validation* label, exactly as when those reads are fetched directly. Ingesting the handoff does not relax the Pass 1 → Pass 2 boundary; it only changes where the Pass-1 starting context comes from.
+
+**The §A1 ingest has a required-field contract; absence degrades, never silently passes.**
+
+A pasted viewer handoff must carry the fields below for the §A1 ingest to be valid; when one is absent, the named degradation applies — the runtime never proceeds as if the field were favorable.
+
+| Field | Role in the ingest | If absent |
+|---|---|---|
+| `exported_at` (envelope) | Lineage clock — the `lineage_id` derives from it per `JOURNAL_MGMT_v4.0.md`, never the session clock | Lineage cannot be derived; surface "lineage unavailable — export carries no `exported_at`" and flag the run lineage-degraded; do not substitute the session clock |
+| `as_of` / `data_through` | Snapshot freshness + decision-anchor freshness | Freshness cannot be established; per `WYCKOFF_v3.0.md` this trips the stale-snapshot check, so the row cannot auto-accept — it drops to the estimation / flagged-reading path |
+| `row_count` (envelope) | Paste-integrity echo / manifest | Surface "row_count not provided — paste integrity unverified" and proceed without the operator-eyeball check |
+| `weekly_agrees`, `structure_conflict` | WYCKOFF hard force-flags | A missing field is read as *unknown*, not "clear" — it cannot confirm a high-confidence reading, so the reading routes to the flagged-reading exchange per `WYCKOFF_v3.0.md` rather than auto-accepting |
+| `regime`, `regime_confidence` | WYCKOFF tier-gate input | The validity gate fails; the row runs the estimation path |
+| earnings / next-earnings date | Step-0 near-event screen | Not a §A1 field — the earnings screen stays in the KB (a KB-side lookup); Step 0 runs that lookup regardless of the handoff |
+
+The Pass 1 → Pass 2 boundary is unchanged by this contract: dealer fields are still re-fetched live from Schwab at Pass 2, and a present-but-degraded handoff field never becomes Pass-2 truth. `exported_at` and `row_count` are handoff envelope fields owned by `JOURNAL_MGMT_v4.0.md`, not per-row §A1 fields; this contract references them, it does not redefine the lineage format.
 
 **Wyckoff status is checked per candidate, in sequence, before trigger evaluation for that candidate.**
 
@@ -166,7 +181,7 @@ Before per-candidate evaluation begins, three conditions must hold:
 
 | Step | What runs | Scope | Governs |
 |---|---|---|---|
-| 0 — Near-event-risk screen | Earnings date lookup; EARNINGS_BLOCK_DAYS / EARNINGS_CAUTION_DAYS evaluation per SIGNAL | Per candidate, before macro gate | Immediate WAIT for block-window candidates; operator-approval WAIT for caution-window candidates |
+| 0 — Near-event-risk screen | Earnings date via KB-side lookup (not the §A1 handoff, which carries no earnings field); EARNINGS_BLOCK_DAYS / EARNINGS_CAUTION_DAYS evaluation per SIGNAL | Per candidate, before macro gate | Immediate WAIT for block-window candidates; operator-approval WAIT for caution-window candidates |
 | 1 — Macro gate | SPY hostile-macro composite evaluation | Once per run, before any per-candidate work | All candidates in the run |
 | 2 — Wyckoff status | Propose-confirm (if unconfirmed) or confirmed-reading lookup | Per candidate, inline sequential | Wyckoff veto; directional fallback |
 | 3 — Regime reads | Regime/dealer/volatility reads ingested from the viewer/v2 handoff (§A1) as Pass-1 triage context where present; tickers without a handoff reading are fetched live (Polygon `avg_iv` for the Pass 1 IV source; dealer/volatility per DEALER/VOLATILITY). Dealer fields are re-fetched live from Schwab at Pass 2. | Per candidate | Dealer-timing veto; spread-mandate |

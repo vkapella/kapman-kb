@@ -26,7 +26,7 @@ This repository separates runtime and engineering materials:
 - **v4.0 files authored so far (Stage 1b, in progress):**
   - `llm_runtime/JOURNAL_MGMT_v4.0.md` — new T2 runbook (journal persistence: memory
     load, lineage derivation, three-log write, no-persist boundary; `positions.md` record
-    grammar added in #75). `kb_version 4.0.1`.
+    grammar added in #75; §A1 lineage degradation in #76). `kb_version 4.0.2`.
   - Substantive v4.0 content has also been added to `llm_runtime/KAPMAN_GUARDRAILS_v3.0.md`
     (memory-not-authority + numeric-no-persist guardrail; `kb_version 3.0.3`). It keeps its
     `_v3.0` filename pending the coordinated `_v3.0 → _v4.0` rename + cross-reference sweep
@@ -69,6 +69,15 @@ This repository separates runtime and engineering materials:
     `(instrument_key, account_id)` join key, write-once entry snapshot vs live-refresh split, Wyckoff field
     constrained to the four named phases) and aligns the live-field label to `net_qty`. Files keep their
     existing filenames.
+  - **§A1 ingest hardening** (Stage 1b, Integration Plan §A1; pilot-surfaced): `PASS1_SCREENING_v3.0.md`
+    (`kb_version 3.0.6 → 3.0.7`) rewords the dangling dealer/vol cross-check map note to informational (already
+    priced into `regime_confidence`) and adds a §A1 required-field contract + per-field degradation
+    (`exported_at`/`as_of`/`row_count`/force-flags; earnings clarified KB-side, not a handoff field);
+    `WYCKOFF_v3.0.md` (`kb_version 3.0.4 → 3.0.5`) adds a force-flag-input-completeness rule — an absent
+    `weekly_agrees`/`structure_conflict` downgrades a would-be `pipeline-accepted` reading to `pipeline-flagged`
+    ("force-flags unevaluated") rather than silently auto-accepting; `JOURNAL_MGMT_v4.0.md`
+    (`kb_version 4.0.1 → 4.0.2`) adds the missing-`exported_at` lineage degradation. The Integration Plan §A1
+    mirrors the cross-check rewording. Files keep their existing filenames.
 
 ## v3.0 file directory
 
@@ -120,8 +129,8 @@ This repository separates runtime and engineering materials:
 |---|---|---|
 | SYSTEM_PARAMS_v3.0.md | 3.0.2 | active |
 | SIGNAL_v3.0.md | 3.0.2 | active |
-| PASS1_SCREENING_v3.0.md | 3.0.6 | active |
-| WYCKOFF_v3.0.md | 3.0.4 | active |
+| PASS1_SCREENING_v3.0.md | 3.0.7 | active |
+| WYCKOFF_v3.0.md | 3.0.5 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.3 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.1 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
@@ -133,8 +142,8 @@ This repository separates runtime and engineering materials:
 | REPORT_TEMPLATE_PASS1_v3.0.html | 3.0.5 | 2026-05-14 |
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.3 | 2026-06-26 |
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
-| WYCKOFF_v3.0.md | 3.0.4 | 2026-06-26 |
-| PASS1_SCREENING_v3.0.md | 3.0.6 | 2026-06-26 |
+| WYCKOFF_v3.0.md | 3.0.5 | 2026-06-27 |
+| PASS1_SCREENING_v3.0.md | 3.0.7 | 2026-06-27 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.3 | 2026-06-27 |
 | PASS2_VALIDATION_v3.0.md | 3.0.1 | 2026-06-27 |
 | REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |

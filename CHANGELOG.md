@@ -1,5 +1,42 @@
 # KapMan KB Changelog
 
+## 2026-06-27 — Stage 1b: §A1 ingest hardening — cross-check resolution, required-field contract, force-flag completeness (closes #76)
+
+### Changed — §A1 ingest hardening (substantive; HITL, approved turn-by-turn in session)
+
+The Workflow-1 counterpart to #75, closing the §A1 gaps the Stage-1 pilot surfaced. Decisions taken with the
+operator: the dealer/vol cross-check fields are **informational** (regime_confidence already nets them — an
+independent gate would double-count); earnings stays a **KB-side lookup** (not a §A1 handoff field), SIGNAL's
+existing no-date default left unchanged; an **absent** force-flag input downgrades a would-be auto-accept to
+flagged rather than silently passing.
+
+- **`llm_runtime/PASS1_SCREENING_v3.0.md`** (`kb_version 3.0.6 → 3.0.7`) — reworded the §A1 map's
+  `dealer_consistent`/`volatility_consistent` row from a phantom "cross-check gate / conviction trim" to
+  informational (already priced into `regime_confidence` per WYCKOFF); added a "§A1 ingest required-field
+  contract" heuristic with per-field degradation for `exported_at`, `as_of`/`data_through`, `row_count`,
+  `weekly_agrees`/`structure_conflict`, `regime`/`regime_confidence`, and earnings (clarified KB-side, not a
+  handoff field), preserving the Pass 1 → Pass 2 Schwab-re-fetch boundary; clarified the Step-0 earnings source.
+- **`llm_runtime/WYCKOFF_v3.0.md`** (`kb_version 3.0.4 → 3.0.5`) — added a **force-flag input-completeness**
+  rule to the tier gate: a `weekly_agrees`/`structure_conflict` field that is absent (or present-but-null) cannot
+  be evaluated, so a reading that would otherwise be `pipeline-accepted` is downgraded to `pipeline-flagged`
+  ("force-flags unevaluated") and routed to the flagged-reading exchange — absence never reads as "clear." Scoped
+  to those two fields (stale-snapshot is covered by the `as_of` validity check; SOW-gated markdown is an
+  absence-detector). Amended the `pipeline-accepted` precondition, the tier-gate table, and the flagged-exchange
+  reason bracket to match.
+- **`llm_runtime/JOURNAL_MGMT_v4.0.md`** (`kb_version 4.0.1 → 4.0.2`) — added the missing-`exported_at`
+  degradation to the lineage heuristic (lineage undeliverable → surfaced + logs flagged lineage-degraded; never
+  a fabricated session-clock ID).
+- **`docs/Kapman_System_Integration_Plan_v1.0.md`** §A1 — mirrored the cross-check rewording.
+- **`INDEX.md`** — recorded the three version bumps (PASS1/WYCKOFF in both version tables; JOURNAL_MGMT in its
+  Version-status bullet) and added a §A1 ingest-hardening bullet.
+
+### Scope notes
+- **Not** changed: SIGNAL Heuristic 0's no-earnings-date default (a separate SIGNAL judgment, deliberately out of
+  scope); the viewer-producer emission of the required fields (`kapman-polygon-viewer` work — the KB states the
+  contract + degradation only).
+- Out of scope (unchanged): §12 PASS2 hygiene; the end-of-Stage-1 `_v3.0 → _v4.0` rename sweep.
+- New v4.0-era cross-references are version-less per the Stage-1 convention.
+
 ## 2026-06-27 — Stage 1b: §A2/journal contract-hardening — derivation rules, positions.md grammar, partial-record (closes #75)
 
 ### Changed — §A2/journal contract-hardening (substantive; HITL, approved turn-by-turn in session)
