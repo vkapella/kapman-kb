@@ -1,5 +1,41 @@
 # KapMan KB Changelog
 
+## 2026-06-27 — Stage 1b: §A2/journal contract-hardening — derivation rules, positions.md grammar, partial-record (closes #75)
+
+### Changed — §A2/journal contract-hardening (substantive; HITL, approved turn-by-turn in session)
+
+Closes the §A2/journal under-specifications the Stage-1 pilot dry-run surfaced (including two real gaps in the
+#73 §A2 source map). Scope is the tradelog→Portfolio→`positions.md` cluster; the §A1 items (cross-check
+gate/trim, viewer export field set) remain a separate Workflow-1 follow-up. Decisions taken with the operator:
+LEAP by **original DTE** (`expiration − entry_date`) ≥ the `LEAP_DTE_BAND` lower bound; debit/credit by the
+**sign of summed `cost_basis`** across the `spread_group_id` legs (net-credit verticals flagged out-of-taxonomy,
+not forced into a debit label); standalone `short_put` → **CSP** with collateral assumed; the `positions.md`
+grammar as a **labeled-line key:value** record with a write-once / live-refresh split; SIGNAL partial-record
+degradation **per-alert** (two four-field groups), regime degradation **per-field**.
+
+- **`llm_runtime/PORTFOLIO_MGMT_v3.0.md`** (`kb_version 3.0.2 → 3.0.3`) — added a "§A2 structure/direction
+  derivation rules" block to the Appendix (single-leg labels incl. uncovered short_call; LEAP original-DTE cutoff
+  citing `LEAP_DTE_BAND`; spread debit/credit by summed `cost_basis` sign with the credit-spread out-of-taxonomy
+  flag; thesis from structure+option_type, not the LONG/SHORT field). Hardened the "absent or partial"
+  subsection: added a third condition — **record matched but field-level partial** — with per-field regime
+  degradation and per-alert SIGNAL reconstruction, and a note that `option_mid` (Pass-2 reference) and
+  `entry_price` (actual fill) are distinct fields, not a Step-1a reconcilable mismatch (with a Step 1a pointer).
+- **`llm_runtime/JOURNAL_MGMT_v4.0.md`** (`kb_version 4.0.0 → 4.0.1`) — added a canonical **`positions.md`
+  record grammar** to the Appendix: the `(instrument_key, account_id)` join key as two named tokens (not
+  positional header text), one labeled line per field, the five entry-time regime fields (Wyckoff field
+  constrained to WYCKOFF's four named phases; `entry_wyckoff_event` an optional non-exempt rider) + the eight
+  SIGNAL levels + `option_mid` write-once, and a `mark`/`net_qty`/`unrealized_pnl`/`refreshed_as_of` live-refresh
+  block overwritten in place. Fixed the line-40 live-field label `quantity` → `net_qty` to match the §A2 contract.
+- **`INDEX.md`** — recorded both version bumps (PORTFOLIO in both version tables; JOURNAL_MGMT in its
+  Version-status bullet) and added a §A2/journal contract-hardening bullet.
+
+### Scope notes
+- The five regime fields + eight SIGNAL levels in the new grammar equal the `KAPMAN_GUARDRAILS` exempt snapshot
+  exactly; `entry_wyckoff_event` and the entry-time IV rank tier are explicitly non-exempt riders.
+- Out of scope (separate follow-up): §A1 cross-check gate/trim + viewer export field set; §12 PASS2 hygiene;
+  the end-of-Stage-1 `_v3.0 → _v4.0` rename sweep.
+- New v4.0-era cross-references are version-less per the Stage-1 convention.
+
 ## 2026-06-27 — Stage 1b: KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS — wire the v4.0 journal session layer (closes #74)
 
 ### Changed — session entry sequence + orientation wired to the v4.0 journal layer (substantive; HITL, approved turn-by-turn in session)

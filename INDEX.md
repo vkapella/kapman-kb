@@ -25,7 +25,8 @@ This repository separates runtime and engineering materials:
   working files.
 - **v4.0 files authored so far (Stage 1b, in progress):**
   - `llm_runtime/JOURNAL_MGMT_v4.0.md` — new T2 runbook (journal persistence: memory
-    load, lineage derivation, three-log write, no-persist boundary). `kb_version 4.0.0`.
+    load, lineage derivation, three-log write, no-persist boundary; `positions.md` record
+    grammar added in #75). `kb_version 4.0.1`.
   - Substantive v4.0 content has also been added to `llm_runtime/KAPMAN_GUARDRAILS_v3.0.md`
     (memory-not-authority + numeric-no-persist guardrail; `kb_version 3.0.3`). It keeps its
     `_v3.0` filename pending the coordinated `_v3.0 → _v4.0` rename + cross-reference sweep
@@ -59,6 +60,15 @@ This repository separates runtime and engineering materials:
     for Stage 3 (not active — no-dangling-capability). Closes the session-wiring blockers the Stage-1 pilot
     dry-run surfaced (the §A1/§A2 ingest logic + `(instrument_key, account_id)` bridge themselves validated).
     File keeps its `_v3.0` filename pending the end-of-Stage-1 rename.
+  - **§A2/journal contract-hardening** (Stage 1b, Integration Plan §A2; pilot-surfaced):
+    `PORTFOLIO_MGMT_v3.0.md` (`kb_version 3.0.2 → 3.0.3`) adds §A2 structure/direction derivation
+    rules (debit/credit by summed `cost_basis` sign; LEAP by original DTE ≥ `LEAP_DTE_BAND` floor;
+    standalone `short_put` → CSP) and a matched-but-partial entry-context condition (per-field regime /
+    per-alert SIGNAL degradation) plus the `option_mid`-vs-`entry_price` distinction; `JOURNAL_MGMT_v4.0.md`
+    (`kb_version 4.0.0 → 4.0.1`) adds a canonical `positions.md` record grammar (named
+    `(instrument_key, account_id)` join key, write-once entry snapshot vs live-refresh split, Wyckoff field
+    constrained to the four named phases) and aligns the live-field label to `net_qty`. Files keep their
+    existing filenames.
 
 ## v3.0 file directory
 
@@ -112,7 +122,7 @@ This repository separates runtime and engineering materials:
 | SIGNAL_v3.0.md | 3.0.2 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.6 | active |
 | WYCKOFF_v3.0.md | 3.0.4 | active |
-| PORTFOLIO_MGMT_v3.0.md | 3.0.2 | active |
+| PORTFOLIO_MGMT_v3.0.md | 3.0.3 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.1 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
 
@@ -125,7 +135,7 @@ This repository separates runtime and engineering materials:
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
 | WYCKOFF_v3.0.md | 3.0.4 | 2026-06-26 |
 | PASS1_SCREENING_v3.0.md | 3.0.6 | 2026-06-26 |
-| PORTFOLIO_MGMT_v3.0.md | 3.0.2 | 2026-06-27 |
+| PORTFOLIO_MGMT_v3.0.md | 3.0.3 | 2026-06-27 |
 | PASS2_VALIDATION_v3.0.md | 3.0.1 | 2026-06-27 |
 | REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | 2026-06-27 |

@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.0
-file_last_updated: 2026-06-26
+kb_version: 4.0.1
+file_last_updated: 2026-06-27
 status: active
 tier: T2
 ---
@@ -37,7 +37,7 @@ Handoffs are partitioned first by source, because a viewer scan and a tradelog p
 
 **Memory files are written end-of-run, overwritten in place, on the trigger that owns each file.**
 
-The three memory files change on distinct triggers, and each write is a full overwrite of that file, never an append. `positions.md` is written at two moments: at Pass 2 validation of a new entry, when the position and its immutable entry-time regime snapshot (entry Wyckoff phase, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels) are recorded; and on a Portfolio-mode positions refresh from a tradelog or broker snapshot, when the open/closed set and live fields (mark, quantity, unrealized P&L) are reconciled. A refresh updates live state only — the entry-time snapshot is write-once and is never rewritten. `overrides.md` is written when the operator explicitly states a standing preference to remember across sessions (e.g., "always block earnings within seven days"); it is never inferred from conversational context, and a standing override recorded here does not activate the per-request macro-gate override defined in `KAPMAN_GUARDRAILS` — it is a remembered convenience, not an active gate. `watchlist.md` is written when the active universe changes — a new viewer handoff defines or refreshes it, or the operator adds or removes tickers. All three writes ride the same end-of-run commit as the logs.
+The three memory files change on distinct triggers, and each write is a full overwrite of that file, never an append. `positions.md` is written at two moments: at Pass 2 validation of a new entry, when the position and its immutable entry-time regime snapshot (entry Wyckoff phase, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels) are recorded; and on a Portfolio-mode positions refresh from a tradelog or broker snapshot, when the open/closed set and live fields (mark, net_qty, unrealized P&L) are reconciled. A refresh updates live state only — the entry-time snapshot is write-once and is never rewritten. `overrides.md` is written when the operator explicitly states a standing preference to remember across sessions (e.g., "always block earnings within seven days"); it is never inferred from conversational context, and a standing override recorded here does not activate the per-request macro-gate override defined in `KAPMAN_GUARDRAILS` — it is a remembered convenience, not an active gate. `watchlist.md` is written when the active universe changes — a new viewer handoff defines or refreshes it, or the operator adds or removes tickers. All three writes ride the same end-of-run commit as the logs.
 
 **Numeric regime reads are never persisted as authoritative; the entry-time snapshot is the sole, narrow exemption.**
 
@@ -116,5 +116,42 @@ row_count: 47
 **Pass 1 record header** (per §A4): `rec_id`, `source_handoff: <lineage_id>`, `{date, ticker, structure, pass}`, disposition (Eligible | NO_TRADE | WAIT) + reason, candidate zone, `decided_at`, `underlying_ref`, `journal_schema_version`, reserved `attack_flags[]` / `invalidation_conditions[]` (empty until Stage 3).
 
 **Pass 2 record header** (per §A4): `rec_id`, `parent_pass1: <rec_id>`, `{ticker, strike, expiration}`, exact spec, entry range, targets, `option_mid`, `decided_at`, `journal_schema_version`.
+
+**`positions.md` record grammar (per open position).** One record per open position; `positions.md` is overwritten in place, never appended (per the write model above). The join key is two distinct labeled tokens — `instrument_key` and `account_id` — parsed from named fields, never positional header text; `PORTFOLIO_MGMT` Step 1b matches the `(instrument_key, account_id)` pair. One labeled line per field. The five entry-time regime fields and the eight SIGNAL stop/profit levels are write-once at Pass 2 (the sole no-persist exemption); the live-refresh block is overwritten in place on each Portfolio refresh.
+
+```
+instrument_key: <stable instrument id>     # join key part 1 — named field, not header text
+account_id:     <account id>               # join key part 2 — entry context is account-scoped; both required to match
+parent_pass2:   <Pass 2 rec_id>            # lineage to the validating Pass 2 record
+journal_schema_version: 4.0
+
+# entry-time regime snapshot — WRITE-ONCE at Pass 2; never rewritten on refresh (the no-persist exemption)
+entry_wyckoff_phase: <Accumulation | Markup | Distribution | Markdown>   # WYCKOFF named phase; UNKNOWN is never a valid entry snapshot
+entry_wyckoff_event: <SC | AR | Spring | SOS | BC | AR_TOP | UT | SOW | null>   # optional confirmed entry event; rider, NOT one of the five exempt fields
+entry_dgpi_tier:  <Strongly supportive | Moderately supportive | Near-neutral | Weakening | Hostile>
+entry_flip_zone:  <Well above flip | Near-flip | Well below flip>
+entry_iv_hv_band: <Cheap | Neutral | Elevated>
+entry_vol_status: <FULL | LIMITED | INVALID>
+
+# eight SIGNAL stop/profit levels — WRITE-ONCE at Pass 2; named individually, one per line
+stop_underlying_price:   <price>
+stop_est_option_price:   <price>
+stop_trail_bidask:       <value>
+stop_trail_mark:         <value>
+profit_underlying_price: <price>
+profit_est_option_price: <price>
+profit_trail_bidask:     <value>
+profit_trail_mark:       <value>
+
+option_mid: <validated-chain bid/ask midpoint at entry>   # position fact, not a regime read; write-once
+
+# live-refresh fields — OVERWRITTEN IN PLACE on each Portfolio-mode refresh; never appended
+mark:            <current option price | null>
+net_qty:         <signed contract count>
+unrealized_pnl:  <value | null when mark is null>
+refreshed_as_of: <the refreshing snapshot's as_of>
+```
+
+Everything above the live-refresh block is write-once entry context; a refresh that touches any write-once field is a grammar violation. `entry_wyckoff_phase` is constrained to WYCKOFF's four named phases — UNKNOWN never appears, because a position is opened only on a confirmed phase; `entry_wyckoff_event` is optional, drawn from WYCKOFF's named events (`WYCKOFF_v3.0.md` owns the vocabulary), and rides as confirmed-event context outside the five-field exempt snapshot. The five regime fields plus the eight SIGNAL levels are exactly the `KAPMAN_GUARDRAILS` entry-time exemption.
 
 **Schema-version namespaces.** `journal_schema_version` is this repo's contract version (4.0). `v2_schema_version` is echoed verbatim from the viewer/v2 export — a separate namespace carried for join reproducibility, never conflated.
