@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.2
-file_last_updated: 2026-06-27
+kb_version: 3.0.3
+file_last_updated: 2026-06-28
 status: active
 tier: T2
 ---
@@ -27,7 +27,7 @@ The entry contract for every Pass 2 run is the eligible-set output that Pass 1 p
 
 When Pass 1 ingested a viewer/v2 handoff (the §A1 path), several of its fields are calibrated or computed by the viewer, not by Schwab: the `pt_up_*`/`pt_down_*` price targets and their `*_prob` calibrated hit-rates, the `average_iv`/`iv_skew_25delta` IV reads, and the `dgpi`/`gamma_flip`/`position_vs_flip` dealer reads. Pass 2 treats each as Pass-1 expectancy or triage context and re-derives or re-checks the corresponding Pass-2 output from the live Schwab chain it fetches itself:
 
-- **Price targets and calibration:** the v2 `pt_*` targets and `*_prob` hit-rates are not the Pass-2 entry-price range, exit targets, or risk-reward. Pass 2 produces the entry-price range from the validated chain's bid/ask and the exit anchors from SIGNAL on current data; the v2 targets may be surfaced as expectancy context in the rationale, never emitted as the trade's prices.
+- **Price targets and calibration:** the v2 `pt_*` targets and `*_prob` hit-rates are not the Pass-2 entry-price range, exit targets, or risk-reward. Pass 2 produces the entry-price range from the validated chain's bid/ask and the exit anchors from SIGNAL on current data. The v2 forward-tested target + `*_prob` is **carried as the forward-tested confidence annotation on the SIGNAL exit anchor** (per SIGNAL's Stop/Profit-target exit-trigger contract): Pass 2 re-derives/validates the LEVEL, and the calibrated hit-rate rides as the target's confidence in the rationale — surfaced, never emitted as the trade's price.
 - **IV and flip:** the viewer's IV and gamma-flip reads are Pass-1 triage only. Pass 2 resolves the spread-mandate from the Schwab ATM chain IV and reads flip/wall levels from the fresh Schwab dealer fetch — Schwab is the authority at Pass 2, per VOLATILITY's source-authority discipline and the dealer-re-fetch heuristic below.
 - **Chain quality:** Pass 2 classifies the live Schwab chain's quality and truncation itself (per PIPELINE_012, below); it consumes no Pass-1 chain-quality or truncation signal — the viewer emits none — and an upstream data limitation never substitutes for Pass 2's own check.
 

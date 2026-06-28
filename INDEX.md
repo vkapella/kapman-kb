@@ -93,8 +93,15 @@ This repository separates runtime and engineering materials:
     decision-layer + succession **graph** (`reaccumulation`/`redistribution` as continuation branches), re-keys the
     Principle, validity gate, event-to-regime priority table, event reading guide, structural levels, and
     propose-confirm examples to the lowercase vocabulary (`AR_TOP`→`ar_dist`), and marks the legacy anchors historical
-    (preserved verbatim). **P4** (dealer/flip vocab) and the **consumer files** (SIGNAL/RISK/PORTFOLIO/PASS1/PASS2/
-    JOURNAL/GUARDRAILS, Stages C–E) remain pending under #78.
+    (preserved verbatim). **Stage C (consumers) — SIGNAL done** — `SIGNAL_v3.0.md` (`kb_version 3.0.2 → 3.0.3`) +
+    `PASS2_VALIDATION_v3.0.md` (`kb_version 3.0.2 → 3.0.3`): re-keys the Wyckoff veto, dealer-timing veto, directional
+    fallback, regime exit advisory, and all propagation tables to the regime model, makes the veto layer
+    **direction-aware/symmetric** (long puts get a first-class bearish path mirroring long calls — operator-approved),
+    fixes the `utad` phase-E→phase-C error, resolves the `lps`/`lpsy` side-awareness, and adds a **forward-tested-target
+    confluence annotation** to the exit triggers (the viewer `pt_*`/`*_prob` rides as a confidence annotation on the
+    structural+validated level, never as the broker price; matching PASS2 §12 carry refinement). **P4** (dealer/flip
+    vocab) and the remaining **consumer files** (RISK/PORTFOLIO/PASS1/JOURNAL/GUARDRAILS/DEALER/REPORT_FORMAT, Stages
+    C–E) remain pending under #78.
 
 ## v3.0 file directory
 
@@ -145,11 +152,11 @@ This repository separates runtime and engineering materials:
 | File | kb_version | status |
 |---|---|---|
 | SYSTEM_PARAMS_v3.0.md | 3.0.2 | active |
-| SIGNAL_v3.0.md | 3.0.2 | active |
+| SIGNAL_v3.0.md | 3.0.3 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.7 | active |
 | WYCKOFF_v3.0.md | 3.0.7 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.3 | active |
-| PASS2_VALIDATION_v3.0.md | 3.0.2 | active |
+| PASS2_VALIDATION_v3.0.md | 3.0.3 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
 
 ### v3.0.1 report metadata patch
@@ -162,7 +169,7 @@ This repository separates runtime and engineering materials:
 | WYCKOFF_v3.0.md | 3.0.7 | 2026-06-27 |
 | PASS1_SCREENING_v3.0.md | 3.0.7 | 2026-06-27 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.3 | 2026-06-27 |
-| PASS2_VALIDATION_v3.0.md | 3.0.2 | 2026-06-27 |
+| PASS2_VALIDATION_v3.0.md | 3.0.3 | 2026-06-28 |
 | REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | 2026-06-27 |
 

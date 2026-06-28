@@ -1,5 +1,56 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage C consumer re-key, SIGNAL (symmetric veto + forward-test confluence) (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage C (SIGNAL consumer; substantive; HITL, approved turn-by-turn in session)
+
+Re-keys the first consumer file to the two-axis canonical model committed in Stage B, and — per two operator
+decisions made this session — makes the veto layer direction-aware and wires the viewer's forward-tested targets
+into the exit triggers. #78 stays open (P4 + remaining consumers).
+
+- **`llm_runtime/SIGNAL_v3.0.md`** (`kb_version 3.0.2 → 3.0.3`):
+  - **Direction-aware / symmetric veto layer** (operator-approved). The Wyckoff veto now evaluates against the
+    candidate's resolved direction: bullish refused in `distribution`/`redistribution`/`markdown` or accumulation-family
+    pre-`spring`; bearish refused in `accumulation`/`reaccumulation`/`markup` or distribution-family pre-`utad`; either
+    direction refused in `ranging_undefined` or `UNKNOWN`. Long puts get a first-class bearish path mirroring long
+    calls. The dealer-timing veto's hostile-macro branch is scoped to bullish long-premium (puts stay the aligned
+    redirect), reconciling it with GUARDRAILS' "Long puts — Eligible — directional alignment with regime."
+  - **Two-axis re-key** of the directional fallback (`sos`/`sow`), the regime exit advisory (unfavorable regime move
+    per the succession graph read relative to the position's direction, OR a phase regression D→B/A), and all
+    propagation tables (firing-condition summary matrix, vocab-alignment, metric-vocabulary, input/output tables,
+    WYCKOFF cross-ref). Fixes a factual error: `utad` confirms distribution **phase C** (was "phase E"). Resolves the
+    `lps`/`lpsy` side-awareness per the viewer glossary (`lps`=support, `lpsy`=supply; exit anchors selected by side).
+  - **Forward-tested-target confluence annotation** (operator-approved) on the Stop & Profit-target exit triggers:
+    the broker exit level stays a structural+validated anchor (anti-hallucination floor untouched); the viewer's
+    forward-tested `pt_*` target + `*_prob` calibrated hit-rate rides as a confidence annotation on that level —
+    surfaced, never emitted as the trade's price. New exit-output-field row + metric-vocab term.
+  - Legacy `SIGNAL_00x` anchors preserved verbatim with a historical note.
+- **`llm_runtime/PASS2_VALIDATION_v3.0.md`** (`kb_version 3.0.2 → 3.0.3`): the §12 hygiene's permissive "v2 targets
+  *may* be surfaced as expectancy context" becomes a defined carry — the forward-tested target + `*_prob` is carried
+  as the forward-tested confidence annotation on the SIGNAL exit anchor; Pass 2 re-derives/validates the level, the
+  hit-rate rides as confidence, never as the trade's price.
+- **`INDEX.md`** — bumped both version tables (SIGNAL 3.0.2→3.0.3, PASS2 3.0.2→3.0.3) and updated the
+  §A1-reconciliation status bullet (Stage C SIGNAL done).
+
+### Verification
+Three adversarial workflow passes (symmetric-logic correctness, faithfulness to WYCKOFF, cross-file consistency,
+completeness, and apply-readiness). All confirmed issues folded in; anti-hallucination floor verified intact; every
+OLD anchor confirmed against the live files before applying. `verify_frontmatter` + `verify_anchors` pass;
+dangling-old-vocab grep clean outside the legacy-anchors block and the v2.3-mapping column.
+
+### Scope notes — deferred to later slices under #78
+- **RISK** (Stage C): mirrored bearish sizing bands (`markdown`/`redistribution` upper; `distribution` conditional-top)
+  + the regime rows, so RISK enforces what SIGNAL names.
+- **PORTFOLIO_MGMT** (Stage C/D): add the D→B/A phase-regression branch; make the advisory direction-aware;
+  "succession table" → "succession graph".
+- **PASS1** (Stage D): veto/direction re-key (post-Spring → post-phase-C; reaccumulation/redistribution; symmetric
+  bearish; ranging/UNKNOWN); `SOS`/`SOW` → `sos`/`sow`; hostile-macro → bullish-scoped.
+- **DEALER**: define the bearish-mirror DGPI band for the per-ticker dealer-timing veto.
+- **WYCKOFF**: add a "projected markdown target" structural-level row (the downside analog SIGNAL now references via
+  the Ice-level projection); reconcile `utad` routing in the downstream-flow table.
+- **REPORT_FORMAT** (Stage E): render the forward-tested-confidence suffix on the exit-plan row.
+- **SYSTEM_PARAMS**: parametrize the forward-tested-target "confluence band" tolerance.
+
 ## 2026-06-27 — Stage 1b: §A1 Wyckoff-vocabulary reconciliation — P2+P3 WYCKOFF core rewrite (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, P2+P3 of 4 (Stage B, WYCKOFF core; substantive; HITL, approved turn-by-turn in session)
