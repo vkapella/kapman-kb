@@ -1,5 +1,36 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Pipeline-feed view spec + §A1 self-contained reconciliation — viewer "Export -" views ship the canonical ATM IV / IV-HV; Pass-1 consumes it from the handoff
+
+### Changed — §A1 ingest-map reconciliation (substantive; HITL, operator-approved; closes the self-contained loop)
+
+The viewer now ships the canonical spread-mandate input in the Pass-1 handoff, so the KB no longer has to reach to the Polygon MCP
+live for the IV/HV read. **`PASS1_SCREENING_v3.0.md`** (`3.0.11 → 3.0.12`): the §A1 ingest map's volatility row now lists
+`atm_iv` / `iv_hv_ratio` / `iv_hv_status` (+ `iv_term_structure`, `put_call_ratio` context) and the dealer row adds `dealer_position`;
+the IV/HV heuristic states that when a handoff carries `iv_hv_ratio`, Pass 1 consumes it directly (same producer either way — the
+handoff value is canonical, not a downgrade), with the single/batch live fetch reserved for tickers fetched directly and the
+fire-by-default fallback. The Pass 1 → Pass 2 boundary is unchanged: Pass 2 still re-confirms on a fresh producer fetch and the
+*Needs chain validation* label is preserved; absence still degrades to fire-by-default per VOLATILITY. No SYSTEM_PARAMS change.
+
+### Added — engineering-only coordination spec (mechanical; records the viewer change + the now-landed §A1 delta)
+
+The viewer-side companion to the #80 volatility re-key. `kapman-polygon-viewer` now surfaces the producer's canonical ATM IV / IV-HV /
+status (`atm_iv`, `iv_hv_ratio`, `iv_hv_status` — `kapman-polygon-mcp-v2` #19) as grid columns, adds four purpose-built **"Export -"
+pipeline-feed presets** (Swing Long Calls, Swing Long Put, LEAPS, CSP) whose displayed columns ARE the §A1 handoff surface — the full
+dealer contract (#79), Wyckoff completeness (phase confidence + the direction-specific spring/UTAD), ATR/RVOL stops, term structure,
+and lineage — and carries the new fields in the Pass-1 export (`A1_FIELDS`). This makes the handoff **self-contained**: the canonical
+spread-mandate input ships in the export rather than the KB reaching to the Polygon MCP live. The viewer derives `iv_hv_ratio` locally
+from the scan's own `atm_iv ÷ HV20` (the same inputs the producer divides), so the value equals the producer's with no extra fetch.
+
+- **`engineering_only/PIPELINE_FEED_VIEW_SPEC_v3.0.md`** (new, `3.0.0`, active) — records the Export-view column-set contract (feed
+  base + per-strategy target ladder / directional event / filter / sort), the viewer-derived IV/HV columns and their producer-equality,
+  and the §A1 ingest-map reconciliation as a ready-to-apply delta.
+- **`INDEX.md`** — new doc registered in the v3.0 file directory + current file inventory tables; PASS1 patch-version bumped to 3.0.12.
+
+### Verification
+Structural — `scripts/verify_frontmatter.sh` + `scripts/verify_anchors.sh` pass; the new doc carries the required frontmatter and is
+registered in INDEX. Viewer side validated in its own repo (158 backend tests; `tsc --noEmit` + `vite build` green).
+
 ## 2026-06-28 — Volatility-contract reconciliation — IV/HV spread-mandate re-keyed to the live Polygon `iv_hv_ratio` producer (4 files, atomic)
 
 ### Changed — volatility-contract reconciliation (substantive; HITL, decisions operator-approved; producer fixed + deployed in parallel)

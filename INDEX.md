@@ -239,6 +239,7 @@ This repository separates runtime and engineering materials:
 | engineering_only/VOLATILITY_MCP_REFERENCE_v3.0.md | — | reference | Volatility MCP formulas and source-authority reference |
 | engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md | — | reference | Wyckoff MCP detection and scoring reference |
 | engineering_only/PORTFOLIO_MGMT_MCP_REFERENCE_v3.0.md | — | reference | Portfolio-management MCP and persistence reference |
+| engineering_only/PIPELINE_FEED_VIEW_SPEC_v3.0.md | — | reference | Viewer "Export -" pipeline-feed view column-set contract; tracks the canonical ATM IV / IV-HV surfacing and the §A1 ingest-map reconciliation |
 
 ### Current file inventory table
 
@@ -254,6 +255,7 @@ This repository separates runtime and engineering materials:
 | `engineering_only/VOLATILITY_MCP_REFERENCE_v3.0.md` | — | draft | 15 |
 | `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` | — | draft | 15 |
 | `engineering_only/PORTFOLIO_MGMT_MCP_REFERENCE_v3.0.md` | — | draft | 15 |
+| `engineering_only/PIPELINE_FEED_VIEW_SPEC_v3.0.md` | — | active | 16 |
 
 ### v3.0.1 patch file version/status
 
@@ -261,7 +263,7 @@ This repository separates runtime and engineering materials:
 |---|---|---|
 | SYSTEM_PARAMS_v3.0.md | 3.0.4 | active |
 | SIGNAL_v3.0.md | 3.0.7 | active |
-| PASS1_SCREENING_v3.0.md | 3.0.11 | active |
+| PASS1_SCREENING_v3.0.md | 3.0.12 | active |
 | WYCKOFF_v3.0.md | 3.0.9 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.5 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.6 | active |

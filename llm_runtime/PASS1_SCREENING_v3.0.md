@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.11
+kb_version: 3.0.12
 file_last_updated: 2026-06-28
 status: active
 tier: T2
@@ -39,8 +39,8 @@ In the v4.0 runtime the candidate list is most often a filtered viewer/v2 watchl
 | `last_event`, `last_event_date`, `setup_tags` | confirmed event / setup class | e.g. `phase_c_spring_long`; seeds direction resolution |
 | `weekly_agrees`, `structure_conflict` | WYCKOFF hard force-flags | force the flagged-reading exchange regardless of confidence |
 | `invalidation_level` | SIGNAL Stop anchor | structural stop |
-| `dgpi`, `gamma_flip`, `position_vs_flip`, `net_gex`, `gex_slope`, `dealer_confidence` | dealer-timing veto (Pass-1 triage) | **Schwab re-fetch at Pass 2** |
-| `iv_skew_25delta`, `average_iv`, `historical_volatility` | IV/HV band + spread-mandate (Pass-1 firing) | labeled *Needs chain validation* |
+| `dgpi`, `gamma_flip`, `dealer_position`, `position_vs_flip`, `net_gex`, `gex_slope`, `dealer_confidence` | dealer-timing veto (Pass-1 triage) | **Schwab re-fetch at Pass 2** |
+| `atm_iv`, `iv_hv_ratio`, `iv_hv_status`; `average_iv`, `iv_skew_25delta`, `iv_term_structure`, `put_call_ratio`, `historical_volatility` | IV/HV band + spread-mandate (Pass-1 firing) — the canonical `iv_hv_ratio` (ATM `atm_iv` ÷ HV20) is consumed directly from the handoff per VOLATILITY source-authority; `average_iv` is the band-average context read and the producer's flagged ATM fallback | labeled *Needs chain validation*; no live MCP fetch when `iv_hv_ratio` is present |
 | `dealer_consistent`, `volatility_consistent` | informational — surfaced in the reading; no independent gate or trim | from v2 `cross_checks`; already priced into `regime_confidence` per WYCKOFF, so re-gating or trimming on them double-counts. A `false` is visible context only — it has already pulled `regime_confidence` down and may push the tier gate to the flagged-reading exchange |
 | `pt_up_*`, `pt_down_*` + `*_prob` | candidate zone + expectancy context | calibrated hit-rates |
 | `price`, `as_of` / `data_through` | decision anchor + freshness label | `price` = underlying_ref anchor |
@@ -80,7 +80,7 @@ Direction resolution follows a priority sequence, and the resolved direction is 
 
 **The Pass 1 IV/HV read is the Polygon producer's `iv_hv_ratio`; its outputs are labeled accordingly.**
 
-IV/HV band computation at Pass 1 reads the Polygon options-metrics producer's `iv_hv_ratio` (ATM `atm_iv` ÷ HV20) — single-symbol for one ticker, batch (capped at 30 symbols per call) for multiple tickers. The resulting IV/HV band is a valid Pass 1 classification for directional screening and for the spread-mandate's firing condition. When the spread-mandate fires at Pass 1, the eligible-set output carries a *Needs chain validation* label on the spread-mandate determination, because the binding mandate is the Pass 2 re-confirm — a fresh re-fetch of the same producer against the validated chain. The spread-mandate fires by default when the Pass 1 read is unavailable (source-substitution is never silent); the candidate receives a spread-mandated output labeled accordingly. Pass 1 and Pass 2 read the same producer; Pass 2 re-fetches fresh rather than carrying the Pass 1 value forward.
+IV/HV band computation at Pass 1 reads the Polygon options-metrics producer's `iv_hv_ratio` (ATM `atm_iv` ÷ HV20) — single-symbol for one ticker, batch (capped at 30 symbols per call) for multiple tickers. When a viewer/v2 handoff carries the row's `atm_iv` / `iv_hv_ratio` / `iv_hv_status` (§A1), Pass 1 consumes those directly as the triage read rather than issuing a live fetch — the producer is the same source either way, so the handoff value is canonical, not a downgrade; the single-symbol/batch call is the path for tickers fetched directly (no handoff reading) and the fire-by-default fallback when no read is available. The resulting IV/HV band is a valid Pass 1 classification for directional screening and for the spread-mandate's firing condition. When the spread-mandate fires at Pass 1, the eligible-set output carries a *Needs chain validation* label on the spread-mandate determination, because the binding mandate is the Pass 2 re-confirm — a fresh re-fetch of the same producer against the validated chain. The spread-mandate fires by default when the Pass 1 read is unavailable (source-substitution is never silent); the candidate receives a spread-mandated output labeled accordingly. Pass 1 and Pass 2 read the same producer; Pass 2 re-fetches fresh rather than carrying the Pass 1 value forward.
 
 **Pass 1 outputs are candidate zones, not validated specifics.**
 
