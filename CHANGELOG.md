@@ -1,5 +1,55 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Volatility-contract reconciliation — IV/HV spread-mandate re-keyed to the live Polygon `iv_hv_ratio` producer (4 files, atomic)
+
+### Changed — volatility-contract reconciliation (substantive; HITL, decisions operator-approved; producer fixed + deployed in parallel)
+
+The dealer reconciliation's sibling finding: the KB's IV/HV spread-mandate named **Schwab ATM chain IV** as the Pass-2 source —
+a source the deployed Schwab tool does not produce (it emits only IV-skew / term-structure / OI) — and treated the volatility-status
+`FULL/LIMITED/INVALID` as a label the tool *delivers*. The real IV/HV fusion lives at **Pass-1 Polygon** (`kapman-polygon-mcp-v2
+get_options_metrics`), which already emits `average_iv` and `historical_volatility`. **Decision (Option B + B2, operator-approved):**
+the operator extended the Polygon producer to emit an **ATM-anchored** `atm_iv` (implied vol interpolated to the nearest-to-money
+strike at a ~30-DTE tenor, with a near-money band-average fallback), the `iv_hv_ratio` (`atm_iv` ÷ HV20, close-to-close annualized),
+plus `iv_hv_status` and an `iv_hv_methodology` stamp — all additive — and deployed it. Verified live across **30 names** (all three
+`atm_iv_source` paths and the degraded `iv_hv_status` values exercised; ratio arithmetic, orientation, and status honesty confirmed
+by a 6-agent adversarial workflow). This commit re-keys the KB to that contract.
+
+- **`VOLATILITY_v3.0.md`** (`3.0.0 → 3.0.1`, anchor) — **W1 (source):** both passes source the IV/HV read from the Polygon
+  options-metrics producer; the spread-mandate input is the ATM-anchored `atm_iv` and the producer's `iv_hv_ratio`. **Pass 2
+  re-confirms by re-fetching the same producer against a fresh chain (B2)** — not by switching to Schwab; *"Needs chain validation"*
+  now means *"awaiting the fresh Pass-2 re-confirm."* Schwab is retired as an IV source (it remains the Pass-2 chain validator for
+  strike/structure); `theoreticalVolatility` stays never-read. `VOLATILITY_015` reconciled in place (minimal, with a dated
+  breadcrumb — no separate historical-note bloat). **W2 (vol-status):** the `FULL/LIMITED/INVALID` volatility-status is now
+  **KB-derived** from the producer's `iv_hv_status` + freshness (the producer emits no semantic label): `OK` → FULL;
+  `ATM_FALLBACK_BAND` → LIMITED (the ratio rests on the band-average fallback — floor-of-band, and a name too thin for a clean
+  30-DTE ATM read is too thin to size aggressively); `NO_PRICE_HISTORY` / `HV_ZERO` / `INSUFFICIENT_CONTRACTS` / stale → INVALID.
+  Downstream behavioral contract unchanged; only its provenance (derived, not delivered) corrected. `VOLATILITY_012/013` re-keyed
+  to match.
+- **Consumer cascade (W1 source only — W2 needed no consumer change, since consumers only *read* the label):**
+  `SIGNAL_v3.0.md` (`3.0.6 → 3.0.7` — the spread-mandate trigger's source clause, the *Needs chain validation* / Pass-2 re-confirm
+  wording, and the source-authority cross-reference), `PASS1_SCREENING_v3.0.md` (`3.0.10 → 3.0.11` — Pass-1 now reads the producer's
+  `iv_hv_ratio`; the provisional→re-confirm reframing), `PASS2_VALIDATION_v3.0.md` (`3.0.5 → 3.0.6` — Pass-2 resolves the mandate by
+  re-fetching the producer, not Schwab ATM).
+- **Threshold:** `IV_HV_ELEVATED_THRESHOLD` held at **1.20** (cheap ceiling 0.95) — **provisional.** The ATM de-skew (band-average
+  IV ran skew-inflated; ATM is generally lower) makes the line *stricter*, not looser, so it is not moved on one Friday's data;
+  recalibrate against a multi-day panel. No SYSTEM_PARAMS change.
+- **`INDEX.md`** — both version tables updated (VOLATILITY added at 3.0.1; SIGNAL/PASS1/PASS2 bumped) + a reconciliation status
+  bullet + the `PIPELINE_010` pointer re-keyed to the renamed PASS1 heuristic.
+
+### Deferred (tracked, not in this commit)
+- **W3 — IV-rank / IV-percentile / IV-dispersion / *"Stretched IV"* dormancy honesty pass.** The KB still describes these as live
+  reads; they are not produced. Pilot-safe because the existing `insufficient_iv_history` null-handling degrades a missing IV-rank
+  read to *"not available"* rather than fabricating one. To be cleaned when IV-rank is revisited.
+- **Absolute-IV guard.** The adversarial workflow found the IV/HV ratio is HV20-denominator-dominated, so it over-mandates spreads
+  on low-absolute-IV names whose realized vol collapsed (HYG at ~8% IV is the canonical case). The correct fix is the IV-rank
+  signal (phase-2 IV-history producer), not a band move; an interim `atm_iv` floor was considered and declined for phase 1.
+
+### Verification
+Conformance verified live (30 names) + by a 6-agent adversarial workflow (conformance audit + recalibration quant + 3 skeptical
+lenses + synthesis). Post-cascade consistency sweep: **zero** surviving Schwab-ATM-as-IV-source / Pass-2-Schwab / `avg_iv`-as-source
+references (only the intentional `theoreticalVolatility` anti-pattern, the `VOLATILITY_015` breadcrumb, and Schwab-as-chain-validator
+remain). `verify_frontmatter` + `verify_anchors` pass.
+
 ## 2026-06-28 — Dealer-contract reconciliation — KB re-keyed to the live signed-DGPI / confidence producer contract (11 files, atomic)
 
 ### Changed — dealer-contract reconciliation (substantive; HITL, decisions operator-approved; producer fixed + deployed in parallel)

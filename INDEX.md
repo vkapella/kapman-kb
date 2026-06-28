@@ -198,6 +198,18 @@ This repository separates runtime and engineering materials:
   **volatility-status** `FULL/LIMITED/INVALID` (P0-2, still open) and **chain-quality** `Full/Limited/Weak` (P0-3a) were
   deliberately left untouched. Behavior change: a ticker formerly floored under "medium-confidence" is now promoted to full
   (high/medium both = trusted). Still open after this: P0-2 (volatility contract), P0-3a, P0-4, P0-5, P1-10, P1-11.
+- **Volatility-contract reconciliation — IV/HV spread-mandate re-keyed to the live Polygon `iv_hv_ratio` producer (2026-06-28).**
+  Same class as the dealer fix (KB asserted IV fields the producer didn't emit): the KB routed the Pass-2 spread-mandate IV/HV to a
+  Schwab ATM source that doesn't exist, and treated vol-status `FULL/LIMITED/INVALID` as a delivered label. **Producer fixed +
+  deployed** (kapman-polygon-mcp-v2 `get_options_metrics` now emits an ATM-anchored `atm_iv` [~30-DTE interp, band-avg fallback],
+  `iv_hv_ratio` [`atm_iv` ÷ HV20], `iv_hv_status`, `iv_hv_methodology`; verified live across 30 names). KB re-key (Option B + B2):
+  both passes source the IV/HV from the Polygon producer, Pass 2 **re-confirms on a fresh fetch** (no Schwab ATM); vol-status
+  `FULL/LIMITED/INVALID` is now **KB-derived** from `iv_hv_status` + freshness (`ATM_FALLBACK_BAND` → LIMITED). Landed across
+  **4 files**: `VOLATILITY_v3.0.md` (3.0.0 → 3.0.1, anchor), `SIGNAL_v3.0.md` (3.0.6 → 3.0.7), `PASS1_SCREENING_v3.0.md`
+  (3.0.10 → 3.0.11), `PASS2_VALIDATION_v3.0.md` (3.0.5 → 3.0.6). Threshold held at 1.20/0.95 (provisional, pending a multi-day
+  panel). **Deferred (tracked):** the IV-rank/percentile/dispersion dormancy honesty pass — existing `insufficient_iv_history`
+  null-handling keeps it pilot-safe — and an absolute-IV guard for the ratio's low-absolute-IV blind spot (both await the phase-2
+  IV-history producer). Closes the IV/HV + vol-status halves of P0-2.
 
 ## v3.0 file directory
 
@@ -248,11 +260,12 @@ This repository separates runtime and engineering materials:
 | File | kb_version | status |
 |---|---|---|
 | SYSTEM_PARAMS_v3.0.md | 3.0.4 | active |
-| SIGNAL_v3.0.md | 3.0.6 | active |
-| PASS1_SCREENING_v3.0.md | 3.0.10 | active |
+| SIGNAL_v3.0.md | 3.0.7 | active |
+| PASS1_SCREENING_v3.0.md | 3.0.11 | active |
 | WYCKOFF_v3.0.md | 3.0.9 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.5 | active |
-| PASS2_VALIDATION_v3.0.md | 3.0.5 | active |
+| PASS2_VALIDATION_v3.0.md | 3.0.6 | active |
+| VOLATILITY_v3.0.md | 3.0.1 | active |
 | RISK_v3.0.md | 3.0.3 | active |
 | DEALER_v3.0.md | 3.0.2 | active |
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.5 | active |
@@ -268,10 +281,11 @@ This repository separates runtime and engineering materials:
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.5 | 2026-06-28 |
 | REPORT_STYLE_v3.0.md | 3.0.5 | 2026-06-28 |
 | WYCKOFF_v3.0.md | 3.0.9 | 2026-06-28 |
-| SIGNAL_v3.0.md | 3.0.6 | 2026-06-28 |
-| PASS1_SCREENING_v3.0.md | 3.0.10 | 2026-06-28 |
+| SIGNAL_v3.0.md | 3.0.7 | 2026-06-28 |
+| PASS1_SCREENING_v3.0.md | 3.0.11 | 2026-06-28 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.5 | 2026-06-28 |
-| PASS2_VALIDATION_v3.0.md | 3.0.5 | 2026-06-28 |
+| PASS2_VALIDATION_v3.0.md | 3.0.6 | 2026-06-28 |
+| VOLATILITY_v3.0.md | 3.0.1 | 2026-06-28 |
 | RISK_v3.0.md | 3.0.3 | 2026-06-28 |
 | DEALER_v3.0.md | 3.0.2 | 2026-06-28 |
 | REPORT_FORMAT_v3.0.md | 3.0.11 | 2026-06-28 |
@@ -405,7 +419,7 @@ This repository separates runtime and engineering materials:
 | PIPELINE_007 | engineering_only/BACKEND_PIPELINE_v3.0.md | PIPELINE_007 | PENDING REWRITE |
 | PIPELINE_008 | engineering_only/BACKEND_PIPELINE_v3.0.md | PIPELINE_008 | PENDING REWRITE |
 | PIPELINE_009 | engineering_only/BACKEND_PIPELINE_v3.0.md | PIPELINE_009 | PENDING REWRITE |
-| PIPELINE_010 | engineering_only/PASS1_MCP_REFERENCE_v3.0.md — full endpoint inventory; runtime behavioral residue in llm_runtime/PASS1_SCREENING_v3.0.md § Operational heuristics ("The Pass 1 IV source is Polygon avg_iv") | PIPELINE_010 | MIGRATED |
+| PIPELINE_010 | engineering_only/PASS1_MCP_REFERENCE_v3.0.md — full endpoint inventory; runtime behavioral residue in llm_runtime/PASS1_SCREENING_v3.0.md § Operational heuristics ("The Pass 1 IV/HV read is the Polygon producer's iv_hv_ratio") | PIPELINE_010 | MIGRATED |
 | PIPELINE_012 | PASS2_VALIDATION_v3.0.md § Legacy anchors; engineering_only/PASS2_MCP_REFERENCE_v3.0.md | PIPELINE_012 | MIGRATED |
 | PIPELINE_011 | llm_runtime/PASS1_SCREENING_v3.0.md § Operational heuristics ("Pass 1 data does not carry forward as authoritative into Pass 2") | PIPELINE_011 | MIGRATED |
 | PIPELINE_011 (mis-filing note) | PASS2_VALIDATION_v3.0.md § Legacy anchors | Mis-filing resolved; authoritative destination is PASS1 |

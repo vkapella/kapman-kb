@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.5
+kb_version: 3.0.6
 file_last_updated: 2026-06-28
 status: active
 tier: T2
@@ -55,7 +55,7 @@ Every chain fetch produces a chain quality classification: Full, Limited, or Wea
 
 **The spread-mandate is resolved definitively at Pass 2 — three outcomes, no others.**
 
-When Pass 1 delivered a candidate with a *Needs chain validation* label on its spread-mandate determination, Pass 2 resolves that label to one of three states using the Schwab ATM chain IV at the nearest-to-money strike as the Pass 2 IV source, per VOLATILITY's source-authority discipline. The three outcomes and their conditions are in the Appendix. A Pass 2 output that carries *Needs chain validation* forward unresolved is incomplete and must not be delivered to the operator as Validated. When the mandate fires by default, the candidate may still be Validated or Flagged depending on chain quality — the default-fire state constrains structure, it does not by itself reject the candidate.
+When Pass 1 delivered a candidate with a *Needs chain validation* label on its spread-mandate determination, Pass 2 resolves that label to one of three states by re-fetching the Polygon options-metrics producer against a fresh chain (the Pass 2 re-confirm), per VOLATILITY's source-authority discipline. The three outcomes and their conditions are in the Appendix. A Pass 2 output that carries *Needs chain validation* forward unresolved is incomplete and must not be delivered to the operator as Validated. When the mandate fires by default, the candidate may still be Validated or Flagged depending on chain quality — the default-fire state constrains structure, it does not by itself reject the candidate.
 
 **Strike selection navigates from the candidate zone to a specific strike using the validated chain, informed by wall levels.**
 
@@ -102,7 +102,7 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 | `PASS1_SCREENING_v3.0.md` (T2) | Per-candidate eligible-set output: structure, direction, candidate zones, DTE band, Pass 1 IV source label, sizing band note, confidence value | Entry contract for every Pass 2 run; PASS2 does not re-derive any of these |
 | `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Anti-hallucination floor; data-quality vocabulary; override discipline | PASS2 enforces the floor on every output; exact strikes and expirations appear only from validated chain; data-quality labels applied throughout |
 | `DEALER_v3.0.md` (T1) | Fresh dealer `confidence` (`high` / `medium` / `low` / `invalid`); call/put wall levels; signed DGPI tier; near-flip flag (`position_vs_flip` `at_flip`) | Re-fetched fresh at Pass 2 start; wall levels inform strike selection; dealer `confidence` combined with chain quality for output-state determination |
-| `VOLATILITY_v3.0.md` (T1) | Pass 2 IV source (Schwab ATM chain per-contract IV); IV/HV band; IV rank tier; volatility-status label; source-authority discipline | Spread-mandate resolution: IV/HV band and IV rank tier determine confirmed / overridden / fire-by-default outcome |
+| `VOLATILITY_v3.0.md` (T1) | Pass 2 IV/HV (the Polygon producer's `iv_hv_ratio`, re-fetched fresh); IV/HV band; IV rank tier; volatility-status label; source-authority discipline | Spread-mandate resolution: IV/HV band and IV rank tier determine confirmed / overridden / fire-by-default outcome |
 | `SIGNAL_v3.0.md` (T1) | Spread-mandate contract (heuristic 3); anti-hallucination floor (heuristic 10); alternative-confidence ordering (heuristic 8) | PASS2 enforces the spread-mandate's three-outcome resolution; honors anti-hallucination floor on truncated chains; orders validated-set summary by descending confidence |
 | `WYCKOFF_v3.0.md` (T1) | Operator-confirmed phase and event readings; structural levels from confirmed phase | Structural levels inform strike selection anchoring within the candidate zone |
 | `RISK_v3.0.md` (T1) | Sizing band ladder; chain-quality sizing step-down discipline | PASS2 inherits Pass 1 sizing band note and may step down based on Pass 2 chain quality; step-down direction and magnitude follow RISK's band ladder |
@@ -135,7 +135,7 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 **Cross-references this file expects to be honored.**
 
 - `SIGNAL_v3.0.md` owns the spread-mandate contract that PASS2 enforces. When SIGNAL and PASS2 appear to specify different spread-mandate outcomes, SIGNAL governs.
-- `VOLATILITY_v3.0.md` owns the IV source-authority rules. PASS2's use of Schwab ATM chain IV as the Pass 2 source is an application of VOLATILITY's source-authority discipline, not an independent PASS2 decision.
+- `VOLATILITY_v3.0.md` owns the IV source-authority rules. PASS2's re-fetch of the Polygon producer for the Pass 2 re-confirm is an application of VOLATILITY's source-authority discipline, not an independent PASS2 decision.
 - `KAPMAN_GUARDRAILS_v3.0.md` owns the anti-hallucination floor and override discipline. Neither may be relaxed by PASS2 heuristics, even implicitly.
 - `RISK_v3.0.md` owns the sizing band ladder. PASS2 applies chain-quality sizing step-downs per RISK's ladder; it does not define its own step-down magnitudes.
 - `engineering_only/PASS2_MCP_REFERENCE_v3.0.md` (forthcoming) owns the specific MCP tool-surface contracts for Pass 2 data fetching — endpoint names, chain-quality numeric thresholds, truncation detection heuristics, and strike-count reduction parameters. PASS2 is silent on all of these; operators and engineers consult the engineering-only reference for tool-surface details.
@@ -180,7 +180,7 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 | Confirmed | ≥ `IV_HV_ELEVATED_THRESHOLD` per SYSTEM_PARAMS | Any | Spread required; naked long-premium refused; sizing denominator = spread-risk |
 | Confirmed (rank reinforcement) | Neutral band | ≥ `IV_RANK_EXTREME_FLOOR` per SYSTEM_PARAMS | Spread required despite neutral IV/HV; *Stretched IV* annotation |
 | Overridden | Below elevated threshold | Below extreme floor | Spread mandate lifts; naked long-premium eligible; sizing denominator = underlying-notional |
-| Fire-by-default | Schwab ATM IV unavailable or chain too degraded to compute reliable IV/HV | N/A | Spread required; *Spread mandated — chain validation failed* label |
+| Fire-by-default | Pass 2 producer re-fetch unavailable or chain too degraded to compute reliable IV/HV | N/A | Spread required; *Spread mandated — chain validation failed* label |
 
 **DTE band reference — per SYSTEM_PARAMS.**
 

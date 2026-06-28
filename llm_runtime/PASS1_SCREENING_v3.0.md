@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.10
+kb_version: 3.0.11
 file_last_updated: 2026-06-28
 status: active
 tier: T2
@@ -78,9 +78,9 @@ For each candidate with a resolved Wyckoff status, the trigger sequence is: Wyck
 
 Direction resolution follows a priority sequence, and the resolved direction is the axis SIGNAL's direction-aware Wyckoff veto evaluates against — so it is established from the confirmed regime and any operator declaration before the veto runs. Primary signals — the confirmed regime's natural direction (an accumulation-family regime, `accumulation`/`reaccumulation`, or confirmed `markup` → BULLISH; a distribution-family regime, `distribution`/`redistribution`, or confirmed `markdown` → BEARISH), an explicit operator direction declaration, or a confirmed dealer regime read that is unambiguous — resolve direction when they are present and in agreement. When primary signals are absent or in conflict, the Wyckoff-event directional fallback applies: confirmed `sos` → BULLISH, confirmed `sow` → BEARISH, neither confirmed → NEUTRAL. The operator can override the NEUTRAL fallback by stating direction explicitly in the screening request, per GUARDRAILS override discipline (an explicit "screen for long puts" is a BEARISH declaration). A candidate that resolves to NEUTRAL receives a NEUTRAL-direction eligible output; the eligible structure for a NEUTRAL candidate is typically a defined-risk spread or CSP rather than a directional naked position. Direction is resolved at Pass 1 and carried into the candidate zone; Pass 2 consumes the resolved direction without re-deriving it.
 
-**The Pass 1 IV source is Polygon `avg_iv`; its outputs are labeled accordingly.**
+**The Pass 1 IV/HV read is the Polygon producer's `iv_hv_ratio`; its outputs are labeled accordingly.**
 
-IV/HV band computation at Pass 1 uses the Polygon options-metrics endpoint as the IV source — single-symbol for one ticker, batch (capped at 30 symbols per call) for multiple tickers. The resulting IV/HV band is a valid Pass 1 classification for directional screening and for the spread-mandate's firing condition. When the spread-mandate fires on Pass 1 IV, the eligible-set output carries a *Needs chain validation* label on the spread-mandate determination, because the definitive mandate requires the Schwab ATM IV source that only Pass 2 has access to. The spread-mandate fires by default when the Pass 1 IV source is unavailable (source-substitution is never silent); the candidate receives a spread-mandated output labeled accordingly. Pass 1 never uses Schwab ATM chain IV — that is a Pass 2 source — and never substitutes Pass 2 source data for Pass 1 source data even if it appears available in the conversation context.
+IV/HV band computation at Pass 1 reads the Polygon options-metrics producer's `iv_hv_ratio` (ATM `atm_iv` ÷ HV20) — single-symbol for one ticker, batch (capped at 30 symbols per call) for multiple tickers. The resulting IV/HV band is a valid Pass 1 classification for directional screening and for the spread-mandate's firing condition. When the spread-mandate fires at Pass 1, the eligible-set output carries a *Needs chain validation* label on the spread-mandate determination, because the binding mandate is the Pass 2 re-confirm — a fresh re-fetch of the same producer against the validated chain. The spread-mandate fires by default when the Pass 1 read is unavailable (source-substitution is never silent); the candidate receives a spread-mandated output labeled accordingly. Pass 1 and Pass 2 read the same producer; Pass 2 re-fetches fresh rather than carrying the Pass 1 value forward.
 
 **Pass 1 outputs are candidate zones, not validated specifics.**
 
@@ -123,7 +123,7 @@ PASS1 SCREENING is tier T2 — a runbook. It is the primary consumer of every T1
 |---|---|---|
 | `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Data-quality vocabulary; override discipline; hostile-macro eligible-set redirect; anti-hallucination floor | PASS1 applies the data-quality labels to every degraded output; applies override discipline at the screening-request entry point; applies the hostile-macro redirect run-wide when macro gate fires; enforces the anti-hallucination floor on every candidate zone |
 | `DEALER_v3.0.md` (T1) | SPY hostile-macro composite (both conditions); per-ticker DGPI tier (signed), flip-zone, near-flip flag, dealer `confidence`; macro-layer dealer `confidence` | PASS1 evaluates the hostile-macro composite once at run start; reads per-ticker dealer regime for the dealer-timing veto; reads near-flip flag for the one-tier sizing step-down note in the candidate output |
-| `VOLATILITY_v3.0.md` (T1) | IV/HV band (Pass 1 source: Polygon `avg_iv`); IV rank tier; volatility-status label; source-authority discipline | PASS1 uses Pass 1 IV source for the spread-mandate firing condition; applies *Needs chain validation* label when the mandate fires on Pass 1 source; degrades to fire-by-default when Pass 1 source is unavailable |
+| `VOLATILITY_v3.0.md` (T1) | IV/HV band (Pass 1 read: the Polygon producer's `iv_hv_ratio`); IV rank tier; volatility-status label; source-authority discipline | PASS1 reads the producer's IV/HV for the spread-mandate firing condition; applies *Needs chain validation* label when the mandate fires at Pass 1 (binding mandate is the Pass 2 re-confirm); degrades to fire-by-default when the Pass 1 read is unavailable |
 | `WYCKOFF_v3.0.md` (T1) | Propose-confirm protocol; confirmed regime + phase (A–E) and event readings; UNKNOWN state; conservative-default behavior; operator-declared regime/phase handling | PASS1 invokes propose-confirm inline per candidate for unconfirmed tickers; consumes the confirmed regime/phase for Wyckoff veto evaluation; consumes confirmed `sos`/`sow` for directional fallback; assigns UNKNOWN and conservative defaults when propose-confirm is declined |
 | `SIGNAL_v3.0.md` (T1) | Wyckoff veto contract (heuristic 1); dealer-timing veto contract (heuristic 2); spread-mandate contract (heuristic 3); directional fallback (heuristic 11); NO_TRADE consistency (heuristic 7); alternative-confidence ordering (heuristic 8); degraded-input fallback (heuristic 9); anti-hallucination floor (heuristic 10) | PASS1 applies the trigger contracts in fixed sequence per candidate; assembles NO_TRADE outputs with NONE structure; assigns confidence values that honor the ordering rule; applies structured fallback on degraded inputs |
 | `RISK_v3.0.md` (T1) | Sizing band ladder (regime-ceiling → dealer-tier → volatility-tier), direction-relative; near-flip one-tier step-down | PASS1 notes the applicable sizing band in the candidate output so Pass 2 and the operator have the sizing context; PASS1 does not compute exact position size — that is RISK and operator work |
@@ -132,7 +132,7 @@ PASS1 SCREENING is tier T2 — a runbook. It is the primary consumer of every T1
 
 | Destination file | What PASS1 delivers | How that file uses it |
 |---|---|---|
-| `PASS2_VALIDATION_v3.0.md` (T2) | Eligible-set: per-candidate structure, direction, candidate zones, DTE band, Pass 1 IV source label, sizing band note, confidence value | PASS2 takes each eligible candidate and validates the structure and direction against the live Schwab chain; selects specific strikes and expirations within the candidate zones; confirms or overrides the spread-mandate using Pass 2 IV source |
+| `PASS2_VALIDATION_v3.0.md` (T2) | Eligible-set: per-candidate structure, direction, candidate zones, DTE band, Pass 1 IV source label, sizing band note, confidence value | PASS2 takes each eligible candidate and validates the structure and direction against the live Schwab chain; selects specific strikes and expirations within the candidate zones; re-confirms the spread-mandate by re-fetching the Polygon producer |
 | `REPORT_FORMAT_v3.0.md` (T3) | Full Pass 1 output: Eligible/NO_TRADE/WAIT determinations with rationale, candidate zones, alternatives with confidence, data-quality labels, macro gate result, override acknowledgments | REPORT_FORMAT renders the Pass 1 section of the screening report; PASS1 does not own report rendering |
 | `REPORT_STYLE_v3.0.md` (T3) | (Indirectly) the Pass 1 output surface | REPORT_STYLE governs field length caps, label vocabulary, and rationale density; PASS1 respects these constraints in the rationale text it assembles |
 | `PORTFOLIO_MGMT_v3.0.md` (T2) | (Indirectly, after Pass 2) The entry-time regime snapshots that Pass 2 completes | PORTFOLIO_MGMT carries regime snapshots in position context; PASS1 is the regime-read origin for the Wyckoff regime (and phase) and direction that eventually become the entry-time snapshot |
@@ -166,7 +166,7 @@ Before per-candidate evaluation begins, three conditions must hold:
 - `SIGNAL_v3.0.md` owns the trigger contracts PASS1 enforces. When SIGNAL and PASS1 appear to specify different firing conditions for the same trigger, SIGNAL governs.
 - `WYCKOFF_v3.0.md` owns the propose-confirm protocol PASS1 invokes. PASS1 specifies *when* propose-confirm runs in the screening workflow; WYCKOFF specifies *how* it runs.
 - `KAPMAN_GUARDRAILS_v3.0.md` owns the override discipline and the anti-hallucination floor. Neither may be relaxed by PASS1 heuristics, even implicitly.
-- `VOLATILITY_v3.0.md` owns the IV source-authority rules. PASS1's use of Polygon `avg_iv` as Pass 1 source is an application of VOLATILITY's source-authority discipline, not an independent PASS1 decision.
+- `VOLATILITY_v3.0.md` owns the IV source-authority rules. PASS1's use of the Polygon producer's `iv_hv_ratio` as the Pass 1 read is an application of VOLATILITY's source-authority discipline, not an independent PASS1 decision.
 - `engineering_only/PASS1_MCP_REFERENCE_v3.0.md` (forthcoming) owns the specific MCP tool-surface contracts for Pass 1 data fetching — endpoint names, batch caps, parameter shapes, and the Polygon deprecated-endpoint inventory. PASS1 is silent on these; operators and engineers consult the engineering-only reference for tool-surface details.
 
 
@@ -211,7 +211,7 @@ Before per-candidate evaluation begins, three conditions must hold:
 | Direction | BULLISH / BEARISH / NEUTRAL | BULLISH |
 | Strike zone | Price range relative to current spot, or delta range | ATM to 5% OTM / Slightly ITM to ATM |
 | DTE band | Calendar day range | `SWING_DTE_BAND` (swing, per SYSTEM_PARAMS) / `CSP_DTE_BAND` (CSP, per SYSTEM_PARAMS) / `LEAP_DTE_BAND` (LEAP, per SYSTEM_PARAMS) |
-| IV source label | Data-quality label when spread-mandate fires on Pass 1 source | *Needs chain validation — spread-mandate fired on Polygon avg_iv; Pass 2 confirms* |
+| IV source label | Data-quality label when spread-mandate fires at Pass 1 | *Needs chain validation — spread-mandate fired on Pass 1 `iv_hv_ratio`; Pass 2 re-confirms* |
 
 **Confidence band discipline.**
 
