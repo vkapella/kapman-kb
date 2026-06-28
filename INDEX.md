@@ -105,8 +105,12 @@ This repository separates runtime and engineering materials:
     `markup`) — trend & post-phase-C continuation → upper; post-phase-C base → conditional-top; pre-phase-C →
     conditional floor (default-refused by the SIGNAL veto, override-only, resolving a prior SIGNAL↔RISK tension);
     non-aligned/`ranging_undefined`/`UNKNOWN` → closed; v2.3 magnitudes preserved; near-flip ladder + dealer-narrowing
-    made direction-aware; RISK_005 preserved verbatim. **P4** (dealer/flip vocab) and the remaining **consumer files**
-    (PORTFOLIO/PASS1/JOURNAL/GUARDRAILS/DEALER/REPORT_FORMAT, Stages C–E) remain pending under #78.
+    made direction-aware; RISK_005 preserved verbatim. **Stage C — PORTFOLIO done** — `PORTFOLIO_MGMT_v3.0.md`
+    (`kb_version 3.0.3 → 3.0.4`): re-keys the Regime exit advisory's Wyckoff branch to the **regime succession graph
+    + phase regression (D→B/A)**, direction-relative (mirrors SIGNAL's committed advisory), with the phase-regression
+    sub-branch consuming the entry-phase (A–E) **rider** (per D-d: regime is the exempt field, phase A–E is a non-exempt
+    rider that degrades to data-absent when missing). **P4** (dealer/flip vocab) and the remaining **consumer files**
+    (PASS1/JOURNAL/GUARDRAILS/DEALER/REPORT_FORMAT, Stages C–E) remain pending under #78.
 
 ## v3.0 file directory
 
@@ -160,7 +164,7 @@ This repository separates runtime and engineering materials:
 | SIGNAL_v3.0.md | 3.0.3 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.7 | active |
 | WYCKOFF_v3.0.md | 3.0.7 | active |
-| PORTFOLIO_MGMT_v3.0.md | 3.0.3 | active |
+| PORTFOLIO_MGMT_v3.0.md | 3.0.4 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | active |
 | RISK_v3.0.md | 3.0.1 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
@@ -174,7 +178,7 @@ This repository separates runtime and engineering materials:
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
 | WYCKOFF_v3.0.md | 3.0.7 | 2026-06-27 |
 | PASS1_SCREENING_v3.0.md | 3.0.7 | 2026-06-27 |
-| PORTFOLIO_MGMT_v3.0.md | 3.0.3 | 2026-06-27 |
+| PORTFOLIO_MGMT_v3.0.md | 3.0.4 | 2026-06-28 |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | 2026-06-28 |
 | RISK_v3.0.md | 3.0.1 | 2026-06-28 |
 | REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |

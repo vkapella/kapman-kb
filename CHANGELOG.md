@@ -1,5 +1,41 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage C consumer re-key, PORTFOLIO (regime exit advisory) (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage C (PORTFOLIO consumer; substantive; HITL, approved turn-by-turn in session)
+
+Re-keys the Regime exit advisory PORTFOLIO operationalizes to match the direction-aware advisory committed in
+SIGNAL (3.0.3). Faithful consumer re-key, no new judgment points. #78 stays open (P4 + remaining consumers).
+
+- **`llm_runtime/PORTFOLIO_MGMT_v3.0.md`** (`kb_version 3.0.3 → 3.0.4`):
+  - The advisory's **"Wyckoff phase succession branch" → "Wyckoff regime succession & phase-regression branch"**:
+    fires on an unfavorable **regime** move (per WYCKOFF's succession **graph**, read **relative to the position's
+    direction** — long-framed graph, bearish = mirror) **OR** a **phase regression D→B/A** (D→C retest excluded).
+    Direction-relative throughout (a long put's decay mirrors a long call's), matching SIGNAL.
+  - **Decision D-d encoded:** the regime-succession sub-branch runs on the exempt Wyckoff-**regime** field; the
+    phase-regression sub-branch consumes the **entry-phase (A–E)**, a non-exempt `positions.md` **rider** (parallel
+    to the existing IV-rank rider) that degrades to data-absent when missing while the regime sub-branch still
+    evaluates. Position-context schema split into an "Entry-time Wyckoff regime" (advisory-required) row + an
+    "Entry-time Wyckoff phase (A–E)" (recommended rider) row.
+  - Re-keyed: Principle snapshot list, the advisory branch, SIGNAL + WYCKOFF source rows, the WYCKOFF cross-ref,
+    the branch-evaluability reference table, and the entry-time-context prose; "succession table" → "succession
+    graph". PORTFOLIO has no legacy anchors (net-new v3.0) — no historical note needed.
+  - Not in scope (correctly unchanged): the §A2 ingest structure/direction derivation (already lowercase +
+    BULLISH/BEARISH from #73/#75).
+- **`INDEX.md`** — bumped both version tables (3.0.3 → 3.0.4) and updated the §A1 status bullet (Stage C PORTFOLIO done).
+
+### Verification
+Adversarial workflow pass (faithfulness, completeness, apply-readiness): faithfulness + apply-readiness `pass`
+(branch matches SIGNAL verbatim; all 8 anchors unique); `apply-with-fixes` for two stale-`phase` stragglers
+(lines 111, 26), both folded in. `verify_frontmatter` + `verify_anchors` pass; dangling-vocab grep clean.
+
+### Scope notes — deferred under #78
+- **PASS1** (Stage D): veto/direction re-key + `SOS`/`SOW` → `sos`/`sow` + hostile-macro bullish-scope.
+- **DEALER**: bearish-mirror DGPI band (referenced by SIGNAL + RISK; the spot-vs-flip advisory branch is already symmetric).
+- **WYCKOFF**: decision-layer bearish column + "conditional-top" normalization.
+- **JOURNAL_MGMT** (Stage D): write `entry_phase` (A–E) + `phase_c_confirmed` as the riders PORTFOLIO now consumes.
+- **SIGNAL** ("floor"→"conditional floor"), GUARDRAILS, REPORT_FORMAT, SYSTEM_PARAMS per the prior slices.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage C consumer re-key, RISK (symmetric sizing bands) (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage C (RISK consumer; substantive; HITL, approved turn-by-turn in session)
