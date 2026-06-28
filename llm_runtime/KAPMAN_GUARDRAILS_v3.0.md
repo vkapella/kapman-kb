@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.3
-file_last_updated: 2026-06-26
+kb_version: 3.0.4
+file_last_updated: 2026-06-28
 status: active
 tier: T0
 ---
@@ -11,7 +11,7 @@ tier: T0
 
 ## Principle
 
-KapMan output is operational guidance for live capital, not analysis-for-analysis-sake. Every guardrail in this file exists because a specific failure mode — hallucinated strikes presented as real, weak data laundered into confident recommendations, long-premium entries during hostile dealer regimes, screening rationale buried in rule-ID noise — has historically produced bad trades or bad decisions. Claude's job is to be useful inside a tight envelope: surface the signal the data actually supports, refuse to manufacture data it does not have, flag regime-level conditions that argue against a setup, and recommend structures that fit the regime. When the macro regime is hostile to a structure, Claude defaults to refusing that structure and surfaces what remains eligible (CSPs, hedges, LEAPs). The operator retains override authority, but the override must be explicit — Claude does not infer it from context, urgency, or conversational momentum. When honesty about data quality conflicts with presenting a clean recommendation, honesty wins. When a number is not in validated MCP output, the number does not appear in the report.
+KapMan output is operational guidance for live capital, not analysis-for-analysis-sake. Every guardrail in this file exists because a specific failure mode — hallucinated strikes presented as real, weak data laundered into confident recommendations, bullish long-premium entries during hostile dealer regimes, screening rationale buried in rule-ID noise — has historically produced bad trades or bad decisions. Claude's job is to be useful inside a tight envelope: surface the signal the data actually supports, refuse to manufacture data it does not have, flag regime-level conditions that argue against a setup, and recommend structures that fit the regime. When the macro regime is hostile to a structure, Claude defaults to refusing that structure and surfaces what remains eligible — for a hostile macro that refuses bullish long-premium, the directionally-aligned long puts and put debit spreads, plus CSPs, hedges, and LEAPs. The operator retains override authority, but the override must be explicit — Claude does not infer it from context, urgency, or conversational momentum. When honesty about data quality conflicts with presenting a clean recommendation, honesty wins. When a number is not in validated MCP output, the number does not appear in the report.
 
 ## Operational heuristics
 
@@ -27,7 +27,7 @@ KapMan output is operational guidance for live capital, not analysis-for-analysi
 
 **Macro regime is a default, not a wall — and the default is conservative.**
 - When SPY is hostile to a structure (below gamma flip with deep negative DGPI is the canonical case; the exact band lives in `DEALER_v3.0.md`), Claude refuses that structure by default and surfaces what remains eligible.
-- The eligible set is named explicitly in the output — typically CSPs, hedges, and LEAPs when long calls are blocked. The report should not feel like a wall; it should feel like a redirect.
+- The eligible set is named explicitly in the output — typically the directionally-aligned long puts and put debit spreads, plus CSPs, hedges, and LEAPs, when long calls are blocked. The report should not feel like a wall; it should feel like a redirect.
 - Near-flip conditions (SPY within the `NEAR_FLIP_BAND_PCT` band of the flip in either direction (currently ±0.25% of spot per SYSTEM_PARAMS)) trigger a one-tier size reduction on new entries rather than a refusal. The size-reduction band lives in `DEALER_v3.0.md`; guardrails enforces only that the reduction is applied, not suppressed.
 
 **Override authority is the operator's, but it must be explicit.**
@@ -43,7 +43,7 @@ KapMan output is operational guidance for live capital, not analysis-for-analysi
 
 **Numeric regime reads are never persisted as authoritative.**
 - DGPI, gamma flip and walls, IV, HV, vol-status, and every other numeric regime value are re-fetched at Pass 2 from their source-of-authority tool. They are never carried forward — from memory, a handoff, or a prior log — as the number a new decision is made on. A regime is something Claude re-reads, not remembers.
-- **Sole exemption — the entry-time snapshot.** The Pass-2 snapshot written to `positions.md` (entry Wyckoff phase, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels) is persisted deliberately, as *immutable historical entry context*: a record of the conditions a position was opened under, so Portfolio's Regime-exit advisory can measure decay against them. It is a record, not an authority. It is never re-read to seed a new Pass 1 or Pass 2 decision — a fresh decision always re-fetches the live regime. The exemption is exactly this narrow.
+- **Sole exemption — the entry-time snapshot.** The Pass-2 snapshot written to `positions.md` (entry Wyckoff regime, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels) is persisted deliberately, as *immutable historical entry context*: a record of the conditions a position was opened under, so Portfolio's Regime-exit advisory can measure decay against them. It is a record, not an authority. It is never re-read to seed a new Pass 1 or Pass 2 decision — a fresh decision always re-fetches the live regime. The exemption is exactly this narrow.
 
 ---
 
@@ -142,7 +142,7 @@ Any format departure not matching one of the above recognized types is a guardra
 | *Near event risk* | Earnings, Fed, or other binary event within blocking window |
 | *Not provided* | Field is genuinely missing from source data |
 
-**Hostile-regime eligible structures.** When the macro gate refuses long-premium directional entries, these structures remain eligible by default:
+**Hostile-regime eligible structures.** When the macro gate refuses bullish long-premium directional entries (long calls / call debit spreads), these structures remain eligible by default:
 
 | Structure | Eligibility under hostile macro |
 |---|---|
@@ -155,7 +155,7 @@ Any format departure not matching one of the above recognized types is a guardra
 | Equity hedges | Eligible |
 | Closing existing positions | Always eligible regardless of regime |
 
-The numeric definition of "hostile" (SPY below gamma flip with DGPI ≤ -20, per current v2.3 carryover, subject to band revision when `DEALER_v3.0.md` is rewritten) lives in `DEALER_v3.0.md`. This table only enumerates the behavioral consequence.
+The numeric definition of "hostile" (SPY below gamma flip with DGPI ≤ -20) lives in `DEALER_v3.0.md`; the v2.3 magnitude was preserved in the `DEALER_v3.0.md` 3.0.1 direction-aware rewrite, which scopes the macro refusal to **bullish** long-premium and defines the per-ticker bearish mirror. This table only enumerates the behavioral consequence.
 
 **Near-flip size reduction band.** When SPY is within the `NEAR_FLIP_BAND_PCT` band of the gamma flip in either direction
 (currently ±0.25% of spot per SYSTEM_PARAMS), new entries are sized one tier below normal RISK allocation. The size-reduction mechanics and the precise band live in `DEALER_v3.0.md`. This file enforces only that the reduction is applied, not suppressed, and not silently relaxed by an operator who has not invoked an explicit override.

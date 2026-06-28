@@ -1,5 +1,45 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D/E consumer re-key, KAPMAN_GUARDRAILS (hostile-macro bullish-scope + exempt-field phase→regime) (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D/E (KAPMAN_GUARDRAILS T0 floor; substantive; HITL, approved turn-by-turn in session)
+
+Brings the T0 behavioral-floor file into line with the committed direction-aware model. The work is faithful
+reconciliation, not new judgment: GUARDRAILS' own hostile-regime eligible-set table already listed "Long puts —
+Eligible — directional alignment with regime," and committed DEALER 3.0.1 + SIGNAL 3.0.4 already carry the bullish
+scope (SIGNAL line 46 explicitly cites this GUARDRAILS table). Only the surrounding **prose** was lagging. #78 stays open.
+
+- **`llm_runtime/KAPMAN_GUARDRAILS_v3.0.md`** (`kb_version 3.0.3 → 3.0.4`):
+  - **Hostile-macro refusal scoped to bullish long-premium** in the Principle, the "Macro regime is a default" heuristic,
+    and the Appendix "Hostile-regime eligible structures" intro: the macro gate refuses **bullish** long-premium (long
+    calls / call debit spreads); long puts / put debit spreads are surfaced as the **directionally-aligned redirect**
+    (then CSPs, hedges, LEAPs). Fixes two prose sites that dropped long puts from the surfaced eligible set — now matching
+    the file's own eligible-set table and the committed DEALER report-label/eligible-set + SIGNAL veto.
+  - **Exempt-snapshot field relabel (D-d):** in the sole no-persist exemption clause, "entry Wyckoff **phase**" → "entry
+    Wyckoff **regime**" — the exempt field holds the confirmed regime (cycle-stage axis), matching JOURNAL_MGMT 4.0.3 +
+    PORTFOLIO 3.0.4. The exempt set is unchanged: **exactly 5 regime fields + 8 SIGNAL stop/profit levels** (a label
+    change, not a count change). The non-exempt `entry_phase`/`phase_c_confirmed`/event riders remain JOURNAL's grammar.
+  - **DEALER-freshness:** the hostile-definition note's "subject to band revision when `DEALER_v3.0.md` is rewritten" is
+    replaced — that rewrite landed (DEALER 3.0.1), the ≤ -20 magnitude was preserved, the refusal scoped to bullish, and
+    the per-ticker bearish mirror defined.
+  - Untouched (correctly): the hostile-regime eligible-set **table** (already direction-aware), the VALIDATION_001 legacy
+    anchor, and line-29's direction-neutral "refuses that structure" framing.
+- **`INDEX.md`** — bumped GUARDRAILS in the report-metadata table (3.0.3 → 3.0.4), added GUARDRAILS to the v3.0.1
+  version/status table (was absent), and updated the §A1 status bullet (Stage D/E GUARDRAILS done).
+
+### Verification
+Focused adversarial workflow (faithfulness/internal-consistency vs DEALER 3.0.1 / SIGNAL 3.0.4 / JOURNAL 4.0.3;
+completeness/prose-site sweep; apply-readiness) + synthesis judge: completeness `pass`, apply-readiness `pass` (all 7
+OLD blocks verbatim + unique; the two line-14 Principle fragments confirmed disjoint), faithful-consistency `pass`
+(prose now matches the file's own eligible-set table and the committed consumers; the 5+8 exempt set unchanged). Judge:
+`apply_ready: true`, zero must-fix (the one finding was an annotation-only stale version in the draft header, corrected).
+`verify_frontmatter` + `verify_anchors` pass.
+
+### Scope notes — deferred under #78
+- **REPORT_FORMAT** (forward-tested-confidence suffix on the exit-plan row), **SYSTEM_PARAMS** (confluence-band tolerance +
+  conditional-top magnitude / JD1), **PASS2** (line 94 phase→regime + riders), **P4** (dealer_confidence/position_vs_flip),
+  and the WYCKOFF↔RISK UNKNOWN floor/closed wording item remain.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage E consumer re-key, SIGNAL ("floor" → "conditional floor") (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage E (SIGNAL terminology; substantive but no-judgment; applied on standing continue)

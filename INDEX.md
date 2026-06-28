@@ -147,8 +147,14 @@ This repository separates runtime and engineering materials:
     "conditional floor" vs RISK "band closed" — converges behaviorally). **Stage E — SIGNAL "floor"→"conditional floor"
     done** — `SIGNAL_v3.0.md` (`kb_version 3.0.3 → 3.0.4`): the committed band-ladder sentence's bare pre-phase-C "floor"
     tightened to **"conditional floor"** (faithful no-judgment re-key disambiguating it from RISK's "band closed", now that
-    RISK has two floors). **P4** (dealer/flip vocab) and the remaining **consumer files** (GUARDRAILS/REPORT_FORMAT/
-    SYSTEM_PARAMS, Stages D–E) remain pending under #78.
+    RISK has two floors). **Stage D/E — GUARDRAILS done** — `KAPMAN_GUARDRAILS_v3.0.md` (`kb_version 3.0.3 → 3.0.4`):
+    reconciles the T0 prose with its own already-direction-aware eligible-set table + committed DEALER/SIGNAL — hostile-macro
+    refusal scoped to **bullish** long-premium (long calls / call debit spreads) with long puts / put debit spreads surfaced
+    as the directionally-aligned redirect (Principle, macro-default heuristic, Appendix eligible-set intro); line-46 exempt
+    field "entry Wyckoff phase" → "entry Wyckoff **regime**" (D-d; exempt set stays exactly 5 regime fields + 8 SIGNAL
+    levels — label change, not count); line-158 DEALER-freshness (DEALER 3.0.1 rewrite landed, magnitude preserved). The
+    eligible-set table + VALIDATION_001 anchor untouched. **P4** (dealer/flip vocab) and the remaining **consumer files**
+    (REPORT_FORMAT/SYSTEM_PARAMS, Stages D–E) remain pending under #78.
 
 ## v3.0 file directory
 
@@ -206,6 +212,7 @@ This repository separates runtime and engineering materials:
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | active |
 | RISK_v3.0.md | 3.0.1 | active |
 | DEALER_v3.0.md | 3.0.1 | active |
+| KAPMAN_GUARDRAILS_v3.0.md | 3.0.4 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
 
 ### v3.0.1 report metadata patch
@@ -213,7 +220,7 @@ This repository separates runtime and engineering materials:
 | File | kb_version | file_last_updated |
 |---|---|---|
 | REPORT_TEMPLATE_PASS1_v3.0.html | 3.0.5 | 2026-05-14 |
-| KAPMAN_GUARDRAILS_v3.0.md | 3.0.3 | 2026-06-26 |
+| KAPMAN_GUARDRAILS_v3.0.md | 3.0.4 | 2026-06-28 |
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
 | WYCKOFF_v3.0.md | 3.0.8 | 2026-06-28 |
 | SIGNAL_v3.0.md | 3.0.4 | 2026-06-28 |
