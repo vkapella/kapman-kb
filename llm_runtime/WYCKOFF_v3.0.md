@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.6
+kb_version: 3.0.7
 file_last_updated: 2026-06-27
 status: active
 tier: T1
@@ -11,7 +11,7 @@ tier: T1
 
 ## Principle
 
-Wyckoff phase identification is the regime-setting judgment that determines whether a long-premium position has structural tailwind, structural headwind, or no directional context — and therefore sets the ceiling within which every downstream sizing and structure decision operates. The four recognized phases are **Accumulation**, **Markup**, **Distribution**, and **Markdown**, cycling in that order; a ticker that has not yet received a confirmed phase reading in the current session is in an **UNKNOWN** state, which is treated as the most conservative case for all dependent triggers. The named events that anchor phase transitions — Selling Climax, Automatic Rally, Spring, Sign of Strength, Buying Climax, AR_TOP, Upthrust, Sign of Weakness — are the landmarks the runtime reasons from.
+Wyckoff identification is the regime-setting judgment that determines whether a long-premium position has structural tailwind, structural headwind, or no directional context — and therefore sets the ceiling within which every downstream sizing and structure decision operates. The reading has **two independent axes**: the **regime** (the cycle-stage) and the **phase** (the schematic stage A–E within a range), with **events** as the landmarks the two axes are read from. The KB's canonical vocabulary for regime, phase, and event is the **viewer/v2 glossary, embedded verbatim in the Appendix ("Wyckoff canonical vocabulary")** — this file does not paraphrase those definitions. The seven regimes are `accumulation`, `reaccumulation`, `markup`, `distribution`, `redistribution`, `markdown`, and `ranging_undefined`; a ticker that has not received a confirmed reading in the current session is **`UNKNOWN`** — a session-state treated as the most conservative case for all dependent triggers, and **distinct from `ranging_undefined`**, which is a *confirmed* no-trend regime (stand aside, conviction floored). Which regimes and phases authorize long-premium, at what sizing band, and what fires the regime-exit advisory is the KB's **decision layer** (Appendix), keyed on these terms: the glossary defines the terms, the KB defines what it does with them.
 
 Phase identification follows a **two-path runtime**: the **viewer-ingest path** and the **estimation path**. The path taken depends on whether a current viewer/v2 reading is available for the ticker — in Stage 1 delivered as a pasted handoff row, by a direct export later — and on how confidently that reading is held.
 
@@ -35,7 +35,7 @@ A viewer reading passes the **validity gate** when all of the following are true
 | Criterion | Source | Passing condition |
 |---|---|---|
 | A reading is present for the ticker | viewer handoff row | The §A1 fields are present for the symbol |
-| `regime` is a recognized phase | viewer `regime` | One of: Accumulation, Markup, Distribution, Markdown |
+| `regime` is a recognized regime | viewer `regime` | One of the seven canonical regimes (see Appendix "Wyckoff canonical vocabulary"): `accumulation`, `reaccumulation`, `distribution`, `redistribution`, `markup`, `markdown`, `ranging_undefined` |
 | Snapshot is current | viewer `as_of` / `data_through` | Within the run's freshness window; not stale relative to the session date |
 | Regime/confidence fields are non-null | viewer `regime`, `regime_confidence` | Both present; `phase_confidence` may legitimately be null when trending |
 
@@ -57,7 +57,7 @@ A reading that passes the validity gate is then resolved by the **confidence tie
 | Structural cross-check conflict | viewer `structure_conflict == "conflict"` (string field; `""` = clear) |
 | Higher-timeframe disagreement | viewer `weekly_agrees == "conflict"` (string field, values `"agree"` / `"conflict"` / `"neutral"`; only `"conflict"` fires) |
 | Stale snapshot | viewer `as_of` / `data_through` outside the run's freshness window |
-| SOW-gated markdown | `regime` is Markdown with no confirmed Sign of Weakness in `last_event` / `setup_tags` |
+| SOW-gated markdown | `regime` is `markdown` with no confirmed `sow` in `last_event` / `setup_tags` |
 
 **Force-flag input completeness.** A hard force-flag can override a high confidence only if the handoff carries the field it reads. Distinguish two states explicitly:
 
@@ -88,11 +88,11 @@ The viewer reading carries event and structural context in three field groups, w
 
 | Field | What it contains | How to use it |
 |---|---|---|
-| `last_event` (+ `last_event_date`) | The most recent named Wyckoff event the viewer detected (SC, AR, Spring, SOS, BC, AR_TOP, UT, SOW) and its date | Primary source for the current-session confirmed event; recency is read from `last_event_date` relative to the session date |
+| `last_event` (+ `last_event_date`) | The most recent named Wyckoff event the viewer detected — one of the ~27 canonical events (Appendix "Wyckoff canonical vocabulary"), e.g. `spring`, `sos`, `sow`, `ut`/`utad`, `jac`, `lps`, `lpsy`, `bu`, `ice_break` — and its date | Primary source for the current-session confirmed event; recency is read from `last_event_date` relative to the session date |
 | `setup_tags` | The viewer's setup classification (e.g., `phase_c_spring_long`) encoding phase, event, and intended direction | The setup class that corroborates the regime/event reading and seeds direction; consumed by PASS1 as the confirmed setup class |
 | `range` block (`support`, `resistance`, `midpoint`, `type`, `started`, `duration_bars`) | The active trading range the viewer fit, with boundaries and duration | Supporting structural context — candidate support/resistance shelves and range maturity; not a substitute for named-event structural levels |
 
-`last_event_date` governs event recency: a `last_event` whose date is well outside the run's freshness window is historical context, not a current regime assertion, and should not by itself drive a phase reading. A Markdown regime requires a confirmed SOW in `last_event` / `setup_tags`; a stale or absent SOW under a Markdown regime forces the flagged-reading exchange via the SOW-gated-markdown force-flag.
+`last_event_date` governs event recency: a `last_event` whose date is well outside the run's freshness window is historical context, not a current regime assertion, and should not by itself drive a phase reading. A `markdown` regime requires a confirmed `sow` in `last_event` / `setup_tags`; a stale or absent `sow` under a `markdown` regime forces the flagged-reading exchange via the SOW-gated-markdown force-flag.
 
 **The estimation path — propose-confirm protocol.**
 
@@ -108,19 +108,19 @@ A phase proposal reads: *"Based on [metric observations], I read [TICKER] as [ph
 
 **Event confirmation is a separate, lighter-weight exchange.**
 
-Phase confirmation establishes the broad regime (Accumulation, Markup, Distribution, Markdown). Event confirmation establishes a specific named landmark within or adjacent to that regime (Spring, SOS, SOW, Upthrust, AR_TOP). The two are independent: the operator may confirm a phase without confirming any specific event, or may confirm an event (particularly SOS or SOW for the directional fallback) while deferring full phase confirmation. An event proposal reads: *"I observe characteristics consistent with a [event name] on [TICKER] — [metric reasoning]. Confirm?"* Event confirmation does not update the phase reading; phase confirmation does not retroactively confirm events unless the operator explicitly names them.
+Regime confirmation establishes the cycle-stage (one of the seven regimes) and, where a range is active, the schematic phase (A–E). Event confirmation establishes a specific named landmark from the canonical vocabulary (e.g. `spring`, `sos`, `sow`, `ut`/`utad`, `lps`/`lpsy`, `ar_dist`). The two are independent: the operator may confirm a regime/phase without confirming any specific event, or may confirm an event (particularly `sos` or `sow` for the directional fallback) while deferring full regime confirmation. An event proposal reads: *"I observe characteristics consistent with a [event name] on [TICKER] — [metric reasoning]. Confirm?"* Event confirmation does not update the phase reading; phase confirmation does not retroactively confirm events unless the operator explicitly names them.
 
 **The priority order governs readings when multiple event signals appear in the same session.**
 
-When price action presents evidence of more than one event type in the same period, the priority order determines which event is treated as regime-setting for the phase proposal: Selling Climax → Spring → Sign of Strength → Buying Climax → Upthrust → Sign of Weakness. This priority is not a recommendation to ignore lower-priority signals — all observed signals should appear in the proposal reasoning — but the dominant phase reading derives from the highest-priority event present. The operator may confirm a lower-priority event as regime-setting if the reading better fits their judgment; the runtime accepts that correction without resistance.
+When price action presents evidence of more than one event type in the same period, the priority order determines which event is treated as regime-setting for the proposal: `sc` → `spring` → `sos` → `bc` → `ut`/`utad` → `sow`. This priority is not a recommendation to ignore lower-priority signals — all observed signals should appear in the proposal reasoning — but the dominant phase reading derives from the highest-priority event present. The operator may confirm a lower-priority event as regime-setting if the reading better fits their judgment; the runtime accepts that correction without resistance.
 
 **The session-start state for all tickers is UNKNOWN.**
 
 No Wyckoff reading carries forward from a prior conversation. At the start of every session, every ticker is UNKNOWN regardless of what was confirmed previously. The runtime does not assert a prior-session phase as a starting point, does not ask the operator to re-confirm a reading from yesterday, and does not treat the operator's mention of a prior reading ("we confirmed accumulation on AAPL last week") as confirmation for the current session. If the operator states a phase directly at session start without running propose-confirm or receiving a pipeline-accepted reading, the runtime treats that statement as an operator-declared override rather than a propose-confirm confirmation; the behavioral consequence is the same (the stated phase becomes authoritative), but the runtime notes that the reading was declared rather than pipeline-accepted or propose-confirmed, which informs the data-quality surface in the report.
 
-**Markdown requires a confirmed Sign of Weakness; soft markdown without SOW is not active.**
+**Markdown requires a confirmed `sow`; soft markdown without `sow` is not active.**
 
-A ticker does not enter a Markdown reading without a confirmed SOW event. This applies on both paths: a viewer `regime` of Markdown without a confirmed SOW in `last_event` / `setup_tags` triggers the SOW-gated-markdown force-flag and the flagged-reading exchange rather than auto-accepting. Distribution can persist — and the distribution-phase behavioral consequences apply — without a confirmed SOW. The transition from Distribution to Markdown is SOW-gated on both paths. Soft markdown (distribution rolling into markdown without explicit weakness confirmation) is disabled in the runtime by default.
+A ticker does not enter a `markdown` reading without a confirmed `sow` event. This applies on both paths: a viewer `regime` of `markdown` without a confirmed `sow` in `last_event` / `setup_tags` triggers the SOW-gated-markdown force-flag and the flagged-reading exchange rather than auto-accepting. `distribution` can persist — and the distribution behavioral consequences apply — without a confirmed `sow`. The transition from `distribution` to `markdown` is `sow`-gated on both paths. Soft markdown (distribution rolling into markdown without explicit weakness confirmation) is disabled in the runtime by default.
 
 **Phase succession requires that the prior phase has been present for a meaningful period.**
 
@@ -136,11 +136,11 @@ A Wyckoff proposal requires sufficient price history to establish support and re
 
 **Structural levels from the viewer are supporting context, not named Wyckoff anchors.**
 
-The viewer reading's `range` block returns `support`, `resistance`, and `midpoint` as the boundaries of the fitted trading range, plus `type`, `started`, and `duration_bars` for range maturity. These are generic range-fit levels. There is no mapping from `range.support` to SC low, AR_TOP low, or any named Wyckoff anchor. Treat them as supporting technical context only. Named Wyckoff structural levels (SC low, AR high, Spring low, BC high, AR_TOP low, etc.) must be identified from the named event in `last_event` and the OHLCV history, not from the `range` boundaries.
+The viewer reading's `range` block returns `support`, `resistance`, and `midpoint` as the boundaries of the fitted trading range, plus `type`, `started`, and `duration_bars` for range maturity. These are generic range-fit levels. There is no mapping from `range.support` to `sc` low, `ar_dist` low, or any named Wyckoff anchor. Treat them as supporting technical context only. Named Wyckoff structural levels (`sc` low, `ar` high, `spring` low, `bc` high, `ar_dist` low, etc.) must be identified from the named event in `last_event` and the OHLCV history, not from the `range` boundaries.
 
 **When the viewer-ingest path is not taken, all unconfirmed tickers degrade conservatively.**
 
-An unconfirmed ticker — one that is UNKNOWN, pipeline-flagged and deferred, or on the estimation path with no operator confirmation — reads as UNKNOWN for all downstream triggers. The behavioral consequences of UNKNOWN are identical across all dependent triggers: the Wyckoff veto fires as if the phase were Distribution or Markdown, the sizing band ceiling closes to the conditional floor, and the directional fallback reads NEUTRAL. There is no middle state where some triggers engage and others do not based on partial metric evidence. `pipeline-accepted` is the only non-operator-confirmation status that preserves full trigger engagement.
+An unconfirmed ticker — one that is UNKNOWN, pipeline-flagged and deferred, or on the estimation path with no operator confirmation — reads as UNKNOWN for all downstream triggers. The behavioral consequences of UNKNOWN are identical across all dependent triggers: the Wyckoff veto fires as if the regime were `distribution` or `markdown`, the sizing band ceiling closes to the conditional floor, and the directional fallback reads NEUTRAL. There is no middle state where some triggers engage and others do not based on partial metric evidence. `pipeline-accepted` is the only non-operator-confirmation status that preserves full trigger engagement.
 
 
 ## Workflow integration
@@ -178,17 +178,17 @@ On the viewer-ingest path the inputs arrive in the pasted handoff row; on the es
 
 | Output | Consumed by | What the downstream file does with it |
 |---|---|---|
-| Confirmed phase (Accumulation / Markup / Distribution / Markdown / UNKNOWN) | `SIGNAL_v3.0.md` | Drives the Wyckoff veto firing condition (heuristic 1); sets the entry-time phase snapshot for the Regime exit advisory (heuristic 6) |
-| Confirmed phase | `RISK_v3.0.md` | Sets the sizing-band ceiling: Markup authorizes the upper band; Accumulation post-Spring authorizes the conditional range; Accumulation pre-Spring caps at the conditional floor; Distribution and Markdown close the long-premium band; UNKNOWN is treated as the most conservative case |
-| Confirmed phase | `DEALER_v3.0.md` | The ticker's DGPI tier narrows within the Wyckoff ceiling, never above it; Distribution and Markdown close the long-premium band regardless of how supportive the dealer regime reads |
-| Confirmed Spring event | `SIGNAL_v3.0.md` | Distinguishes accumulation-pre-Spring (Wyckoff veto fires) from accumulation-post-Spring (eligible for long-premium entry) within heuristic 1 |
-| Confirmed SOS event | `SIGNAL_v3.0.md` | Drives the directional fallback to BULLISH when primary directional signals are absent or in conflict (heuristic 11) |
-| Confirmed SOW event | `SIGNAL_v3.0.md` | Drives the directional fallback to BEARISH (heuristic 11); also gates the Markdown phase reading (no markdown without confirmed SOW) |
-| Confirmed phase succession (unfavorable direction) | `SIGNAL_v3.0.md` | Fires the Regime exit advisory when the entry-time phase has rolled to a less-supportive phase (heuristic 6) |
+| Confirmed regime (one of seven) + phase (A–E); UNKNOWN session-state | `SIGNAL_v3.0.md` | Drives the Wyckoff veto firing condition (heuristic 1); sets the entry-time regime+phase snapshot for the Regime exit advisory (heuristic 6) |
+| Confirmed regime + phase | `RISK_v3.0.md` | Sets the sizing-band ceiling per the Appendix decision layer: `markup` and `reaccumulation` (post-phase-C) authorize the upper band; `accumulation` post-phase-C the conditional range, pre-phase-C the conditional floor; `distribution`/`redistribution`/`markdown` close the long-premium band; `ranging_undefined` and UNKNOWN are the most conservative case |
+| Confirmed regime | `DEALER_v3.0.md` | The ticker's DGPI tier narrows within the Wyckoff ceiling, never above it; `distribution`, `redistribution`, and `markdown` close the long-premium band regardless of how supportive the dealer regime reads |
+| Confirmed `spring` event (phase C) | `SIGNAL_v3.0.md` | Distinguishes pre-phase-C `accumulation`/`reaccumulation` (Wyckoff veto fires) from post-phase-C (eligible for long-premium entry) within heuristic 1 |
+| Confirmed `sos` / `jac` event | `SIGNAL_v3.0.md` | Drives the directional fallback to BULLISH when primary directional signals are absent or in conflict (heuristic 11) |
+| Confirmed `sow` / `ice_break` event | `SIGNAL_v3.0.md` | Drives the directional fallback to BEARISH (heuristic 11); `sow` also gates the `markdown` regime reading (no markdown without confirmed `sow`) |
+| Confirmed regime/phase succession (unfavorable) | `SIGNAL_v3.0.md` | Fires the Regime exit advisory on an unfavorable regime move or phase regression per the Appendix succession graph (heuristic 6) |
 | Confirmed structural levels (support shelf, resistance shelf, range boundaries) | `SIGNAL_v3.0.md` | Candidate alert-price anchors for the Stop alert and Profit target alert when no dealer wall is closer; the Wyckoff structural level is the fallback anchor |
-| Confirmed phase and events | `PASS1_SCREENING_v3.0.md` | Phase gates the eligible-set determination; UNKNOWN tickers are screened as if in distribution or markdown for long-premium eligibility |
-| Confirmed phase and events | `PASS2_VALIDATION_v3.0.md` | Phase and event confirmation status is carried into structure validation context |
-| Confirmed phase and confirmation status | `REPORT_FORMAT_v3.0.md` | Rendered in the Wyckoff regime field of the recommendation row; confirmation status (pipeline-accepted / confirmed / declared / pipeline-flagged / unconfirmed) surfaces in the data-quality section |
+| Confirmed regime, phase, and events | `PASS1_SCREENING_v3.0.md` | Regime gates the eligible-set determination; `ranging_undefined`/UNKNOWN tickers are screened as the most conservative case for long-premium eligibility |
+| Confirmed regime, phase, and events | `PASS2_VALIDATION_v3.0.md` | Regime/phase/event confirmation status is carried into structure validation context |
+| Confirmed regime + phase and confirmation status | `REPORT_FORMAT_v3.0.md` | Rendered in the Wyckoff regime field of the recommendation row; confirmation status (pipeline-accepted / confirmed / declared / pipeline-flagged / unconfirmed) surfaces in the data-quality section |
 
 **Cross-references this file expects to be honored.**
 
@@ -201,6 +201,8 @@ On the viewer-ingest path the inputs arrive in the pasted handoff row; on the es
 
 
 ## Legacy anchors (for legend citations and back-compat)
+
+> **Historical note (v4.0 model change).** The anchors below describe the superseded **four-phase** model (Accumulation → Markup → Distribution → Markdown) and its v2.3 event codes (including `AR_TOP`, now `ar_dist`). They are preserved **verbatim** for legend citations and back-compat — do not rewrite them. The canonical model is now the two-axis **regime (7) + phase (A–E) + event** vocabulary embedded in the Appendix ("Wyckoff canonical vocabulary"). Where an anchor points to "the Appendix phase-succession table," read that as the Appendix **"Regime model and succession graph"**; any Title-case phase name below maps to its lowercase regime token, and `AR_TOP` maps to `ar_dist`.
 
 **WYCKOFF_PHASE_001** → § Operational heuristics, "The minimum history guard applies before any proposal is made." The v2.3 rule enforced a hard minimum-bars constraint (`min_bars_in_range = 20`) that aborted all event and phase detection on insufficient history. The LLM runtime analog is the qualitative history guard in the heuristic: proposals on thin history are marked low-confidence rather than refused, because the operator can supply judgment the tool surface cannot. The specific bar-count threshold lives in `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` (forthcoming). Body-text references in legacy report legends remain valid.
 
@@ -257,53 +259,123 @@ On the viewer-ingest path the inputs arrive in the pasted handoff row; on the es
 
 ## Appendix — formulas and reference tables
 
-**Phase vocabulary and succession sequence.**
+**Wyckoff canonical vocabulary (verbatim from the viewer/v2 glossary, 2026-06-27).**
 
-The four recognized phases cycle in a defined order. The succession sequence is the authoritative reference for phase-change proposals and regime exit advisory readings.
+This is the single source of truth for the regime, phase, and event vocabulary; the body of this file does not paraphrase it. The viewer/v2 producer emits these exact values; the KB consumes them. (The KB *decision layer* — eligibility, sizing, advisory — is the next subsection and is the KB's own.)
 
-| Phase | Regime character | Authorized entry structures | Sizing-band ceiling | Succeeds to |
-|---|---|---|---|---|
-| Accumulation (pre-Spring) | Range-bound; supply being absorbed; no confirmed breakout | Conditional — long-premium refused per Wyckoff veto; CSPs, hedges, LEAPs eligible | Conditional floor | Accumulation post-Spring (Spring confirmation within phase) or Markup (SOS confirmation) |
-| Accumulation (post-Spring) | Range-bound; Spring confirmed; demand beginning to dominate | Long-premium eligible subject to other regime gates | Conditional range — top of conditional | Markup |
-| Markup | Trending higher; demand in control; SOS confirmed breakout | Long-premium fully eligible | Upper band | Distribution |
-| Distribution | Range-bound at highs; supply re-entering; BC confirmed | Long-premium refused per Wyckoff veto; eligible set redirected | Long-premium band closed | Markdown (SOW required) |
-| Markdown | Trending lower; supply in control; SOW confirmed breakdown | Long-premium refused; structures targeting opposite direction eligible | Long-premium band closed | Accumulation (next SC) |
-| UNKNOWN | No confirmed reading in current session | Treated as most conservative case — same as Distribution/Markdown for entry purposes | Long-premium band closed | Any phase (first confirmed reading on either path resolves) |
+*Regime.*
 
-Allowed transitions: Accumulation → Markup → Distribution → Markdown → Accumulation. No other transitions are recognized. A proposed phase change that skips a step in the cycle (e.g., Accumulation → Distribution directly) is not a valid succession; the proposal should name the intermediate phase as either compressed or unobserved and invite operator judgment.
+| Term | Definition | How to read |
+|---|---|---|
+| `accumulation` | A basing range after a downtrend or flat tape; demand absorbing supply. | Bullish base. Best long setups come from its phase-C springs and phase-D LPS. |
+| `reaccumulation` | A consolidation that interrupts an existing uptrend, then resolves higher. | Highest-odds continuation context — best upside target hit-rates. AMD-style markup pauses. |
+| `distribution` | A topping range after an uptrend; supply absorbing demand. | Bearish top. Short setups from phase-C UTADs and phase-D LPSY. |
+| `redistribution` | A consolidation that interrupts a downtrend, then resolves lower. | Continuation-down context. |
+| `markup` | A confirmed uptrend outside any range (trend up, strength ≥ 0.35). | Long-continuation bias while structure holds. Targets carry from the last closed range for 60 bars. |
+| `markdown` | A confirmed downtrend outside any range. | Short-continuation bias — unless a post-climax V-thrust suspends it. |
+| `ranging_undefined` | No range and no qualifying trend. | Stand aside — conviction floored at ~0.15. |
 
-**Event-to-phase mapping and priority order.**
+*Phase.*
 
-When multiple events are observed in the same session period, the priority order determines which event is regime-setting for the phase proposal. Lower-priority events are included in the proposal reasoning as supporting or qualifying context.
+| Term | Definition | How to read |
+|---|---|---|
+| `Phase A` | Stopping action: the climax (SC/BC) and automatic rally/reaction halt the prior trend. | The range is being born; no actionable setup yet. |
+| `Phase B` | Building the cause: the range oscillates while supply/demand rebalance. | Cause accumulating; wait for the phase-C test. |
+| `Phase C` | The decisive test — spring/shakeout (acc) or UTAD (dist). | The highest-information moment; the test sets direction. |
+| `Phase D` | Strength (SOS/JAC) or weakness (SOW/ice) confirms the test direction; LPS/LPSY retests. | The actionable entry window — retests over breakout chases. |
+| `Phase E` | Emergence: price sustains beyond the boundary and the range closes. | Trend underway; the engine flips to markup/markdown. |
 
-| Priority | Event | Phase signal | Directional implication |
+*Event.*
+
+| Term | A.k.a. | Definition | How to read |
 |---|---|---|---|
-| 1 | Selling Climax (SC) | → Accumulation begins | Bullish setup forming (not yet confirmed) |
-| 2 | Spring | → Accumulation (confirms phase C character) | Bullish — accumulation completing |
-| 3 | Sign of Strength (SOS) | → Markup begins | Bullish — confirmed breakout |
-| 4 | Buying Climax (BC) | → Distribution begins | Bearish setup forming (not yet confirmed) |
-| 5 | Upthrust (UT) | → Distribution (confirms failed breakout character) | Bearish — distribution completing |
-| 6 | Sign of Weakness (SOW) | → Markdown begins | Bearish — confirmed breakdown |
-| — | Automatic Rally (AR) | Accumulation context — first post-SC reaction | Neutral — range upper boundary reference |
-| — | AR_TOP | Distribution context — first post-BC reaction | Neutral — range lower boundary reference |
+| `ps` | Preliminary Support | Preliminary Support — early demand before the climax (retro-scanned). | First sign selling is being met. |
+| `sc` | Selling Climax | Selling Climax — climactic-volume capitulation low (vol z ≥ 2, new 60-bar low, ≥ 3 ATR drop). | Panic bottom that seeds an accumulation range. |
+| `ar` | Automatic Rally | Automatic Rally — the ≥ 2 ATR snap-back within 20 bars after the SC. | Sets the range's resistance. |
+| `st` | Secondary Test | Secondary Test — price revisits the climax extreme on lighter volume. | Confirms demand; completes stopping action (A→B). |
+| `spring` |  | A penetration below support that recovers back inside. | Bullish test — shakes out weak holders before markup. Type 1–3 by depth/volume. |
+| `shakeout` |  | A deep, high-volume spring variant. | Aggressive Type-1 spring; strong reversal evidence. |
+| `test` |  | A successful secondary test of a spring low on ≤ 0.7× spring volume. | Confirms the spring held. (Backtest: re-tested springs slightly underperform.) |
+| `sos` | Sign of Strength | Sign of Strength — a wide-spread, high-volume bar crossing the midpoint up. | Demand in control; C→D. Note: standalone breakout chases carry no proven edge. |
+| `jac` | Jump Across the Creek | Jump Across the Creek — a boundary break that holds ≥ 1 ATR for 5 bars. | Decisive upside continuation; bypasses the location guard. |
+| `lps` | Last Point of Support | Last Point of Support — support holding on diminishing volume in phase C/D. | The textbook lower-risk long entry before breakout. |
+| `bu` | Back-Up | Back-Up (to the creek) — a low-volume retest of broken resistance after the range closes. | The post-breakout pullback entry. |
+| `psy` | Preliminary Supply | Preliminary Supply — early supply before the buying climax (retro-scanned). | First sign buying is being met. |
+| `bc` | Buying Climax | Buying Climax — climactic-volume blow-off high. | Euphoric top that seeds a distribution range. |
+| `ar_dist` | Automatic Reaction | Automatic Reaction — the ≥ 2 ATR drop after the BC. | Sets the range's support. |
+| `st_dist` | Secondary Test (distribution) | Secondary Test of supply near the BC high. | Confirms supply; completes stopping action. |
+| `ut` |  | Upthrust — a penetration above resistance that fails back inside. | Bearish test; traps breakout buyers. |
+| `utad` |  | Upthrust After Distribution — a UT in a mature (≥ 25-bar) range. | High-conviction reversal-down marker; the short-side analog of a spring. |
+| `sow` | Sign of Weakness | Sign of Weakness — a wide-spread, high-volume bar crossing the midpoint down. | Supply in control; C→D on the short side. |
+| `msow` |  | Minor Sign of Weakness — a lower-conviction SOW variant. | Weaker breakdown evidence. |
+| `lpsy` | Last Point of Supply | Last Point of Supply — a failed rally on light volume in phase D. | The lower-risk short entry before breakdown (research-only edge). |
+| `ice_break` | Ice Break | Ice Break — a downside boundary break that holds ≥ 1 ATR for 5 bars. | Decisive downside continuation. |
+| `breakout_confirmed` |  | Price sustained ≥ 1.5 ATR above resistance; the range closes up. | Confirms markup; (no excess edge chasing it — wait for the BU). |
+| `breakdown_confirmed` |  | Price sustained ≥ 1.5 ATR below support; the range closes down. | Confirms markdown. |
+| `no_demand` |  | An up-bar on narrow spread + low volume closing weak. | Rally with no conviction — supply may be near. |
+| `no_supply` |  | A down-bar on narrow spread + low volume closing strong. | Decline with no conviction — demand may be near. |
+| `stopping_volume` |  | A down-bar with vol z ≥ 2 closing in the upper third. | Supply being absorbed; potential turn. |
+| `effort_vs_result` |  | High volume + narrow spread + close near mid. | Effort without progress — a stall/absorption signal. |
 
-AR and AR_TOP are not regime-setting events. They are structural landmarks that define range boundaries and inform support/resistance shelf identification for the proposal reasoning.
+*Concept.*
+
+| Term | Definition | How to read |
+|---|---|---|
+| `creek` | Wyckoff name for range resistance in accumulation. | Price must 'jump the creek' (JAC) to break out. |
+| `ice` | Wyckoff name for range support in distribution. | The 'ice' must crack (ice_break) for a breakdown. |
+| `composite operator` | The idealized 'smart money' whose accumulation/distribution the schematics model. | A mental model: read the chart as the composite operator's campaign. |
+| `cause & effect` | Time spent building a range (cause) projects the size of the ensuing move (effect). | Underlies the range-height target geometry (0.5/1.0/1.5 × height). |
+| `effort vs result` | Volume (effort) should agree with price progress (result); divergence warns. | High effort + small result = absorption (see the effort_vs_result event). |
+| `spring type` | Spring strength 1–3: type 1 deep/high-vol, type 3 shallow/low-vol. | Type 1 (shakeout) is the strongest reversal evidence. |
+
+**Regime model and succession graph (KB decision layer — not from the glossary).**
+
+The regime is the cycle-stage axis; the phase (A–E) is the schematic stage within a range. The strict four-phase cycle is replaced by a graph — `reaccumulation`/`redistribution` are continuation branches, not steps in a loop. Eligibility and sizing key on the regime; the phase gates *when* to act within an eligible regime (phase C confirms the test, phase D is the entry window).
+
+| Regime | Long-premium eligibility | Sizing-band ceiling | Unfavorable move (fires the Regime exit advisory) |
+|---|---|---|---|
+| `accumulation` | gated — refused pre-phase-C; eligible at phase C (`spring`) / phase D (`lps`) | conditional floor pre-C → top-of-conditional post-C | → `ranging_undefined`, `distribution`, or `markdown` |
+| `reaccumulation` | eligible post-phase-C (highest-odds continuation) | **upper band** | → `distribution` / `redistribution` |
+| `markup` | fully eligible | upper band | → `distribution` (on `bc`/`ut`) |
+| `distribution` | refused (veto); eligible set redirected | long-premium band closed | (already refused) |
+| `redistribution` | refused | long-premium band closed | (already refused) |
+| `markdown` | refused (`sow`-gated) | long-premium band closed | (already refused) |
+| `ranging_undefined` | stand aside | conviction floored (~0.15) | n/a |
+
+**Favorable moves** (the advisory does not fire): `accumulation`/`reaccumulation` → `markup` (on `sos`/`jac`); `markdown` → `accumulation` (on `sc`, reversal). The Regime exit advisory (PORTFOLIO) fires on an **unfavorable regime move** (toward the refusal set) **or a phase regression** (D → B/A). `UNKNOWN` is a session-state (no read this session), treated as the most conservative case — it is not a node in this graph; `ranging_undefined` is the confirmed stand-aside node. A proposed regime change is judged against this graph, not a fixed cycle; a move that skips expected intermediate context is named as compressed or unobserved and invites operator judgment.
+
+**Event-to-regime/phase mapping and priority order.**
+
+When multiple events are observed in the same period, the priority order determines which is regime-setting for the proposal; lower-priority and non-regime-setting events are included as supporting context. These regime-setting events are the subset the estimation path can reach from OHLCV; the entry-timing and VSA events (`jac`, `lps`, `lpsy`, `bu`, `ice_break`, `no_demand`, …) are viewer-detected and read from "Wyckoff canonical vocabulary" above.
+
+| Priority | Event | Regime / phase signal | Directional implication |
+|---|---|---|---|
+| 1 | `sc` (Selling Climax) | → `accumulation` begins (phase A) | Bullish setup forming (not yet confirmed) |
+| 2 | `spring` (or `shakeout`) | `accumulation`/`reaccumulation` phase C confirmed | Bullish — test held |
+| 3 | `sos` (Sign of Strength) | phase C → D; → `markup` on emergence | Bullish — strength confirmed |
+| 4 | `bc` (Buying Climax) | → `distribution` begins (phase A) | Bearish setup forming (not yet confirmed) |
+| 5 | `utad` / `ut` (Upthrust) | `distribution` phase C confirmed | Bearish — test held (short-side analog of `spring`) |
+| 6 | `sow` (Sign of Weakness) | phase C → D; → `markdown` on emergence (`sow`-gated) | Bearish — weakness confirmed |
+| — | `ar` / `ar_dist` (Automatic Rally / Reaction) | range-boundary landmark (post-`sc` / post-`bc`) | Neutral — resistance / support shelf reference |
+
+`ar` and `ar_dist` are not regime-setting events; they are structural landmarks that define range boundaries and inform support/resistance shelf identification for the proposal reasoning.
 
 **Event reading guide — qualitative patterns for proposal assembly.**
 
-The following table translates v2.3 event detection logic into the qualitative price/volume patterns the runtime reads from the live-delivered metrics to assemble a proposal. Specific z-score thresholds and configuration parameters are in `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` (forthcoming).
+The following table is the estimation-path detection subset — the regime-setting events the runtime can reason to from live price/volume metrics. The full canonical event vocabulary (including the entry-timing and VSA events the viewer detects) is in "Wyckoff canonical vocabulary" above; this table gives the qualitative price/volume patterns for assembling a proposal. Specific z-score thresholds and configuration parameters are in `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` (forthcoming).
 
 | Event | Price pattern | Volume pattern | Prior context required | Notes |
 |---|---|---|---|---|
-| Selling Climax (SC) | Wide-range bar; close recovers off the bar low (closes in upper half of bar) | Volume well above recent average — a spike relative to the period | Prior declining trend strengthens the reading; SC without prior downtrend is a weaker proposal | Regime-setting: → Accumulation. First event in the accumulation structure |
-| Automatic Rally (AR) | First meaningful up-close after SC; range expansion relative to nearby bars | Above-average range; volume need not spike | SC must be established | Not regime-setting. Defines the upper boundary of the accumulation range (resistance shelf) |
-| Spring | Price briefly pierces the established support shelf (SC low area), then recovers back inside the range within one or two bars; closes in the upper portion of the bar | Above-average volume on the break and recovery — not required to be a spike but should be above recent baseline | Accumulation must be established (SC must exist); support shelf must be defined | Regime-setting within accumulation: confirms accumulation phase C character. Spring confirmation is what unlocks post-Spring long-premium eligibility per SIGNAL's Wyckoff veto. Only the first Spring in a period is regime-setting |
-| Sign of Strength (SOS) | Close above the established resistance shelf (AR high area) on a range-expansion bar | Above-average range expansion; volume expansion reinforces the reading | Accumulation or Markdown prior regime strengthens eligibility; SOS in a Distribution or Markup prior regime is a contradictory signal and should be flagged in the proposal | Regime-setting: → Markup. Closes the accumulation phase. SOS confirmation is a directional fallback input for SIGNAL heuristic 11 (BULLISH) |
-| Buying Climax (BC) | Wide-range bar; close near the bar high (closes in upper portion) | Volume well above recent average — a spike | Prior uptrending context strengthens the reading; BC without prior uptrend is a weaker proposal | Regime-setting: → Distribution. First event in the distribution structure |
-| AR_TOP | First meaningful down-close after BC; range expansion relative to nearby bars | Above-average range | BC must be established | Not regime-setting. Defines the lower boundary of the distribution range (support shelf). Distribution-side analog of AR |
-| Upthrust (UT) | Price briefly pierces the established resistance shelf (BC high area), then fails to hold above it within one or two bars; closes in the lower portion of the bar | Volume not required to spike; weak close is the primary signal | Distribution must be established (BC must exist); resistance shelf must be defined | Regime-setting within distribution: confirms distribution phase C character. Distribution-side analog of Spring. Only the first UT in a period is regime-setting |
-| Sign of Weakness (SOW) | Close below the established support shelf (AR_TOP low area) on a range-expansion bar | Above-average range expansion | Distribution or Markup prior regime strengthens eligibility; SOW in an Accumulation or Markdown prior regime is a contradictory signal | Regime-setting: → Markdown. Closes the distribution phase. Required for Markdown — soft markdown without SOW is not active. SOW confirmation is a directional fallback input for SIGNAL heuristic 11 (BEARISH) |
-| Secondary Test (ST) | Low-volume revisit of the SC or BC area without breaking the prior extreme | Volume noticeably below the SC or BC bar — contraction is the signal | SC (for accumulation ST) or BC (for distribution ST) must be established | Not delivered by the viewer/v2 tool surface — no active detection branch. May appear in proposal reasoning as supporting context only; never proposed as a confirmed event |
+| Selling Climax (`sc`) | Wide-range bar; close recovers off the bar low (closes in upper half of bar) | Volume well above recent average — a spike relative to the period | Prior declining trend strengthens the reading; `sc` without prior downtrend is a weaker proposal | Regime-setting: → `accumulation` (phase A). First event in the accumulation structure |
+| Automatic Rally (`ar`) | First meaningful up-close after SC; range expansion relative to nearby bars | Above-average range; volume need not spike | `sc` must be established | Not regime-setting. Defines the upper boundary of the accumulation range (resistance shelf) |
+| Spring (`spring`) | Price briefly pierces the established support shelf (SC low area), then recovers back inside the range within one or two bars; closes in the upper portion of the bar | Above-average volume on the break and recovery — not required to be a spike but should be above recent baseline | `accumulation` must be established (`sc` must exist); support shelf must be defined | Regime-setting within accumulation: confirms accumulation phase C character. `spring` confirmation is what unlocks post-spring long-premium eligibility per SIGNAL's Wyckoff veto. Only the first `spring` in a period is regime-setting |
+| Sign of Strength (`sos`) | Close above the established resistance shelf (`ar` high area) on a range-expansion bar | Above-average range expansion; volume expansion reinforces the reading | `accumulation` or `markdown` prior regime strengthens eligibility; `sos` in a `distribution` or `markup` prior regime is a contradictory signal and should be flagged in the proposal | Regime-setting: phase C→D; → `markup` on emergence. Closes the accumulation phase. `sos` confirmation is a directional fallback input for SIGNAL heuristic 11 (BULLISH) |
+| Buying Climax (`bc`) | Wide-range bar; close near the bar high (closes in upper portion) | Volume well above recent average — a spike | Prior uptrending context strengthens the reading; `bc` without prior uptrend is a weaker proposal | Regime-setting: → `distribution` (phase A). First event in the distribution structure |
+| Automatic Reaction (`ar_dist`) | First meaningful down-close after BC; range expansion relative to nearby bars | Above-average range | `bc` must be established | Not regime-setting. Defines the lower boundary of the distribution range (support shelf). Distribution-side analog of `ar` |
+| Upthrust (`ut`) | Price briefly pierces the established resistance shelf (BC high area), then fails to hold above it within one or two bars; closes in the lower portion of the bar | Volume not required to spike; weak close is the primary signal | `distribution` must be established (`bc` must exist); resistance shelf must be defined | Regime-setting within distribution: confirms distribution phase C character. Distribution-side analog of `spring`. Only the first `ut` in a period is regime-setting |
+| Upthrust After Distribution (`utad`) | An Upthrust occurring in a mature (≥ 25-bar) distribution range | As `ut` — weak close after piercing resistance | Mature `distribution` range established | High-conviction reversal-down marker — the short-side analog of a `spring`; the distribution phase-C test |
+| Sign of Weakness (`sow`) | Close below the established support shelf (`ar_dist` low area) on a range-expansion bar | Above-average range expansion | `distribution` or `markup` prior regime strengthens eligibility; `sow` in an `accumulation` or `markdown` prior regime is a contradictory signal | Regime-setting: phase C→D; → `markdown` on emergence. Closes the distribution phase. Required for `markdown` — soft markdown without `sow` is not active. `sow` confirmation is a directional fallback input for SIGNAL heuristic 11 (BEARISH) |
+| Secondary Test (`st` / `st_dist`) | Low-volume revisit of the SC or BC area without breaking the prior extreme | Volume noticeably below the SC or BC bar — contraction is the signal | `sc` (for `st`) or `bc` (for `st_dist`) must be established | Not regime-setting — confirms the stopping action and completes phase A→B. Viewer-detected; may also appear in proposal reasoning as supporting context |
 
 **`get_wyckoff_scan` and `get_batch_wyckoff_scan` — features block output fields.**
 
@@ -344,14 +416,14 @@ Wyckoff structural levels are the price anchors that emerge from the phase and e
 
 | Level | Definition | Phase context | SIGNAL use |
 |---|---|---|---|
-| Support shelf | Low established by SC (accumulation) or AR_TOP (distribution); the price area the range has held above | Accumulation, Distribution | Stop alert anchor when spot is above support and the position is long |
-| Resistance shelf | High established by AR (accumulation) or BC high (distribution); the price area the range has held below | Accumulation, Distribution | Profit target anchor when the position is long and resistance is the next structural ceiling |
-| Spring low | The intrabar low of the Spring bar; defines the tested-and-rejected support extreme | Accumulation post-Spring | Tight stop anchor for long entries entered after Spring confirmation |
-| Upthrust high | The intrabar high of the UT bar; defines the tested-and-rejected resistance extreme | Distribution | Reference level for short-structure entries |
-| Creek | The resistance shelf in accumulation — synonymous with the AR high area; the level a SOS close must exceed | Accumulation | Breakout confirmation reference; Profit target anchor zone for entries made before SOS |
-| Projected markup target | Estimated by adding the accumulation range height to the Creek level; a width-of-range projection | Post-SOS Markup | Profit target anchor zone for long entries confirmed by SOS; expressed as a zone, not a precise price |
-| Distribution range upper | BC high or UT high — the upper boundary of the distribution range | Distribution | Reference for short-structure entries; Stop alert anchor for short positions |
-| Distribution range lower | AR_TOP low or SOW level — the lower boundary of the distribution range | Distribution, Markdown | Breakdown confirmation reference; Profit target anchor zone for short entries |
+| Support shelf | Low established by `sc` (accumulation) or `ar_dist` (distribution); the price area the range has held above | `accumulation`, `distribution` | Stop alert anchor when spot is above support and the position is long |
+| Resistance shelf | High established by `ar` (accumulation) or `bc` high (distribution); the price area the range has held below | `accumulation`, `distribution` | Profit target anchor when the position is long and resistance is the next structural ceiling |
+| Spring low | The intrabar low of the `spring` bar; defines the tested-and-rejected support extreme | `accumulation` post-spring | Tight stop anchor for long entries entered after `spring` confirmation |
+| Upthrust high | The intrabar high of the `ut` bar; defines the tested-and-rejected resistance extreme | `distribution` | Reference level for short-structure entries |
+| Creek | The resistance shelf in accumulation — synonymous with the `ar` high area; the level a `sos` close must exceed (`jac` = the confirmed jump across it) | `accumulation` | Breakout confirmation reference; Profit target anchor zone for entries made before `sos` |
+| Projected markup target | Estimated by adding the accumulation range height to the Creek level; a width-of-range projection | post-`sos` `markup` | Profit target anchor zone for long entries confirmed by `sos`; expressed as a zone, not a precise price |
+| Distribution range upper | `bc` high or `ut` high — the upper boundary of the distribution range | `distribution` | Reference for short-structure entries; Stop alert anchor for short positions |
+| Distribution range lower (Ice) | `ar_dist` low or `sow` level — the lower boundary of the distribution range (`ice_break` = the confirmed crack below it) | `distribution`, `markdown` | Breakdown confirmation reference; Profit target anchor zone for short entries |
 
 Structural levels are expressed as zones in the report, not as precise prices, until Pass 2 validates the specific level against current chain data. The anti-hallucination floor from GUARDRAILS applies: a Wyckoff structural level is a candidate anchor zone, not a validated strike price.
 
@@ -361,10 +433,10 @@ Non-exhaustive examples of valid propose-confirm exchanges. The operator's confi
 
 | Scenario | Example proposal | Example confirmation | Example correction |
 |---|---|---|---|
-| Viewer-ingest pipeline-accepted | *"Viewer reads AAPL as Accumulation post-Spring — Spring (2026-05-08, confidence 0.82). Proceeding."* | (no response required) | — |
-| Viewer-ingest pipeline-flagged | *"Viewer reads NVDA as Distribution (as of 2026-05-08, confidence 0.52). Flagged because: mid-confidence band (below τ_high) and structure_conflict:true. Accept, override, request independent estimation, or defer?"* | *"Accept"* | *"Override — I see it as Markup now"* |
-| Phase proposal — accumulation pre-Spring (estimation path) | *"Based on AAPL ranging several weeks with RVOL contracting below 1.0 and VSI near zero, SC low from [date] acting as support, no Spring confirmed. I read this as Accumulation pre-Spring. Confirm or correct?"* | *"Confirmed"* / *"Yes"* / *"That's right"* | *"It already had a Spring — I saw it break and recover last Tuesday"* |
-| Phase proposal — markup (estimation path) | *"Based on NVDA closing above the resistance shelf on strong range expansion with RVOL elevated, prior accumulation structure visible from [date range]. I read this as Markup — SOS confirmed. Confirm or correct?"* | *"Confirmed"* | *"No, I think this is a re-test, still in accumulation"* |
+| Viewer-ingest pipeline-accepted | *"Viewer reads AAPL as `accumulation` phase D — `spring` confirmed (2026-05-08, confidence 0.82). Proceeding."* | (no response required) | — |
+| Viewer-ingest pipeline-flagged | *"Viewer reads NVDA as `distribution` (as of 2026-05-08, confidence 0.52). Flagged because: mid-confidence band (below τ_high) and structure_conflict == \"conflict\". Accept, override, request independent estimation, or defer?"* | *"Accept"* | *"Override — I see it as `markup` now"* |
+| Regime/phase proposal — accumulation phase B (estimation path) | *"Based on AAPL ranging several weeks with RVOL contracting below 1.0 and VSI near zero, `sc` low from [date] acting as support, no `spring` confirmed. I read this as `accumulation` phase B (pre-spring). Confirm or correct?"* | *"Confirmed"* / *"Yes"* / *"That's right"* | *"It already had a `spring` — I saw it break and recover last Tuesday"* |
+| Regime/phase proposal — markup (estimation path) | *"Based on NVDA closing above the resistance shelf on strong range expansion with RVOL elevated, prior accumulation structure visible from [date range]. I read this as `markup` — `sos` confirmed. Confirm or correct?"* | *"Confirmed"* | *"No, I think this is a re-test, still in `accumulation`"* |
 | Event confirmation — Spring only | *"TSLA's low today pierced the [price] support level and recovered back above it by close, closing in the upper half of the bar on above-average volume. I observe characteristics consistent with a Spring. Confirm?"* | *"Confirmed"* | *"Volume wasn't there — I wouldn't count that as a Spring"* |
 | Event confirmation — SOS | *"META closed above the [price] resistance shelf on above-average range expansion. I observe characteristics consistent with a Sign of Strength. Confirm?"* | *"Yes, SOS confirmed"* | *"It's close but I want to see one more day — leave it unconfirmed for now"* |
 | Operator declaration (no propose-confirm) | Operator states: *"MSFT is in markup — I confirmed that yesterday"* | Runtime treats this as an operator-declared phase (authoritative for the session); notes in the data-quality surface that the reading was declared rather than pipeline-accepted or propose-confirmed in the current session | — |

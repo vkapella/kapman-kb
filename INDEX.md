@@ -87,8 +87,14 @@ This repository separates runtime and engineering materials:
     KB §A1 layer to the viewer's canonical regime(7)/phase(A–E)/event(~27) glossary (operator-supplied 2026-06-27).
     Design D1–D4 approved (two-axis regime+phase model; lowercase event vocab). **P1 done** — `WYCKOFF_v3.0.md`
     (`kb_version 3.0.5 → 3.0.6`) re-keys the `weekly_agrees`/`structure_conflict` hard force-flags from boolean to the
-    real string value `"conflict"` (they previously could never fire against live data). **P2** (event vocab),
-    **P3** (regime/phase two-axis model), **P4** (dealer/flip vocab) pending under #78.
+    real string value `"conflict"` (they previously could never fire against live data). **P2 + P3 done** (Stage B,
+    WYCKOFF core) — `WYCKOFF_v3.0.md` (`kb_version 3.0.6 → 3.0.7`) embeds the viewer/v2 glossary **verbatim** as the
+    canonical regime(7)/phase(A–E)/event(~27) vocabulary (Appendix), replaces the four-phase cycle with a regime
+    decision-layer + succession **graph** (`reaccumulation`/`redistribution` as continuation branches), re-keys the
+    Principle, validity gate, event-to-regime priority table, event reading guide, structural levels, and
+    propose-confirm examples to the lowercase vocabulary (`AR_TOP`→`ar_dist`), and marks the legacy anchors historical
+    (preserved verbatim). **P4** (dealer/flip vocab) and the **consumer files** (SIGNAL/RISK/PORTFOLIO/PASS1/PASS2/
+    JOURNAL/GUARDRAILS, Stages C–E) remain pending under #78.
 
 ## v3.0 file directory
 
@@ -141,7 +147,7 @@ This repository separates runtime and engineering materials:
 | SYSTEM_PARAMS_v3.0.md | 3.0.2 | active |
 | SIGNAL_v3.0.md | 3.0.2 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.7 | active |
-| WYCKOFF_v3.0.md | 3.0.6 | active |
+| WYCKOFF_v3.0.md | 3.0.7 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.3 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.2 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
@@ -153,7 +159,7 @@ This repository separates runtime and engineering materials:
 | REPORT_TEMPLATE_PASS1_v3.0.html | 3.0.5 | 2026-05-14 |
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.3 | 2026-06-26 |
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
-| WYCKOFF_v3.0.md | 3.0.6 | 2026-06-27 |
+| WYCKOFF_v3.0.md | 3.0.7 | 2026-06-27 |
 | PASS1_SCREENING_v3.0.md | 3.0.7 | 2026-06-27 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.3 | 2026-06-27 |
 | PASS2_VALIDATION_v3.0.md | 3.0.2 | 2026-06-27 |

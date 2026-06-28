@@ -1,5 +1,47 @@
 # KapMan KB Changelog
 
+## 2026-06-27 — Stage 1b: §A1 Wyckoff-vocabulary reconciliation — P2+P3 WYCKOFF core rewrite (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, P2+P3 of 4 (Stage B, WYCKOFF core; substantive; HITL, approved turn-by-turn in session)
+
+The KB adopts the viewer/v2 two-axis Wyckoff model as its own canonical model — **value-preserving**, because
+flattening the viewer's 7 regimes to the legacy 4 phases at ingest would log `reaccumulation` (the viewer's
+highest-hit-rate context) as `markup` and so break the Stage-3 calibration loop the integration exists to build.
+This is the anchor slice (Stage B); the consumer files follow in Stages C–E. #78 stays open (P4 + consumers).
+
+- **`llm_runtime/WYCKOFF_v3.0.md`** (`kb_version 3.0.6 → 3.0.7`):
+  - **Verbatim canonical vocabulary (Appendix).** Embeds the operator-supplied viewer/v2 glossary **byte-faithfully**
+    as the single source of truth — regime (7), phase (A–E), event (~27), and concept tables. The body no longer
+    paraphrases these definitions; it points to the Appendix block.
+  - **Two-axis model.** Principle rewritten to the **regime** (cycle-stage) × **phase** (A–E schematic) axes with
+    events as the landmarks. Seven regimes: `accumulation`, `reaccumulation`, `markup`, `distribution`,
+    `redistribution`, `markdown`, `ranging_undefined`. `UNKNOWN` clarified as a *session-state* (no read this
+    session), distinct from the *confirmed* `ranging_undefined` stand-aside.
+  - **Succession graph (decision layer).** Replaces the strict four-phase cycle with a regime decision-layer table
+    (eligibility + sizing-band ceiling per regime) and a favorable/unfavorable succession **graph** —
+    `reaccumulation`/`redistribution` are continuation branches, not loop steps. The Regime exit advisory fires on
+    an unfavorable regime move (toward the refusal set) or a phase regression (D→B/A).
+  - **Vocabulary re-key.** Validity gate, event-to-regime priority table, event reading guide, structural-levels
+    table, and propose-confirm examples re-keyed to the lowercase vocabulary; `AR_TOP` → `ar_dist` everywhere except
+    legacy anchors; the stale "ST not delivered by the viewer" note corrected (`st`/`st_dist` are in the canonical
+    set); `structure_conflict:true` example corrected to `== "conflict"`.
+  - **Legacy anchors** (`WYCKOFF_PHASE_*` / `WYCKOFF_EVENT_*`) preserved **verbatim** for back-compat (decision D-e),
+    with a single historical note marking the superseded four-phase model and redirecting "phase-succession table"
+    pointers to the new "Regime model and succession graph."
+- **`INDEX.md`** — bumped both version tables (3.0.6 → 3.0.7) and updated the §A1-reconciliation status bullet
+  (P1 + P2 + P3 done; P4 and the consumer files pending).
+
+### Scope notes
+- Pending under #78: **P4** (viewer `dealer_confidence`/`position_vs_flip` vocab vs Schwab Pass-2 dealer-status) and
+  the **consumer files** — SIGNAL/RISK/PORTFOLIO (Stage C), JOURNAL/PASS1/PASS2/GUARDRAILS (Stage D),
+  REPORT_FORMAT/DEALER/SYSTEM_PARAMS (Stage E) — then validate + golden(bullish)+bearish pilot and the
+  `_v3.0 → _v4.0` rename sweep (Stage F).
+- Decisions locked this slice: D-a succession graph; D-b estimation path = regime-setting subset, viewer-ingest =
+  full vocab; D-c `dealer_confidence` (Pass-1) and FULL/LIMITED/INVALID (Pass-2) kept as two layers; D-d GUARDRAILS
+  exempt stays 5 fields (`entry_wyckoff_phase` holds the regime; `entry_phase`/`phase_c_confirmed` non-exempt riders);
+  D-e legacy anchors verbatim.
+- The viewer producer already emits these values correctly; this unit aligns the KB consumer.
+
 ## 2026-06-27 — Stage 1b: §A1 Wyckoff-vocabulary reconciliation — P1 force-flag value fix (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, P1 of 4 (substantive; HITL, approved turn-by-turn in session)
