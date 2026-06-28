@@ -1,5 +1,31 @@
 # KapMan KB Changelog
 
+## 2026-06-27 — Stage 1b: §12 PASS2 hygiene — viewer/v2 outputs are Pass-1 context, not Pass-2 truth (closes #77)
+
+### Changed — §12 PASS2 hygiene (substantive; HITL, approved turn-by-turn in session)
+
+The PASS2-review bullet of Integration Plan §12. A read-only audit of `kapman-polygon-viewer` established that
+the viewer emits no `volatility_chain_truncated` flag (it exists only in the plan's §12 note), so the planned
+chain-quality-gate alignment is a no-op; this entry reflects that corrected reality.
+
+- **`llm_runtime/PASS2_VALIDATION_v3.0.md`** (`kb_version 3.0.1 → 3.0.2`) — added the heuristic "When the eligible
+  set arrived via a viewer/v2 handoff, its v2 outputs are Pass-1 context — not Pass-2 truth": the v2
+  `pt_*`/`*_prob` price targets and calibration are not Pass-2 prices (Pass 2 derives the entry-price range from
+  the validated chain and exit anchors from SIGNAL); the viewer IV/flip reads are Pass-1 triage only (Pass 2 uses
+  Schwab ATM IV + the fresh Schwab dealer fetch); Pass 2 classifies the live Schwab chain's quality/truncation
+  itself (PIPELINE_012) and consumes no Pass-1 chain-quality signal — the viewer emits none.
+- **`docs/Kapman_System_Integration_Plan_v1.0.md`** §12 — corrected the PASS2-review bullet: the
+  `isChainTruncated` ↔ `volatility_chain_truncated` alignment is N/A (the viewer emits no such flag; PASS2 owns
+  its own check).
+- **`INDEX.md`** — recorded the PASS2 bump in both version tables and added a §12 status bullet.
+
+### Scope notes
+- Producer-side finding (out of KB scope): the viewer's §A1 data largely exists in
+  `GET /api/scan?include_options=true`, but the user-facing export is column-driven AG-Grid CSV with no envelope; a
+  dedicated Pass-1 JSON export (download + clipboard) is being added to `kapman-polygon-viewer` separately.
+- Out of scope (unchanged): the end-of-Stage-1 `_v3.0 → _v4.0` rename sweep.
+- New v4.0-era cross-references are version-less per the Stage-1 convention.
+
 ## 2026-06-27 — Stage 1b: §A1 ingest hardening — cross-check resolution, required-field contract, force-flag completeness (closes #76)
 
 ### Changed — §A1 ingest hardening (substantive; HITL, approved turn-by-turn in session)

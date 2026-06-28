@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.1
+kb_version: 3.0.2
 file_last_updated: 2026-06-27
 status: active
 tier: T2
@@ -22,6 +22,16 @@ Pass 2 does not produce exact strikes or expirations by assertion. It produces t
 **Pass 2 begins with the PASS1 eligible set as its entry contract — and only that.**
 
 The entry contract for every Pass 2 run is the eligible-set output that Pass 1 produced in the current session: per-candidate structure, direction, candidate zones, DTE band, Pass 1 IV source label, sizing band note, and confidence value. Pass 2 does not accept candidates that did not clear Pass 1. Pass 2 does not re-evaluate the Wyckoff veto, the dealer-timing veto, or the hostile-macro gate — those determinations are Pass 1's and are carried forward with full authority. The one Pass 1 output that Pass 2 may surface for operator review rather than consume silently is regime drift: when the fresh Pass 2 dealer fetch shows a material change since Pass 1 ran, Pass 2 names the drift before proceeding on the affected candidates. It does not silently apply a new veto; the Pass 1 determination is the baseline.
+
+**When the eligible set arrived via a viewer/v2 handoff, its v2 outputs are Pass-1 context — not Pass-2 truth.**
+
+When Pass 1 ingested a viewer/v2 handoff (the §A1 path), several of its fields are calibrated or computed by the viewer, not by Schwab: the `pt_up_*`/`pt_down_*` price targets and their `*_prob` calibrated hit-rates, the `average_iv`/`iv_skew_25delta` IV reads, and the `dgpi`/`gamma_flip`/`position_vs_flip` dealer reads. Pass 2 treats each as Pass-1 expectancy or triage context and re-derives or re-checks the corresponding Pass-2 output from the live Schwab chain it fetches itself:
+
+- **Price targets and calibration:** the v2 `pt_*` targets and `*_prob` hit-rates are not the Pass-2 entry-price range, exit targets, or risk-reward. Pass 2 produces the entry-price range from the validated chain's bid/ask and the exit anchors from SIGNAL on current data; the v2 targets may be surfaced as expectancy context in the rationale, never emitted as the trade's prices.
+- **IV and flip:** the viewer's IV and gamma-flip reads are Pass-1 triage only. Pass 2 resolves the spread-mandate from the Schwab ATM chain IV and reads flip/wall levels from the fresh Schwab dealer fetch — Schwab is the authority at Pass 2, per VOLATILITY's source-authority discipline and the dealer-re-fetch heuristic below.
+- **Chain quality:** Pass 2 classifies the live Schwab chain's quality and truncation itself (per PIPELINE_012, below); it consumes no Pass-1 chain-quality or truncation signal — the viewer emits none — and an upstream data limitation never substitutes for Pass 2's own check.
+
+This is the same Pass 1 → Pass 2 boundary the dealer-re-fetch heuristic enforces, stated for the viewer/v2 field set so a richly-populated handoff is not mistaken for validated chain data.
 
 **Dealer metrics are re-fetched fresh at the start of every Pass 2 run — this is not optional.**
 

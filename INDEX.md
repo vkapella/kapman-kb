@@ -78,6 +78,11 @@ This repository separates runtime and engineering materials:
     ("force-flags unevaluated") rather than silently auto-accepting; `JOURNAL_MGMT_v4.0.md`
     (`kb_version 4.0.1 → 4.0.2`) adds the missing-`exported_at` lineage degradation. The Integration Plan §A1
     mirrors the cross-check rewording. Files keep their existing filenames.
+  - **§12 PASS2 hygiene** (Stage 1b, Integration Plan §12): `PASS2_VALIDATION_v3.0.md` (`kb_version 3.0.1 → 3.0.2`)
+    adds a heuristic that viewer/v2 outputs (`pt_*`/calibration, IV/flip, dealer reads) are Pass-1 context, not
+    Pass-2 truth — Pass 2 re-derives the entry-price range, exit anchors, IV/flip, and chain-quality from the live
+    Schwab chain it fetches itself. The §12 "align chain-quality gate" item resolved to a no-op (the viewer emits
+    no `volatility_chain_truncated` flag — audited 2026-06-27). File keeps its `_v3.0` filename.
 
 ## v3.0 file directory
 
@@ -132,7 +137,7 @@ This repository separates runtime and engineering materials:
 | PASS1_SCREENING_v3.0.md | 3.0.7 | active |
 | WYCKOFF_v3.0.md | 3.0.5 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.3 | active |
-| PASS2_VALIDATION_v3.0.md | 3.0.1 | active |
+| PASS2_VALIDATION_v3.0.md | 3.0.2 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
 
 ### v3.0.1 report metadata patch
@@ -145,7 +150,7 @@ This repository separates runtime and engineering materials:
 | WYCKOFF_v3.0.md | 3.0.5 | 2026-06-27 |
 | PASS1_SCREENING_v3.0.md | 3.0.7 | 2026-06-27 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.3 | 2026-06-27 |
-| PASS2_VALIDATION_v3.0.md | 3.0.1 | 2026-06-27 |
+| PASS2_VALIDATION_v3.0.md | 3.0.2 | 2026-06-27 |
 | REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | 2026-06-27 |
 

@@ -218,7 +218,7 @@ When Stage 1 KB edits land: snapshot current v3.0 `llm_runtime/` + `engineering_
 
 ## 12. Governance / hygiene (fold into Stage 1)
 - **Naming:** reconcile `kapman-mcp` ↔ `kapman-trader` across the KB + memory; state the canonical live source for pipeline readings (today: Polygon v2 / viewer). `kapman-mcp` is the disconnected MCP surface of the `kapman-trader` server — not dead code.
-- **PASS2 review:** bump from v3.0.0; reconcile with v2 `price_targets`/calibration; reaffirm Schwab IV/flip authority; align chain-quality gate (`isChainTruncated:false` ↔ v2 `volatility_chain_truncated`).
+- **PASS2 review:** bump from v3.0.0; reconcile with v2 `price_targets`/calibration; reaffirm Schwab IV/flip authority. (Chain-quality-gate alignment is a no-op: the viewer emits **no** `volatility_chain_truncated` flag — audited 2026-06-27 — so PASS2 owns its own chain-quality/truncation check on the live Schwab chain via PIPELINE_012; there is no upstream signal to reconcile.)
 - **HTML/markdown default:** reconcile retained memory (HTML-default) with Rule 6 (markdown-default; Rule 6 wins).
 - **Engineering-only MCP reference tier:** the scaffolding placeholders are the right home for the live-tool→KB-field contract; fill as contracts solidify.
 
