@@ -1,5 +1,52 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D persistence re-key, JOURNAL_MGMT (positions.md regime grammar + riders) (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D (JOURNAL_MGMT persistence; substantive; HITL, approved turn-by-turn in session)
+
+Re-keys the `positions.md` record grammar to the two-axis canonical model so the riders PORTFOLIO (3.0.4) now
+consumes get written, and so the entry-time snapshot speaks the same regime/phase/event vocabulary as the screening
+spine. Faithful re-key + two net-new riders locked by decision D-d. #78 stays open (P4 + remaining files).
+
+- **`llm_runtime/JOURNAL_MGMT_v4.0.md`** (`kb_version 4.0.2 → 4.0.3`):
+  - **`entry_wyckoff_phase` now HOLDS the regime.** The load-bearing exempt field keeps its name (cited cross-file as
+    the GUARDRAILS-exempt field) but its value domain is re-keyed from the old four Title-case phases
+    (`Accumulation | Markup | Distribution | Markdown`) to the **seven lowercase canonical regimes** — the cycle-stage
+    axis, per D-d. Matches the already-committed PORTFOLIO 3.0.4 ("the exempt-snapshot Wyckoff field holds the regime").
+    `ranging_undefined`/`UNKNOWN` never populate a real entry (a position opens only on a confirmed, direction-aligned
+    regime); the enum is the value domain.
+  - **`entry_wyckoff_event` re-keyed to the lowercase ~27-event vocab** (WYCKOFF "Wyckoff canonical vocabulary" owns
+    the set; old `SC|AR|Spring|SOS|BC|AR_TOP|UT|SOW` → lowercase, with bullish `spring/shakeout/lps/sos/jac` and bearish
+    `utad/ut/lpsy/sow` exemplars).
+  - **Two non-exempt riders added** (D-d): `entry_phase` (A–E) — the schematic phase, the recommended rider PORTFOLIO's
+    D→B/A phase-regression sub-branch reads; and `phase_c_confirmed` (`true|false`) — records the post-/pre-phase-C
+    distinction RISK applied live when sizing, **reserved** entry context with no current reader (framed like the
+    reserved `attack_flags[]`/`invalidation_conditions[]`, empty until Stage 3).
+  - **Exempt snapshot unchanged in scope:** still **exactly 5 regime fields + 8 SIGNAL levels**. The three riders sit
+    **outside** the exemption — categorical/boolean structural facts, not numeric regime reads, so the numeric
+    no-persist prohibition never reached them. The riders were grouped into their own labeled block so the 5+8 exempt
+    set is unambiguous. Heuristic prose "entry Wyckoff phase" → "entry Wyckoff regime" in the 5-field list.
+  - Not touched (correctly): the join-key tokens, `parent_pass2`, the 8 SIGNAL levels, `option_mid`, the live-refresh
+    block, the §A4 record headers, the lineage/no-persist heuristics. JOURNAL has no legacy `DOMAIN_NNN` anchors
+    (v4.0-native) — no historical note needed.
+- **`INDEX.md`** — bumped the JOURNAL Version-status bullet (4.0.2 → 4.0.3) and updated the §A1-reconciliation status
+  bullet (Stage D JOURNAL_MGMT done).
+
+### Verification
+Adversarial workflow pass (faithfulness to WYCKOFF/PORTFOLIO/GUARDRAILS, cross-file consistency, completeness/dangling
+old-vocab, apply-readiness) + synthesis judge: apply-readiness `pass` (all 4 OLD blocks verbatim + unique);
+faithfulness `pass` (exempt set independently re-counted as exactly 5+8, regimes byte-faithful to WYCKOFF, events
+correctly sided); one confirmed must-fix folded in — the draft had over-claimed a present-tense "Stage-3 calibration
+loop" consumer (ungrounded in `llm_runtime/`, and PORTFOLIO reads `entry_phase` not `phase_c_confirmed`), corrected to
+the reserved-field framing. `verify_frontmatter` + `verify_anchors` pass; dangling-vocab grep clean.
+
+### Scope notes — deferred under #78
+- **PASS2_VALIDATION** (line 94) and **GUARDRAILS** (line 46) still say "entry Wyckoff phase" and don't list the three
+  riders; both converge to "regime" + the riders in their own later slices.
+- **DEALER** (bearish-mirror DGPI band), **WYCKOFF** (decision-layer bearish column + "conditional-top" normalization +
+  projected-markdown-target row + `utad` routing), **SIGNAL** ("floor"→"conditional floor"), **REPORT_FORMAT**,
+  **SYSTEM_PARAMS**, **P4** (dealer_confidence/position_vs_flip) remain pending.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D consumer re-key, PASS1 (direction-aware screening) (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D (PASS1 consumer; substantive; HITL, approved turn-by-turn in session)

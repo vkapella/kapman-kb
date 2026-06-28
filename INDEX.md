@@ -26,7 +26,9 @@ This repository separates runtime and engineering materials:
 - **v4.0 files authored so far (Stage 1b, in progress):**
   - `llm_runtime/JOURNAL_MGMT_v4.0.md` — new T2 runbook (journal persistence: memory
     load, lineage derivation, three-log write, no-persist boundary; `positions.md` record
-    grammar added in #75; §A1 lineage degradation in #76). `kb_version 4.0.2`.
+    grammar added in #75; §A1 lineage degradation in #76; §A1 Wyckoff-vocabulary re-key of the
+    `positions.md` grammar in #78 — `entry_wyckoff_phase` now holds the regime, lowercase ~27-event
+    `entry_wyckoff_event`, `entry_phase`/`phase_c_confirmed` non-exempt riders). `kb_version 4.0.3`.
   - Substantive v4.0 content has also been added to `llm_runtime/KAPMAN_GUARDRAILS_v3.0.md`
     (memory-not-authority + numeric-no-persist guardrail; `kb_version 3.0.3`). It keeps its
     `_v3.0` filename pending the coordinated `_v3.0 → _v4.0` rename + cross-reference sweep
@@ -115,8 +117,17 @@ This repository separates runtime and engineering materials:
     symmetric** (accumulation-family/`markup` → BULLISH; distribution-family/`markdown` → BEARISH; `sos`/`sow`
     fallback) and established **before** the direction-aware veto, Wyckoff-status/degraded-tables/workflow rows
     re-keyed to regime+phase. Behavioral completion: a confirmed bearish regime now yields an **Eligible** long put
-    (was NO_TRADE+redirect). §A1 ingest map already new-vocab (untouched). **P4** (dealer/flip vocab) and the remaining
-    **consumer files** (JOURNAL/GUARDRAILS/DEALER/WYCKOFF/SIGNAL/REPORT_FORMAT/SYSTEM_PARAMS, Stages D–E) remain pending under #78.
+    (was NO_TRADE+redirect). §A1 ingest map already new-vocab (untouched). **Stage D — JOURNAL_MGMT done** —
+    `JOURNAL_MGMT_v4.0.md` (`kb_version 4.0.2 → 4.0.3`): re-keys the `positions.md` record grammar to the two-axis
+    model — the load-bearing exempt field `entry_wyckoff_phase` now **holds the regime** (one of the 7 lowercase
+    regimes, per D-d) rather than the old four Title-case phases; `entry_wyckoff_event` re-keyed to the lowercase
+    ~27-event canonical vocab; **adds two non-exempt riders** `entry_phase` (A–E; the rider PORTFOLIO's phase-regression
+    sub-branch consumes) and `phase_c_confirmed` (records the post-/pre-phase-C sizing gate; reserved entry context, no
+    current reader — framed like the reserved `attack_flags[]`/`invalidation_conditions[]`). Exempt snapshot stays
+    **exactly 5 regime fields + 8 SIGNAL levels**; the three riders sit outside it (categorical/boolean, not numeric
+    regime reads, so the no-persist prohibition never reached them). PASS2 line 94 + GUARDRAILS line 46 still say "entry
+    Wyckoff phase" — tracked to converge in their own slices. **P4** (dealer/flip vocab) and the remaining **consumer
+    files** (GUARDRAILS/DEALER/WYCKOFF/SIGNAL/REPORT_FORMAT/SYSTEM_PARAMS, Stages D–E) remain pending under #78.
 
 ## v3.0 file directory
 

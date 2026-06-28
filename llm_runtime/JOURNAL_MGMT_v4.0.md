@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.2
-file_last_updated: 2026-06-27
+kb_version: 4.0.3
+file_last_updated: 2026-06-28
 status: active
 tier: T2
 ---
@@ -37,7 +37,7 @@ Handoffs are partitioned first by source, because a viewer scan and a tradelog p
 
 **Memory files are written end-of-run, overwritten in place, on the trigger that owns each file.**
 
-The three memory files change on distinct triggers, and each write is a full overwrite of that file, never an append. `positions.md` is written at two moments: at Pass 2 validation of a new entry, when the position and its immutable entry-time regime snapshot (entry Wyckoff phase, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels) are recorded; and on a Portfolio-mode positions refresh from a tradelog or broker snapshot, when the open/closed set and live fields (mark, net_qty, unrealized P&L) are reconciled. A refresh updates live state only — the entry-time snapshot is write-once and is never rewritten. `overrides.md` is written when the operator explicitly states a standing preference to remember across sessions (e.g., "always block earnings within seven days"); it is never inferred from conversational context, and a standing override recorded here does not activate the per-request macro-gate override defined in `KAPMAN_GUARDRAILS` — it is a remembered convenience, not an active gate. `watchlist.md` is written when the active universe changes — a new viewer handoff defines or refreshes it, or the operator adds or removes tickers. All three writes ride the same end-of-run commit as the logs.
+The three memory files change on distinct triggers, and each write is a full overwrite of that file, never an append. `positions.md` is written at two moments: at Pass 2 validation of a new entry, when the position and its immutable entry-time regime snapshot (entry Wyckoff regime, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels) are recorded; and on a Portfolio-mode positions refresh from a tradelog or broker snapshot, when the open/closed set and live fields (mark, net_qty, unrealized P&L) are reconciled. A refresh updates live state only — the entry-time snapshot is write-once and is never rewritten. `overrides.md` is written when the operator explicitly states a standing preference to remember across sessions (e.g., "always block earnings within seven days"); it is never inferred from conversational context, and a standing override recorded here does not activate the per-request macro-gate override defined in `KAPMAN_GUARDRAILS` — it is a remembered convenience, not an active gate. `watchlist.md` is written when the active universe changes — a new viewer handoff defines or refreshes it, or the operator adds or removes tickers. All three writes ride the same end-of-run commit as the logs.
 
 **Numeric regime reads are never persisted as authoritative; the entry-time snapshot is the sole, narrow exemption.**
 
@@ -125,13 +125,17 @@ account_id:     <account id>               # join key part 2 — entry context i
 parent_pass2:   <Pass 2 rec_id>            # lineage to the validating Pass 2 record
 journal_schema_version: 4.0
 
-# entry-time regime snapshot — WRITE-ONCE at Pass 2; never rewritten on refresh (the no-persist exemption)
-entry_wyckoff_phase: <Accumulation | Markup | Distribution | Markdown>   # WYCKOFF named phase; UNKNOWN is never a valid entry snapshot
-entry_wyckoff_event: <SC | AR | Spring | SOS | BC | AR_TOP | UT | SOW | null>   # optional confirmed entry event; rider, NOT one of the five exempt fields
+# entry-time regime snapshot — the FIVE exempt fields; WRITE-ONCE at Pass 2; never rewritten on refresh (the no-persist exemption)
+entry_wyckoff_phase: <accumulation | reaccumulation | markup | distribution | redistribution | markdown | ranging_undefined>   # holds the confirmed REGIME (cycle-stage axis, per D-d), NOT the A–E phase; in a real entry never `ranging_undefined`/`UNKNOWN` (a position opens only on a confirmed, direction-aligned regime)
 entry_dgpi_tier:  <Strongly supportive | Moderately supportive | Near-neutral | Weakening | Hostile>
 entry_flip_zone:  <Well above flip | Near-flip | Well below flip>
 entry_iv_hv_band: <Cheap | Neutral | Elevated>
 entry_vol_status: <FULL | LIMITED | INVALID>
+
+# entry-time structural riders — WRITE-ONCE at Pass 2; NON-exempt entry context (outside the five-field exemption); categorical/boolean, not numeric regime reads; each may be absent
+entry_wyckoff_event: <lowercase canonical event | null>   # confirmed entry landmark from WYCKOFF "Wyckoff canonical vocabulary" (~27 events): bullish e.g. spring/shakeout/lps/sos/jac; bearish e.g. utad/ut/lpsy/sow
+entry_phase:         <A | B | C | D | E | null>           # schematic phase at entry (typically C test or D entry window; null when trending, no active range). The recommended rider PORTFOLIO's D→B/A phase-regression sub-branch reads
+phase_c_confirmed:   <true | false>                       # was the decisive phase-C test confirmed at entry (bullish spring/shakeout; bearish utad)? Records the post-/pre-phase-C distinction RISK applied LIVE when sizing (post-C → upper/conditional-top; pre-C → conditional floor); reserved entry context — no current reader
 
 # eight SIGNAL stop/profit levels — WRITE-ONCE at Pass 2; named individually, one per line
 stop_underlying_price:   <price>
@@ -152,6 +156,6 @@ unrealized_pnl:  <value | null when mark is null>
 refreshed_as_of: <the refreshing snapshot's as_of>
 ```
 
-Everything above the live-refresh block is write-once entry context; a refresh that touches any write-once field is a grammar violation. `entry_wyckoff_phase` is constrained to WYCKOFF's four named phases — UNKNOWN never appears, because a position is opened only on a confirmed phase; `entry_wyckoff_event` is optional, drawn from WYCKOFF's named events (`WYCKOFF_v3.0.md` owns the vocabulary), and rides as confirmed-event context outside the five-field exempt snapshot. The five regime fields plus the eight SIGNAL levels are exactly the `KAPMAN_GUARDRAILS` entry-time exemption.
+Everything above the live-refresh block is write-once entry context; a refresh that touches any write-once field is a grammar violation. The exempt-snapshot Wyckoff field `entry_wyckoff_phase` holds the confirmed **regime** — one of WYCKOFF's seven canonical regimes, the cycle-stage axis (per decision D-d) — not the A–E phase; the enum is the value domain (all seven), while a real entry is constrained to the direction-aligned eligible subset, so `ranging_undefined` and the `UNKNOWN` session-state never actually populate it (a position is opened only on a confirmed, direction-aligned regime). The five regime fields plus the eight SIGNAL levels are exactly the `KAPMAN_GUARDRAILS` entry-time exemption — the guaranteed write-once snapshot. The three structural riders — `entry_wyckoff_event` (a lowercase canonical event from WYCKOFF's vocabulary), `entry_phase` (the schematic phase A–E), and `phase_c_confirmed` (whether the decisive phase-C test was confirmed at entry) — are write-once entry context too, but **non-exempt**: they are categorical/boolean structural facts, not numeric regime reads, so the numeric no-persist prohibition never reached them; they sit outside the five-field exemption and may be absent even when the snapshot is present. `entry_phase` is the recommended rider PORTFOLIO's Regime-exit advisory reads for its D→B/A phase-regression sub-branch; `entry_wyckoff_event` and `phase_c_confirmed` are recorded as entry context with no current consumer — reserved for later calibration work, the same way the Pass-1 / Pass-2 records carry reserved `attack_flags[]` / `invalidation_conditions[]` (empty until Stage 3). `WYCKOFF_v3.0.md` owns the regime, phase, and event vocabulary.
 
 **Schema-version namespaces.** `journal_schema_version` is this repo's contract version (4.0). `v2_schema_version` is echoed verbatim from the viewer/v2 export — a separate namespace carried for join reproducibility, never conflated.
