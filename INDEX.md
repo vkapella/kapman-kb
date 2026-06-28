@@ -165,8 +165,12 @@ This repository separates runtime and engineering materials:
     (% of denominator; promotes the conditional-top magnitude / JD1 from a RISK reference point to a named tunable). `RISK`
     (`3.0.1 → 3.0.2`) cites `CONDITIONAL_TOP_SIZE_PCT` by name (other v2.3 band magnitudes stay reference points); `SIGNAL`
     (`3.0.4 → 3.0.5`) + `REPORT_FORMAT` (`3.0.9 → 3.0.10`) resolve their "a SYSTEM_PARAMS follow-up" placeholders to the
-    named confluence param ("consumed by name" satisfied). **P4** (dealer/flip vocab), **PASS2** (line 94 phase→regime),
-    and the WYCKOFF↔RISK UNKNOWN floor/closed wording item remain pending under #78.
+    named confluence param ("consumed by name" satisfied). **Stage D — PASS2 done** — `PASS2_VALIDATION_v3.0.md`
+    (`kb_version 3.0.3 → 3.0.4`): the entry-time-snapshot capture heuristic re-keyed "entry Wyckoff **phase**" → "entry
+    Wyckoff **regime**" (matching JOURNAL/PORTFOLIO/GUARDRAILS) and now names the best-effort non-exempt riders (entry
+    phase A–E, `phase_c_confirmed`, `entry_wyckoff_event`) captured alongside; the exempt set stays exactly 5 regime fields
+    + 8 SIGNAL levels (riders + `option_mid` explicitly outside the exemption). **P4** (dealer/flip vocab) and the
+    WYCKOFF↔RISK UNKNOWN floor/closed wording item remain pending under #78.
 
 ## v3.0 file directory
 
@@ -221,7 +225,7 @@ This repository separates runtime and engineering materials:
 | PASS1_SCREENING_v3.0.md | 3.0.8 | active |
 | WYCKOFF_v3.0.md | 3.0.8 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | active |
-| PASS2_VALIDATION_v3.0.md | 3.0.3 | active |
+| PASS2_VALIDATION_v3.0.md | 3.0.4 | active |
 | RISK_v3.0.md | 3.0.2 | active |
 | DEALER_v3.0.md | 3.0.1 | active |
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.4 | active |
@@ -239,7 +243,7 @@ This repository separates runtime and engineering materials:
 | SIGNAL_v3.0.md | 3.0.5 | 2026-06-28 |
 | PASS1_SCREENING_v3.0.md | 3.0.8 | 2026-06-28 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | 2026-06-28 |
-| PASS2_VALIDATION_v3.0.md | 3.0.3 | 2026-06-28 |
+| PASS2_VALIDATION_v3.0.md | 3.0.4 | 2026-06-28 |
 | RISK_v3.0.md | 3.0.2 | 2026-06-28 |
 | DEALER_v3.0.md | 3.0.1 | 2026-06-28 |
 | REPORT_FORMAT_v3.0.md | 3.0.10 | 2026-06-28 |

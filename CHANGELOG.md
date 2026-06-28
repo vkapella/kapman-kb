@@ -1,5 +1,33 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D consumer re-key, PASS2 (entry-snapshot phase→regime + riders) (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D (PASS2 persistence-capture; faithful no-judgment re-key; applied on standing continue)
+
+The last "entry Wyckoff phase" exempt-field wording lag, in the file that owns the *trigger and timing* of the entry-time
+snapshot write. Faithful re-key matching the committed JOURNAL_MGMT 4.0.3 / PORTFOLIO 3.0.4 / GUARDRAILS 3.0.4 (the exempt
+Wyckoff field holds the **regime** per D-d). #78 stays open.
+
+- **`llm_runtime/PASS2_VALIDATION_v3.0.md`** (`kb_version 3.0.3 → 3.0.4`): in the "capture the entry-time snapshot into
+  `positions.md`" heuristic, "entry Wyckoff **phase**" → "entry Wyckoff **regime**". The capture now also names the
+  best-effort non-exempt entry-context **riders** (entry phase A–E, `phase_c_confirmed`, the confirmed `entry_wyckoff_event`)
+  written at the same Pass-2 moment, and states explicitly that the riders and `option_mid` ride **outside** the exemption
+  proper. The exempt set is unchanged — **exactly the regime snapshot's 5 fields + the 8 SIGNAL levels** (the "sole exemption
+  to the numeric-no-persist floor"); `JOURNAL_MGMT_v4.0` owns the riders' grammar, `KAPMAN_GUARDRAILS` owns the exemption.
+  The Pass 1 → Pass 2 boundary and anti-hallucination floor are untouched.
+- **`INDEX.md`** — bumped PASS2 in both v3.0.1 version tables (3.0.3 → 3.0.4) and updated the §A1 status bullet (Stage D
+  PASS2 done).
+
+### Verification
+Faithful single-paragraph re-key mirroring the committed exempt-snapshot definition (5 regime fields + 8 SIGNAL levels,
+riders non-exempt) already verified across JOURNAL/PORTFOLIO/GUARDRAILS this cycle; OLD string confirmed unique; no
+multi-lens workflow run (disproportionate for a faithful consumer re-key with established referents). `verify_frontmatter`
++ `verify_anchors` pass.
+
+### Scope notes — deferred under #78
+- **P4** (viewer `dealer_confidence` high/med/low/invalid at Pass 1 vs Schwab `FULL/LIMITED/INVALID` at Pass 2 — keep as two
+  layers, clarify at each ref) and the **WYCKOFF↔RISK UNKNOWN** floor/closed wording item remain — then Stage F closeout.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage E parameters, SYSTEM_PARAMS confluence band + conditional-top (+ RISK/SIGNAL/REPORT_FORMAT wiring) (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage E (SYSTEM_PARAMS + consumer wiring; substantive; HITL, parameter values operator-approved in session)

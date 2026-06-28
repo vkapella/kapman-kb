@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.3
+kb_version: 3.0.4
 file_last_updated: 2026-06-28
 status: active
 tier: T2
@@ -91,7 +91,7 @@ After all candidates have been processed, Pass 2 assembles the validated-set sum
 
 **At validation, capture the entry-time snapshot into `positions.md` — write-once, and never read back at Pass 2.**
 
-When a candidate is validated, Pass 2 captures three things into `kapman-journal/memory/positions.md` so Portfolio's Regime exit advisory can later measure decay against the conditions the trade was opened under: the entry-time regime snapshot (entry Wyckoff phase, DGPI tier, flip-zone, IV/HV band, vol-status), the eight SIGNAL Stop/Profit alert levels, and `option_mid` — the validated-chain bid/ask midpoint at entry. The regime snapshot and the eight SIGNAL levels are the one regime read Pass 2 persists: the sole exemption to the numeric-no-persist floor, written as immutable historical entry context — a record, not an authority — never re-read to seed a Pass 1 or Pass 2 decision, since a fresh decision always re-fetches the live regime. `option_mid` rides alongside as a position fact, not a regime read. Pass 2 owns only the trigger and timing of this write — validation of a new entry; `JOURNAL_MGMT_v4.0` owns the path, schema, and write-once mechanics, and `KAPMAN_GUARDRAILS` owns the exemption. The capture changes neither the Pass 1 → Pass 2 boundary nor the anti-hallucination floor: Pass 2 still validates from the live chain and persists a record, not an authority.
+When a candidate is validated, Pass 2 captures the entry-time record into `kapman-journal/memory/positions.md` so Portfolio's Regime exit advisory can later measure decay against the conditions the trade was opened under: the entry-time regime snapshot (entry Wyckoff regime, DGPI tier, flip-zone, IV/HV band, vol-status), the eight SIGNAL Stop/Profit alert levels, and `option_mid` — the validated-chain bid/ask midpoint at entry — plus the best-effort entry-context riders (entry phase A–E, `phase_c_confirmed`, and the confirmed `entry_wyckoff_event`). The regime snapshot's five fields and the eight SIGNAL levels are the one regime read Pass 2 persists: the sole exemption to the numeric-no-persist floor, written as immutable historical entry context — a record, not an authority — never re-read to seed a Pass 1 or Pass 2 decision, since a fresh decision always re-fetches the live regime. `option_mid` rides alongside as a position fact, and the riders as non-exempt categorical entry context — both outside the exemption proper. Pass 2 owns only the trigger and timing of this write — validation of a new entry; `JOURNAL_MGMT_v4.0` owns the path, schema, and write-once mechanics (including the riders' grammar), and `KAPMAN_GUARDRAILS` owns the exemption. The capture changes neither the Pass 1 → Pass 2 boundary nor the anti-hallucination floor: Pass 2 still validates from the live chain and persists a record, not an authority.
 
 ## Workflow integration
 
