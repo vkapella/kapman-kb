@@ -1,5 +1,61 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Dealer-contract reconciliation — KB re-keyed to the live signed-DGPI / confidence producer contract (11 files, atomic)
+
+### Changed — dealer-contract reconciliation (substantive; HITL, decisions operator-approved; producer fixed + deployed in parallel)
+
+A code-grounded Stage-F audit found the KB's DEALER/VOLATILITY runtime contracts asserted Schwab fields that did not
+exist — a signed ±100 DGPI tiered at ±20/±50, a `FULL/LIMITED/INVALID` "dealer-status", and a `long_gamma/short_gamma/neutral`
+position-class — none of which the deployed `kapman-schwab-MCP` emitted (it emitted a magnitude-only DGPI, `above/below/at_flip`
+position, and `confidence: high/med/low/invalid`). The KB's signed-DGPI model *did* match the **Pass-1 Polygon producer**
+(`kapman-polygon-mcp-v2/lib/dealer_metrics.py`), which is what the viewer displays and the §A1 handoff exports; only the
+Pass-2 Schwab tool diverged. **Decision (Option B):** the operator fixed `kapman-schwab-MCP` to match the Polygon contract
+(signed DGPI `[-100,100]`, `position` gamma-regime, separate `position_vs_flip`, optional `iv_rank`), deployed + smoke-tested
+(live SPY confirmed: DGPI −100 signed, Short Gamma, Below Flip, High). This commit re-keys the KB to that now-uniform contract,
+**atomically across 11 files** (a half-applied KB would reference both contracts).
+
+- **`llm_runtime/SYSTEM_PARAMS_v3.0.md`** (`3.0.3 → 3.0.4`): adds `DGPI_NEUTRAL_BAND` (10), `DGPI_STRONG_BAND` (30),
+  `HOSTILE_MACRO_DGPI_MAX` (-30) — the producer's signed 10/30/60 bands, promoted to named tunables; `NEAR_FLIP_BAND_PCT`
+  `0.25 → 0.5` (the producers' `at_flip` band).
+- **`llm_runtime/DEALER_v3.0.md`** (`3.0.1 → 3.0.2`, anchor): DGPI tier table re-keyed `20/50 → 10/30/60` (signed, parametrized);
+  the fictional `FULL/LIMITED/INVALID` "dealer-status" **removed** — dealer-trust behavior now keys directly on the emitted
+  `confidence` (`high`/`medium` → full band + full hostile-macro; `low` → floor-of-band; `invalid` → drop the ticker layer);
+  hostile-macro DGPI `≤ -20 → ≤ -30`; bearish-mirror band `≥ +50 → ≥ +30`; the `position` (gamma regime) / `position_vs_flip`
+  (flip location) two-field split adopted; near-flip `0.25% → 0.5%`; a stale ticker drops the layer (was inconsistently
+  floored); Pass-1↔Pass-2 dealer "agrees by tier/direction, never by exact value" (different option universes); legacy
+  anchors `DEALER_011/012/013` preserved verbatim with a historical note marking the superseded dealer-status.
+- **Consumer cascade** (dealer-sense `FULL/LIMITED/INVALID → confidence`, DGPI band re-keys, near-flip 0.5%):
+  `SIGNAL_v3.0.md` (`3.0.5 → 3.0.6` — dealer-timing veto bands `-50/-20 → -30`, bearish-mirror `≥ +30`, the deferred "DEALER
+  reconciliation" references resolved); `RISK_v3.0.md` (`3.0.2 → 3.0.3` — dealer-narrowing "reconciliation item" resolved to
+  the `≥ +30` mirror band); `PASS2_VALIDATION_v3.0.md` (`3.0.4 → 3.0.5` — the chain-quality × dealer-confidence matrix; drift
+  by tier/direction); `PASS1_SCREENING_v3.0.md` (`3.0.9 → 3.0.10` — hostile-macro `-30`; **the P4 paragraph corrected**: Schwab
+  now emits `confidence`, so the Pass-1/Pass-2 distinction is *provenance and timing, not vocabulary*); `PORTFOLIO_MGMT_v3.0.md`
+  (`3.0.4 → 3.0.5`); `KAPMAN_GUARDRAILS_v3.0.md` (`3.0.4 → 3.0.5` — hostile `≤ -30`; the now-false "v2.3 magnitude preserved"
+  claim corrected); `REPORT_FORMAT_v3.0.md` (`3.0.10 → 3.0.11`); `REPORT_STYLE_v3.0.md` (`3.0.4 → 3.0.5`);
+  `REPORT_TEMPLATE_PASS1_v3.0.html` (the source-bar degradation-flag label).
+- **Deliberately untouched (separate findings):** the overloaded **volatility-status** `FULL/LIMITED/INVALID` (P0-2 — the vol
+  tool still emits only skew/term/OI; not fixed by the dealer change) and **chain-quality** `Full/Limited/Weak` (P0-3a).
+- **Behavior change (intended):** `high` and `medium` confidence are now treated identically (trusted, full band), so a ticker
+  formerly floored under a "medium-confidence" read is promoted to full sizing.
+- **`INDEX.md`** — bumped all 11 files in both version tables and added a dealer-contract-reconciliation status bullet.
+
+### Verification
+The anchor (DEALER + SYSTEM_PARAMS) was verified by an adversarial workflow (apply-readiness + faithfulness to the live
+producer formulas + the locked decisions): faithfulness **pass** (signed-DGPI formula byte-identical between both producers;
+the `10/30/60` tier mapping, the `confidence` behavioral contract, and the position split all correct; the live SPY read maps
+to hostile-macro + full as intended). A second workflow produced the per-file cascade edit map with hard LEAVE-guards on the
+overloaded vol-status/chain-quality labels. The cascade map's agent for **SIGNAL failed (returned null)**, so SIGNAL was
+authored directly and caught by the post-apply consistency sweep (along with a PORTFOLIO orphan row and the HTML template).
+Final sweep: **zero** surviving dealer-sense `dealer-status` / stale DGPI cutpoints; vol-status (6 files) + chain-quality intact;
+`verify_frontmatter` + `verify_anchors` pass.
+
+### Scope notes — still open
+- **P0-2 (volatility contract)** — the vol tool emits only IV-skew/term/OI; no avg-IV/HV/rank/vol-status; the IV/HV
+  spread-mandate path has no wired HV source. The single biggest remaining contract gap; no fix in flight.
+- **P0-3a** (RISK↔PASS2 Weak-chain), **P0-4** (positions.md written at validation not fill), **P0-3b**, **P0-5** (CSP
+  "regime-aligned" overclaim), **P1-10**, **P1-11** remain. #78 (Wyckoff vocabulary) stays open for Stage F (bearish pilot +
+  rename), blocked on the operator's bearish fixture.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage E tail: P4 two-layer dealer vocab (PASS1) + WYCKOFF↔RISK UNKNOWN wording (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage E tail (two faithful clarifications; HITL — P4 softened after a verify catch)

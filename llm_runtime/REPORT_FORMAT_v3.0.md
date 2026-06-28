@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.10
+kb_version: 3.0.11
 file_last_updated: 2026-06-28
 status: active
 tier: T3
@@ -42,10 +42,10 @@ The subtitle line for Screening mode carries, at minimum: session date, mode lab
 
 **The source bar appears immediately below the subtitle in every report section that surfaces MCP-sourced data.**
 
-- The source bar is a single line (or at most two lines) identifying: data sources used, their freshness timestamps, and any chain quality or dealer-status degradation flags active for this report.
+- The source bar is a single line (or at most two lines) identifying: data sources used, their freshness timestamps, and any chain quality or dealer-confidence degradation flags active for this report.
 - The source bar is not part of the legend/footer. It sits between the subtitle and the first table of its section.
 - In Hybrid mode, each section (Screening, Portfolio) carries its own source bar. The shared legend/footer does not repeat source information already stated in the bars.
-- Degradation flags in the source bar use the vocabulary from GUARDRAILS: "Stale dealer data [timestamp]", "Limited chain — [ticker]", "Dealer-status INVALID — [ticker]". The source bar is where these flags surface structurally; rationale cells reference the condition but do not re-state the full flag.
+- Degradation flags in the source bar use the vocabulary from GUARDRAILS: "Stale dealer data [timestamp]", "Limited chain — [ticker]", "Dealer confidence invalid — [ticker]". The source bar is where these flags surface structurally; rationale cells reference the condition but do not re-state the full flag.
 
 **Rule IDs appear once per report, in the legend/footer "Rules applied" line — nowhere else.**
 
@@ -124,11 +124,11 @@ When REPORT_FORMAT and a T1 or T2 file appear to conflict on a structural questi
 |---|---|---|
 | `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Hard-cap mandate; rule-ID-legend-only rule; override acknowledgment requirement; data-quality vocabulary; mode discipline | REPORT_FORMAT enforces caps numerically; places rule IDs in legend/footer only; places override acknowledgment in subtitle or footnote per heuristic; uses GUARDRAILS vocabulary in source bar flags |
 | `SIGNAL_v3.0.md` (T1) | Label vocabulary for trigger states; four-field exit-trigger output format; the forward-tested-target confluence annotation on the underlying alert level; NO_TRADE/WAIT consistency rule; confidence ordering rule; anti-hallucination floor substitution labels | REPORT_FORMAT renders trigger-state labels verbatim; renders the four exit-trigger fields as a matched pair per position, with the forward-tested-target confluence annotation rendered as a suffix on the underlying alert level when SIGNAL carries it (never as the alert price); enforces NO_TRADE/WAIT row structure; renders alternatives in descending confidence order; renders zone substitutions per pass label discipline |
-| `DEALER_v3.0.md` (T1) | DGPI tier names; flip-zone labels; dealer-status labels (FULL/LIMITED/INVALID); hostile-macro flag | REPORT_FORMAT renders DGPI tier in the screening table and Macro Regime card; renders flip-zone in rationale where relevant; renders dealer-status in the source bar and chain quality badge |
+| `DEALER_v3.0.md` (T1) | DGPI tier names; flip-zone labels; dealer-confidence labels (high/medium/low/invalid); hostile-macro flag | REPORT_FORMAT renders DGPI tier in the screening table and Macro Regime card; renders flip-zone in rationale where relevant; renders dealer confidence in the source bar |
 | `VOLATILITY_v3.0.md` (T1) | IV/HV band labels; IV rank tier labels; volatility-status labels; stale-data flag | REPORT_FORMAT renders volatility regime in the screening table; renders "Stretched IV" annotation for extreme tier; renders stale-data flag in source bar with timestamp |
 | `WYCKOFF_v3.0.md` (T1) | Phase labels; event labels | REPORT_FORMAT renders Wyckoff phase in the screening table and portfolio detail; renders confirmed events in rationale |
 | `PASS1_SCREENING_v3.0.md` (T2) | Eligible/NO_TRADE/WAIT determinations; candidate zones; alternatives with confidence; Pass 1 data-quality labels; macro gate result; override acknowledgments | REPORT_FORMAT renders the screening table and per-ticker detail from Pass 1 output; applies zone rendering to all Pass 1 strike and expiration fields |
-| `PASS2_VALIDATION_v3.0.md` (T2) | Validated/Flagged/Rejected states; exact strikes and expirations; chain quality label; dealer-status label; entry price range; sizing band | REPORT_FORMAT renders exact values for Pass 2 validated candidates; renders Flagged and Rejected states with named reasons; renders chain quality badge in source bar |
+| `PASS2_VALIDATION_v3.0.md` (T2) | Validated/Flagged/Rejected states; exact strikes and expirations; chain quality label; dealer-confidence label; entry price range; sizing band | REPORT_FORMAT renders exact values for Pass 2 validated candidates; renders Flagged and Rejected states with named reasons; renders chain quality badge in source bar |
 | `PORTFOLIO_MGMT_v3.0.md` (T2) | Position context schema; lifecycle state labels (Open/Advisory/Exited/Expired); advisory flag format; DTE decay warning format; Regime exit advisory decay reasons | REPORT_FORMAT renders the portfolio view table and per-position detail from position context; renders advisory flag with named decay reason; renders DTE decay warning when active; renders Exited and Expired summary sections when present |
 | `SYSTEM_PARAMS_v3.0.md` | DTE band values (SWING_DTE_BAND, CSP_DTE_BAND, DTE_DECAY_WARNING_THRESHOLD) | REPORT_FORMAT uses DTE band values as the canonical expiration-band labels in Pass 1 zone rendering; uses DTE_DECAY_WARNING_THRESHOLD to determine when the decay warning renders in the portfolio detail |
 
@@ -141,7 +141,7 @@ The HTML render artifact for Pass 1 reports is `REPORT_TEMPLATE_PASS1_v3.0.html`
 | Content of any field | T1 and T2 files |
 | Behavioral rules that determine what content is produced | SIGNAL, GUARDRAILS, runbooks |
 | Visual presentation (typography, color, HTML/CSS) | `REPORT_STYLE_v3.0.md` |
-| Label vocabulary (DGPI tier names, dealer-status labels, chain quality labels) | Respective T1 files |
+| Label vocabulary (DGPI tier names, dealer-confidence labels, chain quality labels) | Respective T1 files |
 | Override discipline | `KAPMAN_GUARDRAILS_v3.0.md` |
 | Regime exit advisory firing condition | `SIGNAL_v3.0.md` |
 | DTE band numeric values | `SYSTEM_PARAMS_v3.0.md` |
@@ -184,7 +184,7 @@ REPORT_FORMAT_v3.0.md has no direct v2.3 antecedent file. Its content was distri
 
 **Macro Regime card** → § Operational heuristics, "The Macro Regime card appears above the screening table when hostile macro is active." The v2.3 card format appeared inline in `KAPMAN_PROJECT_INSTRUCTIONS_v2.3.md` Communication Style: `"SPY $X | Below flip ($Y) | DGPI [Z] | Regime: MARKDOWN | Long-call entries blocked. CSP / hedge / LEAPs eligible only."` The v3.0 card expands this to five named elements with explicit ordering (SPY spot, flip level, DGPI tier, regime label, eligible-set redirect) and clarifies that the card is a distinct block, not a table row. The pipe-delimited inline format from v2.3 is a valid rendering of the five elements and remains compatible with v3.0 structure.
 
-**Trade-sheet table** → § Appendix, Screening table field sequence. The v2.3 trade-sheet column sequence (Ticker / Type / Action / Wyckoff Phase / DGPI / Strike / Exp / Entry / Exit / Scale / Confidence / Rationale) is preserved in v3.0 with additions for chain quality label and dealer-status label, which were implicit in v2.3 but not surfaced as discrete table columns.
+**Trade-sheet table** → § Appendix, Screening table field sequence. The v2.3 trade-sheet column sequence (Ticker / Type / Action / Wyckoff Phase / DGPI / Strike / Exp / Entry / Exit / Scale / Confidence / Rationale) is preserved in v3.0 with additions for chain quality label and dealer-confidence label, which were implicit in v2.3 but not surfaced as discrete table columns.
 
 ---
 
@@ -245,7 +245,7 @@ One block per screened candidate, appearing below the screening table in the sam
 |---|---|---|---|
 | 1 | Setup rationale | 40 words | What triggered the candidate; Wyckoff event and phase context |
 | 2 | Wyckoff phase read | 25 words | Current phase, confirming events, proposed-confirm status |
-| 3 | Dealer regime read | 25 words | DGPI tier, flip-zone, near-flip flag if active, dealer-status label |
+| 3 | Dealer regime read | 25 words | DGPI tier, flip-zone, near-flip flag if active, dealer-confidence label |
 | 4 | Volatility regime read | 25 words | IV/HV band, IV rank tier, spread-mandate outcome, volatility-status label |
 | 5 | Exit plan | 60 words | Stop alert four fields + Profit target alert four fields as matched pair; "Pending" with reason if unavailable. When SIGNAL carries a forward-tested-target confluence annotation on an underlying alert level, render it as a suffix on that level — *"…— viewer forward-tested hit-rate ~Z%, as-of [date]"* — never as the alert price itself; the structural+validated level stays the order (anti-hallucination floor). When the forward-tested target diverges from the structural anchor beyond the near-coincidence tolerance (`FORWARD_TEST_CONFLUENCE_BAND_PCT` per SYSTEM_PARAMS), both levels surface per SIGNAL and the operator weighs the divergence |
 | 6 | Alternatives | 30 words | Present only when SIGNAL produced alternatives; descending confidence order; omitted entirely when absent |
@@ -274,7 +274,7 @@ Subsection sequence per block:
 |---|---|---|---|
 | 1 | Refusal / deferral reason | 20 words | Restatement from Rationale cell; names the veto or missing input |
 | 2 | Wyckoff phase read | 25 words | Current phase, confirming events, proposed-confirm status |
-| 3 | Dealer regime read | 25 words | DGPI tier, flip-zone, near-flip flag if active, dealer-status label |
+| 3 | Dealer regime read | 25 words | DGPI tier, flip-zone, near-flip flag if active, dealer-confidence label |
 | 4 | Volatility regime read | 25 words | IV/HV band, IV rank tier, spread-mandate outcome, volatility-status label |
 | 5 | Alternatives | 30 words | Named structure + direction + candidate zone + confidence, descending confidence order; omit subsection entirely when no alternatives exist |
 | 6 | Recheck trigger | 20 words | What specific input change would flip this candidate to Eligible; names the blocking condition |
@@ -359,7 +359,7 @@ The source bar appears immediately below the subtitle in every section that surf
 |---|---|---|
 | Data sources | 60 chars | "Schwab dealer metrics, Polygon options metrics, Schwab chain" |
 | Freshness timestamps | 30 chars | "as of HH:MM ET" or "as of YYYY-MM-DD HH:MM ET" for prior-day data |
-| Degradation flags | 40 chars per flag | "Stale dealer data [HH:MM ET] — [ticker]"; "Dealer-status INVALID — [ticker]"; "Limited chain — [ticker]" |
+| Degradation flags | 40 chars per flag | "Stale dealer data [HH:MM ET] — [ticker]"; "Dealer confidence invalid — [ticker]"; "Limited chain — [ticker]" |
 
 Multiple degradation flags are comma-separated on the source bar line. When flags exceed the two-line cap, they move to the first footnote of the session (footnote ¹), and the source bar carries "See footnote ¹ for data quality details."
 

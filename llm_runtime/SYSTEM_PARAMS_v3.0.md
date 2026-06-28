@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.3
+kb_version: 3.0.4
 file_last_updated: 2026-06-28
 status: active
 tier: T3
@@ -35,7 +35,10 @@ SYSTEM_PARAMS defines values. It does not define what to do with them. The behav
 | `LEAP_DTE_BAND` | 12–24 | months | PASS1, PASS2 | Applies to LEAP long calls. Expressed in months because LEAPS expirations are sparsely listed and month-level granularity is the practical selection unit. |
 | `IV_HV_ELEVATED_THRESHOLD` | 1.20 | ratio (IV ÷ HV) | VOLATILITY, SIGNAL | The IV/HV ratio at or above which the spread-mandate fires for new directional entries. Boundary value resolves to elevated (conservative) per VOLATILITY heuristics. |
 | `IV_RANK_EXTREME_FLOOR` | 75 | IV rank score [0–100] | VOLATILITY, SIGNAL | The IV rank score at or above which the extreme tier activates, reinforcing the spread-mandate even when IV/HV reads neutral. |
-| `NEAR_FLIP_BAND_PCT` | 0.25 | percent of spot (±) | DEALER, GUARDRAILS | The symmetric percentage band around the gamma flip level that defines the near-flip zone. Applies identically to SPY (macro layer) and per-ticker. |
+| `NEAR_FLIP_BAND_PCT` | 0.5 | percent of spot (±) | DEALER, GUARDRAILS | The symmetric percentage band around the gamma flip level that defines the near-flip zone (the `at_flip` band). Applies identically to SPY (macro) and per-ticker. **Aligned to the producers' 0.5% `at_flip` band** (kapman-polygon-mcp-v2 + kapman-schwab-MCP) — was 0.25%, which disagreed with both producers. |
+| `DGPI_NEUTRAL_BAND` | 10 | DGPI magnitude (\|x\|) | DEALER | Below this magnitude (`-10 < DGPI < +10`) the dealer read is **near-neutral** (the producer's "low pressure" band). Matches the producer DGPI bands (kapman-polygon-mcp-v2 `dealer_metrics.py`: <10 low / 10-30 moderate / 30-60 significant / >60 extreme) and the viewer header's go/no-go light. |
+| `DGPI_STRONG_BAND` | 30 | DGPI magnitude (\|x\|) | DEALER | At/above this magnitude the tier is **strongly supportive** (≥ +30) or **hostile** (≤ -30); between `DGPI_NEUTRAL_BAND` and this is moderately-supportive / weakening. The producer's "significant" + "extreme" (>60) bands fold into the strong tier (the KB does not surface a separate 60 cutpoint). |
+| `HOSTILE_MACRO_DGPI_MAX` | -30 | signed DGPI | DEALER, GUARDRAILS | SPY DGPI at/below this (combined with SPY below gamma flip) is the DGPI half of the hostile-macro composite. Set to the hostile tier (-`DGPI_STRONG_BAND`). Because DGPI is log-compressed, SPY's \|DGPI\| is almost always large, so the hostile-macro gate is **sign-dominated** in practice — this threshold mainly prevents firing on a near-neutral SPY. Independently tunable. |
 | `EARNINGS_BLOCK_DAYS` | 7 | calendar days | PASS1, SIGNAL | Hard WAIT. Earnings ≤ 7d from screening date: immediate WAIT output, no further regime evaluation, no override path. |
 | `EARNINGS_CAUTION_DAYS` | 21 | calendar days | PASS1, SIGNAL | Soft WAIT. Earnings 8–21d out: WAIT with named operator-approval gate. Candidate does not advance to Eligible until operator explicitly redirects in current session. |
 | `DTE_DECAY_WARNING_THRESHOLD` | 21 | calendar days | PORTFOLIO_MGMT | The remaining DTE at or below which PORTFOLIO_MGMT surfaces a DTE decay warning for an open position. Signals that the operator may want to roll or close rather than hold to expiration. Operator-configurable; 21 days is the default, corresponding to the point where theta decay accelerates materially for most structures. |
@@ -54,7 +57,7 @@ This file is consumed by:
 - `REPORT_FORMAT_v3.0.md` — reads `FORWARD_TEST_CONFLUENCE_BAND_PCT` as the divergence boundary for rendering the forward-tested-target confidence suffix on the exit-plan / exit-trigger-proximity rows
 - `RISK_v3.0.md` — reads `CONDITIONAL_TOP_SIZE_PCT` as the conditional-top sizing-band magnitude
 - `VOLATILITY_v3.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` as the Appendix band boundary values
-- `DEALER_v3.0.md` — reads `NEAR_FLIP_BAND_PCT` as the near-flip zone Appendix band value
+- `DEALER_v3.0.md` — reads `NEAR_FLIP_BAND_PCT` as the near-flip zone Appendix band value, and `DGPI_NEUTRAL_BAND` / `DGPI_STRONG_BAND` / `HOSTILE_MACRO_DGPI_MAX` as the DGPI tier cutpoints and hostile-macro DGPI threshold
 - `PORTFOLIO_MGMT_v3.0.md` — reads `DTE_DECAY_WARNING_THRESHOLD` for DTE decay warning evaluation at Step 5 of the Portfolio mode workflow
 - `WYCKOFF_v3.0.md` — reads `TIER_GATE_TAU_HIGH` and `TIER_GATE_TAU_LOW` as the viewer/v2 ingest tier-gate boundaries that resolve a pasted reading to `pipeline-accepted`, `pipeline-flagged`, or estimation-path
 - `PASS1_SCREENING_v3.0.md` — reads `TIER_GATE_TAU_HIGH` and `TIER_GATE_TAU_LOW` indirectly via WYCKOFF when ingesting a viewer/v2 handoff as the candidate source; PASS1 does not re-implement the gate, it consumes WYCKOFF's resolved confirmation status
@@ -78,3 +81,5 @@ Changes to individual parameter values are recorded here in addition to the top-
 | 2026-06-26 | `TIER_GATE_TAU_LOW` | (not previously defined) | 0.45 (provisional) | New parameter for the v4.0 viewer/v2 ingest tier gate (Integration Plan §A1/§A5). Provisional default pending Stage-1 pilot calibration. Invariant: `τ_low ≤ τ_high` |
 | 2026-06-28 | `FORWARD_TEST_CONFLUENCE_BAND_PCT` | (not previously defined) | 0.5 (provisional) | New v4.0 param for the SIGNAL forward-tested-target confluence annotation (#78). The near-coincidence tolerance deciding when the viewer `pt_*`/`*_prob` rides as a confidence annotation on the exit anchor vs both levels surfacing. Provisional ±0.5% of spot pending pilot calibration; resolves the "SYSTEM_PARAMS follow-up" placeholders SIGNAL/REPORT_FORMAT carried |
 | 2026-06-28 | `CONDITIONAL_TOP_SIZE_PCT` | ~1% (reference point in RISK Appendix) | 1.0 | Promotes the v4.0 conditional-top sizing magnitude (JD1) from a RISK Appendix reference point to a named operator-tunable SYSTEM_PARAMS value (#78); RISK now references it by name. Value unchanged (~1% → 1.0%); only the ownership/tunability surface changes |
+| 2026-06-28 | `NEAR_FLIP_BAND_PCT` | 0.25 | 0.5 | Dealer contract reconciliation: aligned the KB near-flip band to the producers' actual 0.5% `at_flip` band (both kapman-polygon-mcp-v2 and kapman-schwab-MCP); the prior 0.25% disagreed with both. |
+| 2026-06-28 | `DGPI_NEUTRAL_BAND` / `DGPI_STRONG_BAND` / `HOSTILE_MACRO_DGPI_MAX` | (DEALER-hardcoded 20/50; macro ≤ -20) | 10 / 30 / -30 | Dealer contract reconciliation: re-keyed DEALER's DGPI tier cutpoints to the producer's signed-DGPI 10/30/60 magnitude bands (kapman-polygon-mcp-v2 `calculate_dgpi`), matching the viewer header; promoted from DEALER-hardcoded to named tunables. Hostile-macro set to the hostile tier (-30); sign-dominated in practice. |

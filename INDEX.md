@@ -181,6 +181,24 @@ This repository separates runtime and engineering materials:
     closeout remains** (structural validate + golden/BEARISH pilot + completeness critic + estimation-path regression +
     `_v3.0 → _v4.0` rename sweep) — **blocked on the operator-produced BEARISH viewer fixture**.
 
+- **Dealer-contract reconciliation (2026-06-28; a Stage-F-audit finding, separate from #78).** A code-grounded review found
+  the KB's DEALER/VOLATILITY contracts asserted Schwab fields that did not exist (the "kapman-mcp lesson"). The operator
+  fixed the **kapman-schwab-MCP** producer to match kapman-polygon-mcp-v2 (signed DGPI [-100,100], `position`
+  long_gamma/short_gamma/neutral, separate `position_vs_flip`, `confidence`), deployed + smoke-tested. The KB-side re-key
+  (this slice) landed atomically across **11 files**: `SYSTEM_PARAMS_v3.0.md` (3.0.3 → 3.0.4 — adds `DGPI_NEUTRAL_BAND=10`,
+  `DGPI_STRONG_BAND=30`, `HOSTILE_MACRO_DGPI_MAX=-30`; `NEAR_FLIP_BAND_PCT 0.25 → 0.5`), `DEALER_v3.0.md` (3.0.1 → 3.0.2 —
+  anchor: signed DGPI tiers re-keyed `20/50 → 10/30/60`, the fictional `FULL/LIMITED/INVALID` dealer-status replaced by the
+  emitted `confidence` contract [high/med → full, low → floor, invalid → drop], `position`/`position_vs_flip` split, near-flip
+  0.5%, Pass-1↔Pass-2 agrees by tier/direction not value, legacy-anchor historical note), and the consumer cascade
+  `SIGNAL_v3.0.md` (3.0.5 → 3.0.6), `RISK_v3.0.md` (3.0.2 → 3.0.3), `PASS2_VALIDATION_v3.0.md` (3.0.4 → 3.0.5),
+  `PASS1_SCREENING_v3.0.md` (3.0.9 → 3.0.10 — incl. the P4-paragraph correction: Schwab now emits `confidence`, so the
+  Pass-1/Pass-2 distinction is provenance, not vocabulary), `PORTFOLIO_MGMT_v3.0.md` (3.0.4 → 3.0.5), `KAPMAN_GUARDRAILS_v3.0.md`
+  (3.0.4 → 3.0.5 — hostile `≤ -30`, false-provenance claim fixed), `REPORT_FORMAT_v3.0.md` (3.0.10 → 3.0.11),
+  `REPORT_STYLE_v3.0.md` (3.0.4 → 3.0.5), `REPORT_TEMPLATE_PASS1_v3.0.html` (degradation-flag label). The overloaded
+  **volatility-status** `FULL/LIMITED/INVALID` (P0-2, still open) and **chain-quality** `Full/Limited/Weak` (P0-3a) were
+  deliberately left untouched. Behavior change: a ticker formerly floored under "medium-confidence" is now promoted to full
+  (high/medium both = trusted). Still open after this: P0-2 (volatility contract), P0-3a, P0-4, P0-5, P1-10, P1-11.
+
 ## v3.0 file directory
 
 | path | tier | doc_type | role |
@@ -229,16 +247,17 @@ This repository separates runtime and engineering materials:
 
 | File | kb_version | status |
 |---|---|---|
-| SYSTEM_PARAMS_v3.0.md | 3.0.3 | active |
-| SIGNAL_v3.0.md | 3.0.5 | active |
-| PASS1_SCREENING_v3.0.md | 3.0.9 | active |
+| SYSTEM_PARAMS_v3.0.md | 3.0.4 | active |
+| SIGNAL_v3.0.md | 3.0.6 | active |
+| PASS1_SCREENING_v3.0.md | 3.0.10 | active |
 | WYCKOFF_v3.0.md | 3.0.9 | active |
-| PORTFOLIO_MGMT_v3.0.md | 3.0.4 | active |
-| PASS2_VALIDATION_v3.0.md | 3.0.4 | active |
-| RISK_v3.0.md | 3.0.2 | active |
-| DEALER_v3.0.md | 3.0.1 | active |
-| KAPMAN_GUARDRAILS_v3.0.md | 3.0.4 | active |
-| REPORT_FORMAT_v3.0.md | 3.0.10 | active |
+| PORTFOLIO_MGMT_v3.0.md | 3.0.5 | active |
+| PASS2_VALIDATION_v3.0.md | 3.0.5 | active |
+| RISK_v3.0.md | 3.0.3 | active |
+| DEALER_v3.0.md | 3.0.2 | active |
+| KAPMAN_GUARDRAILS_v3.0.md | 3.0.5 | active |
+| REPORT_FORMAT_v3.0.md | 3.0.11 | active |
+| REPORT_STYLE_v3.0.md | 3.0.5 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
 
 ### v3.0.1 report metadata patch
@@ -246,17 +265,17 @@ This repository separates runtime and engineering materials:
 | File | kb_version | file_last_updated |
 |---|---|---|
 | REPORT_TEMPLATE_PASS1_v3.0.html | 3.0.5 | 2026-05-14 |
-| KAPMAN_GUARDRAILS_v3.0.md | 3.0.4 | 2026-06-28 |
-| REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
+| KAPMAN_GUARDRAILS_v3.0.md | 3.0.5 | 2026-06-28 |
+| REPORT_STYLE_v3.0.md | 3.0.5 | 2026-06-28 |
 | WYCKOFF_v3.0.md | 3.0.9 | 2026-06-28 |
-| SIGNAL_v3.0.md | 3.0.5 | 2026-06-28 |
-| PASS1_SCREENING_v3.0.md | 3.0.9 | 2026-06-28 |
-| PORTFOLIO_MGMT_v3.0.md | 3.0.4 | 2026-06-28 |
-| PASS2_VALIDATION_v3.0.md | 3.0.4 | 2026-06-28 |
-| RISK_v3.0.md | 3.0.2 | 2026-06-28 |
-| DEALER_v3.0.md | 3.0.1 | 2026-06-28 |
-| REPORT_FORMAT_v3.0.md | 3.0.10 | 2026-06-28 |
-| SYSTEM_PARAMS_v3.0.md | 3.0.3 | 2026-06-28 |
+| SIGNAL_v3.0.md | 3.0.6 | 2026-06-28 |
+| PASS1_SCREENING_v3.0.md | 3.0.10 | 2026-06-28 |
+| PORTFOLIO_MGMT_v3.0.md | 3.0.5 | 2026-06-28 |
+| PASS2_VALIDATION_v3.0.md | 3.0.5 | 2026-06-28 |
+| RISK_v3.0.md | 3.0.3 | 2026-06-28 |
+| DEALER_v3.0.md | 3.0.2 | 2026-06-28 |
+| REPORT_FORMAT_v3.0.md | 3.0.11 | 2026-06-28 |
+| SYSTEM_PARAMS_v3.0.md | 3.0.4 | 2026-06-28 |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | 2026-06-27 |
 
 ### Session 14 llm_runtime inventory verification

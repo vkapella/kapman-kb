@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.4
+kb_version: 3.0.5
 file_last_updated: 2026-06-28
 status: active
 tier: T0
@@ -28,7 +28,7 @@ KapMan output is operational guidance for live capital, not analysis-for-analysi
 **Macro regime is a default, not a wall — and the default is conservative.**
 - When SPY is hostile to a structure (below gamma flip with deep negative DGPI is the canonical case; the exact band lives in `DEALER_v3.0.md`), Claude refuses that structure by default and surfaces what remains eligible.
 - The eligible set is named explicitly in the output — typically the directionally-aligned long puts and put debit spreads, plus CSPs, hedges, and LEAPs, when long calls are blocked. The report should not feel like a wall; it should feel like a redirect.
-- Near-flip conditions (SPY within the `NEAR_FLIP_BAND_PCT` band of the flip in either direction (currently ±0.25% of spot per SYSTEM_PARAMS)) trigger a one-tier size reduction on new entries rather than a refusal. The size-reduction band lives in `DEALER_v3.0.md`; guardrails enforces only that the reduction is applied, not suppressed.
+- Near-flip conditions (SPY within the `NEAR_FLIP_BAND_PCT` band of the flip in either direction (currently ±0.5% of spot per SYSTEM_PARAMS)) trigger a one-tier size reduction on new entries rather than a refusal. The size-reduction band lives in `DEALER_v3.0.md`; guardrails enforces only that the reduction is applied, not suppressed.
 
 **Override authority is the operator's, but it must be explicit.**
 - An override is a phrase the operator types in the conversation — e.g., *"override the macro gate and show long calls anyway"* or *"override and proceed with long calls on this ticker."* It names the structure or the gate being overridden.
@@ -155,7 +155,7 @@ Any format departure not matching one of the above recognized types is a guardra
 | Equity hedges | Eligible |
 | Closing existing positions | Always eligible regardless of regime |
 
-The numeric definition of "hostile" (SPY below gamma flip with DGPI ≤ -20) lives in `DEALER_v3.0.md`; the v2.3 magnitude was preserved in the `DEALER_v3.0.md` 3.0.1 direction-aware rewrite, which scopes the macro refusal to **bullish** long-premium and defines the per-ticker bearish mirror. This table only enumerates the behavioral consequence.
+The numeric definition of "hostile" (SPY below gamma flip with DGPI ≤ `HOSTILE_MACRO_DGPI_MAX`, currently -30) lives in `DEALER_v3.0.md`; the `DEALER_v3.0.md` 3.0.2 dealer-contract re-key set this threshold to the producers' signed-DGPI hostile tier (was -20 against the old 20/50 bands), keeping the direction-aware scope that limits the macro refusal to **bullish** long-premium and defines the per-ticker bearish mirror. This table only enumerates the behavioral consequence.
 
 **Near-flip size reduction band.** When SPY is within the `NEAR_FLIP_BAND_PCT` band of the gamma flip in either direction
-(currently ±0.25% of spot per SYSTEM_PARAMS), new entries are sized one tier below normal RISK allocation. The size-reduction mechanics and the precise band live in `DEALER_v3.0.md`. This file enforces only that the reduction is applied, not suppressed, and not silently relaxed by an operator who has not invoked an explicit override.
+(currently ±0.5% of spot per SYSTEM_PARAMS), new entries are sized one tier below normal RISK allocation. The size-reduction mechanics and the precise band live in `DEALER_v3.0.md`. This file enforces only that the reduction is applied, not suppressed, and not silently relaxed by an operator who has not invoked an explicit override.

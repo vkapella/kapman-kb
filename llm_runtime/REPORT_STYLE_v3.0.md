@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: style
-kb_version: 3.0.4
-file_last_updated: 2026-05-31
+kb_version: 3.0.5
+file_last_updated: 2026-06-28
 status: active
 tier: T3
 ---
@@ -68,7 +68,7 @@ REPORT_STYLE is tier T3 — the visual implementation layer. It sits alongside R
 | `REPORT_FORMAT_v3.0.md` (T3) | Field cap numeric values; footnote numbering convention; source bar placement rule; legend/footer internal order | Implements column-width CSS from field caps; implements superscript CSS for footnote references; implements source bar visual block; implements legend/footer visual block |
 | `PORTFOLIO_MGMT_v3.0.md` (T2) | Lifecycle state labels (Open/Advisory/Exited/Expired); DTE decay warning flag format; Advisory flag format | Assigns semantic row class and badge treatment per state label |
 | `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Urgency mandate for Expired positions; override acknowledgment placement | Implements critical visual tier (`.expired`) for Expired rows; ensures override acknowledgment text is visually distinct in subtitle or footnote position |
-| `DEALER_v3.0.md` (T1) | Dealer-status labels (FULL/LIMITED/INVALID); chain quality badge vocabulary | Maps chain quality labels to tag color classes |
+| `DEALER_v3.0.md` (T1) | Dealer-confidence labels (high/medium/low/invalid); chain quality badge vocabulary | Maps dealer-confidence labels and chain quality labels to tag color classes |
 | `SIGNAL_v3.0.md` (T1) | Confidence band labels (High/Med/Low); action labels (ACT TODAY/MONITOR/NO_TRADE/WAIT) | Maps action labels to row class and badge class |
 
 **What REPORT_STYLE does not own.**
@@ -216,7 +216,7 @@ All badges: `display: inline-block`, `padding: 0 4px`, `border-radius: 2px`, `fo
 
 | Class | Background | Text | Example labels |
 |---|---|---|---|
-| `.tag-red` | #fde8e8 | #c0392b | Below flip, EXIT, STOP, INVALID |
+| `.tag-red` | #fde8e8 | #c0392b | Below flip, EXIT, STOP, Invalid conf |
 | `.tag-green` | #eafaf1 | #1a7a3c | Above flip, ACT, Full chain, HOLD |
 | `.tag-orange` | #fff3cd | #a04000 | MONITOR, Near flip, CONDITIONAL, DTE Warning |
 | `.tag-gray` | #f0f0f0 | #555 | N/A, Low conf, Needs validation, Exited |

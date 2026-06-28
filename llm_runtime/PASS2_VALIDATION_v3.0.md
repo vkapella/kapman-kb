@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.4
+kb_version: 3.0.5
 file_last_updated: 2026-06-28
 status: active
 tier: T2
@@ -35,11 +35,11 @@ This is the same Pass 1 → Pass 2 boundary the dealer-re-fetch heuristic enforc
 
 **Dealer metrics are re-fetched fresh at the start of every Pass 2 run — this is not optional.**
 
-Before any chain fetch, Pass 2 re-fetches Schwab dealer metrics for every candidate ticker and for SPY. The wall levels and DGPI tier that inform strike selection must come from this fresh fetch, not from values established at Pass 1 or compacted in conversation context. A Pass 2 run that reuses Pass 1 dealer values for strike selection violates the data boundary that PIPELINE_011 (now owned by PASS1) established and that Pass 2 is required to enforce on its own behalf. The fresh fetch also produces the dealer-status label (FULL / LIMITED / INVALID) that Pass 2 reads alongside chain quality as two independent dimensions of data confidence.
+Before any chain fetch, Pass 2 re-fetches Schwab dealer metrics for every candidate ticker and for SPY. The wall levels and DGPI tier that inform strike selection must come from this fresh fetch, not from values established at Pass 1 or compacted in conversation context. A Pass 2 run that reuses Pass 1 dealer values for strike selection violates the data boundary that PIPELINE_011 (now owned by PASS1) established and that Pass 2 is required to enforce on its own behalf. The fresh fetch also produces the dealer `confidence` rating (`high` / `medium` / `low` / `invalid`) that Pass 2 reads alongside chain quality as two independent dimensions of data confidence — there is no separate `FULL/LIMITED/INVALID` "dealer-status" field; both producers emit `confidence`, and trusted (`high`/`medium`) → full dealer behavior, `low` → floor-of-band, `invalid` → the per-name dealer layer reads as absent.
 
 **Regime drift is a named heuristic, not an implicit behavior.**
 
-When the fresh Pass 2 dealer fetch reveals a material regime change relative to Pass 1 context — SPY has crossed below its flip level, a per-ticker DGPI tier has moved two or more tiers, or a near-flip flag has become newly active on a candidate ticker — Pass 2 surfaces the drift explicitly before proceeding on the affected candidates. The operator decides whether to re-screen the affected candidates or proceed on the Pass 1 baseline with the drift noted. Pass 2 does not independently veto a candidate based on drift; it returns the candidate to the operator's judgment with the drift named and the implication stated. Candidates not affected by the drift proceed to chain fetch without interruption. When drift is minor — a DGPI tier shift of one, a wall level move within the candidate zone — Pass 2 notes it in the output rationale without pausing. The materiality thresholds for what triggers a pause versus a rationale note are in the Appendix.
+When the fresh Pass 2 dealer fetch reveals a material regime change relative to Pass 1 context — assessed by **tier crossing or sign/direction flip, never by exact-value equality** (Pass-1 kapman-polygon-mcp-v2 and Pass-2 kapman-schwab-MCP compute the signed DGPI over different option universes, so the live Schwab read governs) — such as SPY crossing below its flip level, a per-ticker DGPI tier moving two or more tiers (the signed five-tier scheme per DEALER / SYSTEM_PARAMS, 10/30/60 bands), or `position_vs_flip` becoming `at_flip` on a candidate ticker — Pass 2 surfaces the drift explicitly before proceeding on the affected candidates. The operator decides whether to re-screen the affected candidates or proceed on the Pass 1 baseline with the drift noted. Pass 2 does not independently veto a candidate based on drift; it returns the candidate to the operator's judgment with the drift named and the implication stated. Candidates not affected by the drift proceed to chain fetch without interruption. When drift is minor — a DGPI tier shift of one, a wall level move within the candidate zone — Pass 2 notes it in the output rationale without pausing. The materiality thresholds for what triggers a pause versus a rationale note are in the Appendix.
 
 **Chain fetch scope is bounded by the PASS1 candidate zone and DTE band.**
 
@@ -49,9 +49,9 @@ For each eligible candidate, Pass 2 fetches the Schwab option chain constrained 
 
 A chain fetch result that shows fewer contracts than expected for the zone and DTE band, missing far strikes within the zone, or incomplete expiration coverage within the DTE band is a truncation signal per PIPELINE_012. When truncation is suspected, Pass 2 reduces the strike count parameter and re-fetches, or splits the fetch by targeted expiration, before classifying chain quality or selecting strikes. A chain that has not been confirmed complete cannot be classified Full. If the re-fetch resolves the truncation, classification proceeds on the complete result. If the re-fetch does not resolve it, the chain is classified at its actual quality level with the truncation noted, and the output for the affected candidate is Flagged rather than Validated. The numeric strike-count parameters and the re-fetch mechanics belong in `engineering_only/PASS2_MCP_REFERENCE_v3.0.md`; the behavioral contract — never treat a truncated chain as complete — is this file's to own.
 
-**Chain quality classification is Pass 2's data-quality gate, independent of dealer-status.**
+**Chain quality classification is Pass 2's data-quality gate, independent of dealer confidence.**
 
-Every chain fetch produces a chain quality classification: Full, Limited, or Weak. This classification is independent of the dealer-status label (FULL / LIMITED / INVALID) that the fresh dealer fetch produces. Both dimensions apply simultaneously. Chain quality thresholds (contract count floors, bid/ask spread limits, OI floors per contract) are MCP-internal parameters that belong in `engineering_only/PASS2_MCP_REFERENCE_v3.0.md`. The runtime classification vocabulary — Full, Limited, Weak — and the behavioral consequence for each combination with dealer-status are this file's to own. The combination matrix is in the Appendix.
+Every chain fetch produces a chain quality classification: Full, Limited, or Weak. This classification is independent of the dealer `confidence` (`high` / `medium` / `low` / `invalid`) that the fresh dealer fetch produces. Both dimensions apply simultaneously. Chain quality thresholds (contract count floors, bid/ask spread limits, OI floors per contract) are MCP-internal parameters that belong in `engineering_only/PASS2_MCP_REFERENCE_v3.0.md`. The runtime classification vocabulary — Full, Limited, Weak — and the behavioral consequence for each combination with dealer confidence are this file's to own. The combination matrix is in the Appendix.
 
 **The spread-mandate is resolved definitively at Pass 2 — three outcomes, no others.**
 
@@ -101,7 +101,7 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 |---|---|---|
 | `PASS1_SCREENING_v3.0.md` (T2) | Per-candidate eligible-set output: structure, direction, candidate zones, DTE band, Pass 1 IV source label, sizing band note, confidence value | Entry contract for every Pass 2 run; PASS2 does not re-derive any of these |
 | `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Anti-hallucination floor; data-quality vocabulary; override discipline | PASS2 enforces the floor on every output; exact strikes and expirations appear only from validated chain; data-quality labels applied throughout |
-| `DEALER_v3.0.md` (T1) | Fresh dealer-status label (FULL / LIMITED / INVALID); call/put wall levels; DGPI tier; near-flip flag | Re-fetched fresh at Pass 2 start; wall levels inform strike selection; dealer-status combined with chain quality for output-state determination |
+| `DEALER_v3.0.md` (T1) | Fresh dealer `confidence` (`high` / `medium` / `low` / `invalid`); call/put wall levels; signed DGPI tier; near-flip flag (`position_vs_flip` `at_flip`) | Re-fetched fresh at Pass 2 start; wall levels inform strike selection; dealer `confidence` combined with chain quality for output-state determination |
 | `VOLATILITY_v3.0.md` (T1) | Pass 2 IV source (Schwab ATM chain per-contract IV); IV/HV band; IV rank tier; volatility-status label; source-authority discipline | Spread-mandate resolution: IV/HV band and IV rank tier determine confirmed / overridden / fire-by-default outcome |
 | `SIGNAL_v3.0.md` (T1) | Spread-mandate contract (heuristic 3); anti-hallucination floor (heuristic 10); alternative-confidence ordering (heuristic 8) | PASS2 enforces the spread-mandate's three-outcome resolution; honors anti-hallucination floor on truncated chains; orders validated-set summary by descending confidence |
 | `WYCKOFF_v3.0.md` (T1) | Operator-confirmed phase and event readings; structural levels from confirmed phase | Structural levels inform strike selection anchoring within the candidate zone |
@@ -112,8 +112,8 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 
 | Destination file | What PASS2 delivers | How that file uses it |
 |---|---|---|
-| `PORTFOLIO_MGMT_v3.0.md` (T2) | Validated trade specifications: exact strike, exact expiration, structure, direction, entry price range, sizing band, chain quality label, dealer-status label, entry-time regime snapshot | PORTFOLIO_MGMT carries the validated specification and regime snapshot in position context for monitoring and exit-trigger evaluation |
-| `REPORT_FORMAT_v3.0.md` (T3) | Full Pass 2 output: Validated / Flagged / Rejected per candidate with named reasons; chain quality label; dealer-status label; spread-mandate resolution outcome; entry price range; sizing band | REPORT_FORMAT renders the Pass 2 section of the screening report; PASS2 does not own report rendering |
+| `PORTFOLIO_MGMT_v3.0.md` (T2) | Validated trade specifications: exact strike, exact expiration, structure, direction, entry price range, sizing band, chain quality label, dealer `confidence` rating, entry-time regime snapshot | PORTFOLIO_MGMT carries the validated specification and regime snapshot in position context for monitoring and exit-trigger evaluation |
+| `REPORT_FORMAT_v3.0.md` (T3) | Full Pass 2 output: Validated / Flagged / Rejected per candidate with named reasons; chain quality label; dealer `confidence` rating; spread-mandate resolution outcome; entry price range; sizing band | REPORT_FORMAT renders the Pass 2 section of the screening report; PASS2 does not own report rendering |
 | `REPORT_STYLE_v3.0.md` (T3) | (Indirectly) the Pass 2 output surface | REPORT_STYLE governs field length caps and label vocabulary; PASS2 respects these constraints in the rationale text it assembles |
 
 **What PASS2 does not own.**
@@ -155,23 +155,23 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 
 | State | Specifiable from chain? | Named caveat present? | Operator action required before execution? | Minimum content |
 |---|---|---|---|---|
-| Validated | Yes — Full or Limited chain supports complete specification | No unresolved caveats | None — trade-ready as delivered | Exact strike, exact expiration, confirmed structure, entry price range, sizing band, chain quality label, dealer-status label |
+| Validated | Yes — Full or Limited chain supports complete specification | No unresolved caveats | None — trade-ready as delivered | Exact strike, exact expiration, confirmed structure, entry price range, sizing band, chain quality label, dealer `confidence` rating |
 | Flagged | Fully or partially — chain supports specification with known limitations | Yes — one or more named flags | Operator must acknowledge flag(s) before treating as executable | All Validated fields where available, plus named flag reason(s) |
 | Rejected | No — chain cannot support a valid specification | Yes — named rejection reason | Candidate returns to Pass 1 state; no execution path without re-screening | Named rejection reason only; no strike or expiration produced |
 
-**Chain quality × dealer-status combination matrix.**
+**Chain quality × dealer-confidence combination matrix.** (Dealer confidence is the emitted `confidence`: `high`/`medium` are *trusted* and behave identically; `low` floors sizing; `invalid` drops the dealer layer. Chain quality — Full/Limited/Weak — is the independent axis.)
 
-| Chain quality | Dealer-status | Output state floor | Sizing consequence |
+| Chain quality | Dealer confidence | Output state floor | Sizing consequence |
 |---|---|---|---|
-| Full | FULL | Validated eligible | Full sizing band per RISK |
-| Full | LIMITED | Validated eligible | Floor-of-band sizing per RISK |
-| Full | INVALID | Flagged | Floor-of-band sizing; dealer-data-absent label |
-| Limited | FULL | Validated eligible with caveat noted | One-tier step-down per RISK |
-| Limited | LIMITED | Flagged | One-tier step-down; both dimensions noted |
-| Limited | INVALID | Flagged | One-tier step-down; dealer-data-absent label |
-| Weak | FULL | Flagged | Two-tier step-down or Flagged with sizing caveat |
-| Weak | LIMITED | Flagged | Two-tier step-down; both dimensions noted |
-| Weak | INVALID | Rejected | No valid specification producible |
+| Full | trusted (`high`/`medium`) | Validated eligible | Full sizing band per RISK |
+| Full | `low` | Validated eligible | Floor-of-band sizing per RISK |
+| Full | `invalid` | Flagged | Floor-of-band sizing; dealer-data-absent label |
+| Limited | trusted (`high`/`medium`) | Validated eligible with caveat noted | One-tier step-down per RISK |
+| Limited | `low` | Flagged | One-tier step-down; both dimensions noted |
+| Limited | `invalid` | Flagged | One-tier step-down; dealer-data-absent label |
+| Weak | trusted (`high`/`medium`) | Flagged | Two-tier step-down or Flagged with sizing caveat |
+| Weak | `low` | Flagged | Two-tier step-down; both dimensions noted |
+| Weak | `invalid` | Rejected | No valid specification producible |
 
 **Spread-mandate resolution quick reference.**
 
@@ -197,7 +197,7 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 | SPY crossed below gamma flip since Pass 1 | Yes — always material |
 | Per-ticker DGPI tier moved two or more tiers | Yes |
 | Near-flip flag newly active on a candidate ticker | Yes |
-| Dealer-status label changed from FULL or LIMITED to INVALID | Yes — surfaces as data-quality flag on the affected candidate |
+| Dealer `confidence` dropped from trusted (`high`/`medium`) to `invalid` | Yes — surfaces as data-quality flag on the affected candidate |
 | Per-ticker DGPI tier moved one tier | No — note in rationale; do not pause |
 | Wall levels shifted within the candidate zone | No — note in rationale; do not pause |
-| Dealer-status label changed from FULL to LIMITED | No — note in rationale; sizing consequence applied |
+| Dealer `confidence` dropped from trusted (`high`/`medium`) to `low` | No — note in rationale; sizing restricted to floor-of-band per the confidence contract |

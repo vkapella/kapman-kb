@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.2
+kb_version: 3.0.3
 file_last_updated: 2026-06-28
 status: active
 tier: T1
@@ -22,7 +22,7 @@ A ticker's screening score gets it into the eligible set; the regime determines 
 The band ceiling is set by the position's regime read **relative to the position's direction** (WYCKOFF's decision-layer table is long-framed; the bearish bands are its mirror). A direction-aligned **confirmed trend** — `markup` for a long, `markdown` for a long put — earns the **upper** band by default. A direction-aligned **continuation branch confirmed at phase C** — `reaccumulation` (post-`spring`/`shakeout`) for a long, `redistribution` (post-`utad`) for a long put — also earns the **upper** band (it is the highest-odds continuation context). A direction-aligned **base regime confirmed at phase C** — `accumulation` (post-`spring`/`shakeout`) for a long, `distribution` (post-`utad`) for a long put — earns the **conditional-top** band: the phase-C test has confirmed but the breakout/breakdown has not, so it sizes below a confirmed trend. A direction-aligned range regime **without its phase-C** earns only the **conditional floor**, and is in any case refused by the SIGNAL Wyckoff veto unless the operator overrides — the trade may be right, but the regime hasn't yet provided the confirmation that would justify a normal-sized entry. A regime that does **not** align with the position's direction (the refusal set for that direction), `ranging_undefined`, or an unconfirmed reading (`UNKNOWN`) closes the long-premium band entirely; the eligible structures shift to the directionally-aligned alternatives plus CSPs, hedges, and LEAPs per GUARDRAILS, and those structures have their own sizing logic (margin capacity for CSPs, time-decoupled allocation for LEAPs).
 
 **Dealer regime narrows the band within the Wyckoff ceiling.**
-Within an eligible (direction-aligned, phase-C-confirmed or trend) regime, a dealer regime **supportive of the position's direction** earns the top of the band; a near-neutral or direction-adverse dealer regime steps the band down. For a long this is DGPI deep in supportive (positive) territory; for a long put it is the mirror — a dealer regime adverse to the underlying (the exact bearish-mirror DGPI band is a `DEALER_v3.0.md` reconciliation item). The specific dealer thresholds live in `DEALER_v3.0.md`. Hostile macro is not a sizing question — it's a refusal, owned by GUARDRAILS.
+Within an eligible (direction-aligned, phase-C-confirmed or trend) regime, a dealer regime **supportive of the position's direction** earns the top of the band; a near-neutral or direction-adverse dealer regime steps the band down. For a long this is DGPI deep in supportive (positive) territory; for a long put it is the mirror — a dealer regime adverse to the underlying (the per-ticker bearish-mirror DGPI band, DGPI ≥ +30, defined in `DEALER_v3.0.md`'s Appendix). The specific dealer thresholds (signed 10/30/60 bands) live in `DEALER_v3.0.md`. Hostile macro is not a sizing question — it's a refusal, owned by GUARDRAILS.
 
 **Chain quality is a sizing factor, not just a structure factor.**
 A full liquid chain (open interest and volume comfortably above execution thresholds) supports normal sizing. A limited chain — typically 5–24 contracts of acceptable liquidity — drops sizing to the floor of the band regardless of other factors, and caps contract count to what the chain can actually absorb. A chain too thin to execute against drops the candidate from eligible-set entirely, which is a Pass 2 validation outcome, not a RISK decision.
@@ -63,7 +63,7 @@ Hedges (SPY puts, VIX calls, sector inverse exposure) are sized against aggregat
 | Input | Owned by | How RISK consumes it |
 |---|---|---|
 | Wyckoff regime + phase (A–E) | `WYCKOFF_v3.0.md` | Sets the band ceiling relative to the position's direction (per WYCKOFF's decision layer, mirrored for a long put): direction-aligned trend (`markup`/`markdown`) or post-phase-C continuation (`reaccumulation`/`redistribution`) → upper band; post-phase-C base (`accumulation`/`distribution`) → conditional-top; pre-phase-C → conditional floor (override-only); non-aligned regime / `ranging_undefined` / `UNKNOWN` → long-premium band closed |
-| Dealer regime (DGPI tier) | `DEALER_v3.0.md` | Narrows the band within the Wyckoff ceiling: dealer regime supportive of the position's direction → top of band, near-neutral/direction-adverse → step down (bullish keys on positive DGPI; bearish on the mirror — exact band per DEALER reconciliation) |
+| Dealer regime (DGPI tier) | `DEALER_v3.0.md` | Narrows the band within the Wyckoff ceiling: dealer regime supportive of the position's direction → top of band, near-neutral/direction-adverse → step down (bullish keys on positive DGPI; bearish on the mirror — the per-ticker bearish-mirror band, DGPI ≥ +30, per DEALER's Appendix) |
 | Near-flip flag | `DEALER_v3.0.md` | Triggers the mechanical one-tier step-down per GUARDRAILS |
 | Hostile macro flag | `DEALER_v3.0.md` (definition), `KAPMAN_GUARDRAILS_v3.0.md` (behavior) | Not a sizing input — a refusal. RISK does not size long-premium structures when hostile macro is active |
 | Volatility regime (IV/HV, IV source tier) | `VOLATILITY_v3.0.md` | Governs structure choice (naked vs. spread), which determines the sizing denominator |
@@ -124,7 +124,7 @@ If any of these is missing or ambiguous, sizing does not proceed. A sizing band 
 | Direction-aligned base regime post-phase-C (`accumulation` post-`spring`/`shakeout` / `distribution` post-`utad`) | Conditional-top | `CONDITIONAL_TOP_SIZE_PCT` per SYSTEM_PARAMS (currently 1.0% of real-capital denominator; top of the conditional band) | Long call / long put, CONDITIONAL status | v4.0 (extends v2.3 clause 5; JD1) |
 | Direction-aligned base/continuation pre-phase-C (no confirmed phase-C — `spring`/`shakeout` bullish; `utad` bearish) | Conditional floor — default refused by the SIGNAL Wyckoff veto; sized here only under operator override | ~0.5% of real-capital denominator | Long call / long put, CONDITIONAL status | v2.3 clause 5 |
 | Regime not aligned with the position's direction (refusal set), or `ranging_undefined`, or `UNKNOWN` | Long-premium band closed | No new long-premium entries in that direction | Directionally-aligned alternatives + CSPs, hedges, LEAPs | v2.3 clause 6 (generalized) |
-| Hostile macro (SPY below gamma flip AND SPY DGPI ≤ -20) | Refused (bullish long-premium) | No new bullish long-call entries; bearish long puts remain the aligned redirect | Override required per GUARDRAILS | v2.3 clause 7 |
+| Hostile macro (SPY below gamma flip AND SPY DGPI ≤ `HOSTILE_MACRO_DGPI_MAX`, currently -30) | Refused (bullish long-premium) | No new bullish long-call entries; bearish long puts remain the aligned redirect | Override required per GUARDRAILS | v2.3 clause 7 |
 
 **Absolute single-position ceiling.**
 
