@@ -99,9 +99,14 @@ This repository separates runtime and engineering materials:
     **direction-aware/symmetric** (long puts get a first-class bearish path mirroring long calls — operator-approved),
     fixes the `utad` phase-E→phase-C error, resolves the `lps`/`lpsy` side-awareness, and adds a **forward-tested-target
     confluence annotation** to the exit triggers (the viewer `pt_*`/`*_prob` rides as a confidence annotation on the
-    structural+validated level, never as the broker price; matching PASS2 §12 carry refinement). **P4** (dealer/flip
-    vocab) and the remaining **consumer files** (RISK/PORTFOLIO/PASS1/JOURNAL/GUARDRAILS/DEALER/REPORT_FORMAT, Stages
-    C–E) remain pending under #78.
+    structural+validated level, never as the broker price; matching PASS2 §12 carry refinement). **Stage C — RISK
+    done** — `RISK_v3.0.md` (`kb_version 3.0.0 → 3.0.1`): re-keys the sizing bands to the 7-regime model and makes
+    them **direction-relative/symmetric** (a long put in `markdown` earns the upper band, mirroring a long call in
+    `markup`) — trend & post-phase-C continuation → upper; post-phase-C base → conditional-top; pre-phase-C →
+    conditional floor (default-refused by the SIGNAL veto, override-only, resolving a prior SIGNAL↔RISK tension);
+    non-aligned/`ranging_undefined`/`UNKNOWN` → closed; v2.3 magnitudes preserved; near-flip ladder + dealer-narrowing
+    made direction-aware; RISK_005 preserved verbatim. **P4** (dealer/flip vocab) and the remaining **consumer files**
+    (PORTFOLIO/PASS1/JOURNAL/GUARDRAILS/DEALER/REPORT_FORMAT, Stages C–E) remain pending under #78.
 
 ## v3.0 file directory
 
@@ -157,6 +162,7 @@ This repository separates runtime and engineering materials:
 | WYCKOFF_v3.0.md | 3.0.7 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.3 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | active |
+| RISK_v3.0.md | 3.0.1 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
 
 ### v3.0.1 report metadata patch
@@ -170,6 +176,7 @@ This repository separates runtime and engineering materials:
 | PASS1_SCREENING_v3.0.md | 3.0.7 | 2026-06-27 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.3 | 2026-06-27 |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | 2026-06-28 |
+| RISK_v3.0.md | 3.0.1 | 2026-06-28 |
 | REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | 2026-06-27 |
 

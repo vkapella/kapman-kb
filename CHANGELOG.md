@@ -1,5 +1,46 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage C consumer re-key, RISK (symmetric sizing bands) (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage C (RISK consumer; substantive; HITL, approved turn-by-turn in session)
+
+Re-keys RISK to the two-axis canonical model and makes the sizing bands **direction-relative/symmetric**, so RISK
+enforces the per-regime band ceilings that SIGNAL (3.0.3) references and WYCKOFF (3.0.7) decision layer defines.
+#78 stays open (P4 + remaining consumers).
+
+- **`llm_runtime/RISK_v3.0.md`** (`kb_version 3.0.0 → 3.0.1`):
+  - **Direction-relative symmetric sizing bands.** The band ceiling is set by the position's regime read relative to
+    its direction (WYCKOFF's decision layer is long-framed; bearish = mirror): direction-aligned trend (`markup`
+    long / `markdown` long put) and post-phase-C continuation branch (`reaccumulation`/`redistribution`) → **upper**;
+    post-phase-C base regime (`accumulation`/`distribution`) → **conditional-top**; pre-phase-C → **conditional
+    floor**; non-aligned regime / `ranging_undefined` / `UNKNOWN` → **long-premium band closed**. A long put in
+    `markdown` earns the upper band, mirroring a long call in `markup`. v2.3 named-band magnitudes (3%/2%/1%/0.5–1%,
+    5% ceiling) preserved unchanged; only the regime→band mapping is re-keyed and mirrored.
+  - **Phase-C confirmer** is `spring`/`shakeout` (bullish) / `utad` (bearish) throughout.
+  - **JD2 reconciliation:** pre-phase-C long-premium is *default-refused by the SIGNAL Wyckoff veto* and sized at the
+    conditional floor only under operator override — resolving a prior SIGNAL↔RISK tension (SIGNAL refused it; old
+    RISK gave it "conditional sizing").
+  - Near-flip step-down ladder and the dealer-narrowing heuristic made direction-aware; every ladder rung is a real
+    reduction (both ~1% bands step to the conditional floor ~0.5%).
+  - Re-keyed: Principle, "Wyckoff regime sets the band ceiling" heuristic (renamed), inputs table (Wyckoff + dealer
+    rows), entry-point checklist, WYCKOFF cross-ref, Appendix sizing-band table (9 direction-relative rows). Legacy
+    RISK_005 preserved **verbatim** with a historical note (incl. a redirect for the renamed heuristic).
+- **`INDEX.md`** — added RISK to both v3.0.1 version tables (3.0.0 → 3.0.1) and updated the §A1 status bullet (Stage C RISK done).
+
+### Verification
+Two adversarial workflow passes (faithfulness, cross-file consistency, completeness, apply-readiness): the first
+returned `revise` (bullish phase-C token, a no-op near-flip ladder rung, two missed long-only sites); all folded
+in; the re-verify returned `apply-as-is` / `apply_ready: true`. `verify_frontmatter` + `verify_anchors` pass;
+dangling-vocab grep clean outside RISK_005 + the historical note.
+
+### Scope notes — deferred under #78
+- **DEALER**: bearish-mirror DGPI band for the direction-aware narrowing/veto (shared with SIGNAL's deferred item).
+- **WYCKOFF**: decision-layer table is long-framed (consumers read it direction-relative); normalize the
+  post-phase-C base-regime band name (line 182 "conditional range" / line 337 "top-of-conditional" → "conditional-top").
+- **SIGNAL**: tighten the bare "floor" in its committed band sentence to "conditional floor" (RISK now has two floors).
+- **JD1** (conditional-top magnitude ~1%) and **JD3** (bearish dealer mirror) remain operator-tunable.
+- PORTFOLIO/PASS1/REPORT_FORMAT/SYSTEM_PARAMS per the SIGNAL slice follow-ups.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage C consumer re-key, SIGNAL (symmetric veto + forward-test confluence) (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage C (SIGNAL consumer; substantive; HITL, approved turn-by-turn in session)

@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.0
-file_last_updated: 2026-05-13
+kb_version: 3.0.1
+file_last_updated: 2026-06-28
 status: active
 tier: T1
 ---
@@ -11,18 +11,18 @@ tier: T1
 
 ## Principle
 
-Position sizing is the mechanism by which conviction and regime translate into capital at risk. Every other guardrail in KapMan — data honesty, structure selection, macro gating — exists to make sure the *direction* of a trade is sound; sizing is what determines whether a sound trade can survive being wrong, and whether an unsound trade can do real damage when it fails. The governing judgment is that sizing is regime-conditional, never fixed: the same ticker with the same Wyckoff phase deserves different allocation depending on dealer regime, volatility regime, and chain quality, and the regime assessments themselves live in their own principle files (`WYCKOFF_v3.0.md`, `DEALER_v3.0.md`, `VOLATILITY_v3.0.md`). RISK does not re-derive those regimes; it consumes them and converts them into a sizing band. The sizing denominator is the combined value of all funded, real-capital accounts in the operator's household; paper accounts are excluded from the denominator even when they execute the same screening output, because the dollars at risk are notional. The one rule that survives every regime is that no single position is ever a portfolio-shaping event — the absolute ceiling exists so that being catastrophically wrong on a single name cannot end the portfolio's ability to keep operating. Below that ceiling, sizing moves in bands, not cliffs: a clean Wyckoff markup with supportive dealer regime and a full liquid chain earns the top of the band; the same setup with thin chain liquidity, elevated IV, or weakening dealer support earns the bottom; pre-confirmation setups (accumulation without a confirmed Spring) earn only conditional sizing; and hostile macro regimes refuse the structure outright per `KAPMAN_GUARDRAILS_v3.0.md`. The near-flip one-tier reduction from GUARDRAILS steps down from whichever band RISK has selected, never replaces it. CSP sizing is governed by margin capacity, not premium percentage — premium-as-percent-of-portfolio is the wrong denominator for a structure whose risk is defined by assigned share cost. The operator retains override authority over individual sizing decisions, but the override mechanics live in GUARDRAILS; RISK enforces only the bands and the absolute ceiling.
+Position sizing is the mechanism by which conviction and regime translate into capital at risk. Every other guardrail in KapMan — data honesty, structure selection, macro gating — exists to make sure the *direction* of a trade is sound; sizing is what determines whether a sound trade can survive being wrong, and whether an unsound trade can do real damage when it fails. The governing judgment is that sizing is regime-conditional, never fixed: the same ticker with the same Wyckoff regime deserves different allocation depending on dealer regime, volatility regime, and chain quality, and the regime assessments themselves live in their own principle files (`WYCKOFF_v3.0.md`, `DEALER_v3.0.md`, `VOLATILITY_v3.0.md`). RISK does not re-derive those regimes; it consumes them and converts them into a sizing band. The sizing denominator is the combined value of all funded, real-capital accounts in the operator's household; paper accounts are excluded from the denominator even when they execute the same screening output, because the dollars at risk are notional. The one rule that survives every regime is that no single position is ever a portfolio-shaping event — the absolute ceiling exists so that being catastrophically wrong on a single name cannot end the portfolio's ability to keep operating. Below that ceiling, sizing moves in bands, not cliffs: a clean direction-aligned trend (a long in `markup`, a long put in `markdown`) — or a post-phase-C continuation branch (`reaccumulation`/`redistribution`) — with supportive dealer regime and a full liquid chain earns the top of the band; the same setup with thin chain liquidity, elevated IV, or weakening dealer support earns the bottom; pre-confirmation setups (a range regime without its confirmed phase-C — `spring`/`shakeout` on the bullish side, `utad` on the bearish side) earn only conditional sizing (and are refused outright by the SIGNAL Wyckoff veto unless the operator overrides); and hostile macro regimes refuse the structure outright per `KAPMAN_GUARDRAILS_v3.0.md`. The near-flip one-tier reduction from GUARDRAILS steps down from whichever band RISK has selected, never replaces it. CSP sizing is governed by margin capacity, not premium percentage — premium-as-percent-of-portfolio is the wrong denominator for a structure whose risk is defined by assigned share cost. The operator retains override authority over individual sizing decisions, but the override mechanics live in GUARDRAILS; RISK enforces only the bands and the absolute ceiling.
 
 ## Operational heuristics
 
 **Sizing bands are anchored to regime quality, not ticker score.**
-A ticker's screening score gets it into the eligible set; the regime determines how much capital it earns. A high-score ticker in a thin-chain, elevated-IV, weak-dealer environment sizes smaller than a moderate-score ticker in a clean markup with full chain liquidity. A high score does not round the band up — the sizing band reflects the environment the trade has to survive, not the confidence in the entry.
+A ticker's screening score gets it into the eligible set; the regime determines how much capital it earns. A high-score ticker in a thin-chain, elevated-IV, weak-dealer environment sizes smaller than a moderate-score ticker in a clean direction-aligned trend (`markup` for a long, `markdown` for a long put) with full chain liquidity. A high score does not round the band up — the sizing band reflects the environment the trade has to survive, not the confidence in the entry.
 
-**Wyckoff phase sets the band ceiling.**
-Markup phases earn the upper sizing band by default. Accumulation without a confirmed Spring earns only conditional sizing — the trade may be right, but the regime hasn't yet provided the confirmation that would justify normal sizing. Distribution and markdown phases close the long-premium band entirely; the eligible structures shift to CSPs, hedges, and LEAPs per GUARDRAILS, and those structures have their own sizing logic (margin capacity for CSPs, time-decoupled allocation for LEAPs).
+**Wyckoff regime sets the band ceiling, relative to the position's direction.**
+The band ceiling is set by the position's regime read **relative to the position's direction** (WYCKOFF's decision-layer table is long-framed; the bearish bands are its mirror). A direction-aligned **confirmed trend** — `markup` for a long, `markdown` for a long put — earns the **upper** band by default. A direction-aligned **continuation branch confirmed at phase C** — `reaccumulation` (post-`spring`/`shakeout`) for a long, `redistribution` (post-`utad`) for a long put — also earns the **upper** band (it is the highest-odds continuation context). A direction-aligned **base regime confirmed at phase C** — `accumulation` (post-`spring`/`shakeout`) for a long, `distribution` (post-`utad`) for a long put — earns the **conditional-top** band: the phase-C test has confirmed but the breakout/breakdown has not, so it sizes below a confirmed trend. A direction-aligned range regime **without its phase-C** earns only the **conditional floor**, and is in any case refused by the SIGNAL Wyckoff veto unless the operator overrides — the trade may be right, but the regime hasn't yet provided the confirmation that would justify a normal-sized entry. A regime that does **not** align with the position's direction (the refusal set for that direction), `ranging_undefined`, or an unconfirmed reading (`UNKNOWN`) closes the long-premium band entirely; the eligible structures shift to the directionally-aligned alternatives plus CSPs, hedges, and LEAPs per GUARDRAILS, and those structures have their own sizing logic (margin capacity for CSPs, time-decoupled allocation for LEAPs).
 
 **Dealer regime narrows the band within the Wyckoff ceiling.**
-Within a markup phase, a strongly positive dealer regime (DGPI deep in supportive territory) earns the top of the band; a near-neutral or weakening dealer regime steps the band down. The specific dealer thresholds live in `DEALER_v3.0.md`. Hostile macro is not a sizing question — it's a refusal, owned by GUARDRAILS.
+Within an eligible (direction-aligned, phase-C-confirmed or trend) regime, a dealer regime **supportive of the position's direction** earns the top of the band; a near-neutral or direction-adverse dealer regime steps the band down. For a long this is DGPI deep in supportive (positive) territory; for a long put it is the mirror — a dealer regime adverse to the underlying (the exact bearish-mirror DGPI band is a `DEALER_v3.0.md` reconciliation item). The specific dealer thresholds live in `DEALER_v3.0.md`. Hostile macro is not a sizing question — it's a refusal, owned by GUARDRAILS.
 
 **Chain quality is a sizing factor, not just a structure factor.**
 A full liquid chain (open interest and volume comfortably above execution thresholds) supports normal sizing. A limited chain — typically 5–24 contracts of acceptable liquidity — drops sizing to the floor of the band regardless of other factors, and caps contract count to what the chain can actually absorb. A chain too thin to execute against drops the candidate from eligible-set entirely, which is a Pass 2 validation outcome, not a RISK decision.
@@ -31,7 +31,7 @@ A full liquid chain (open interest and volume comfortably above execution thresh
 Elevated IV (IV/HV materially above 1) makes long-premium structures expensive and mandates a spread rather than a naked long. The spread sizing is then governed by spread risk (debit paid), not by underlying notional. Low-IV environments where naked longs are appropriate use underlying-notional sizing within the band.
 
 **Near-flip steps down one tier.**
-When `DEALER_v3.0.md` flags near-flip conditions, the sizing band is selected normally, then stepped down one tier from that band. The reduction is mechanical; it is not a refusal and is not optional. If the selected band is already at the floor (e.g., conditional accumulation, limited chain), the step-down produces no-new-entry for that candidate rather than negative sizing.
+When `DEALER_v3.0.md` flags near-flip conditions, the sizing band is selected normally, then stepped down one tier from that band. The reduction is mechanical; it is not a refusal and is not optional. If the selected band is already at the conditional floor (e.g., a direction-aligned regime pre-phase-C, or a limited chain), the step-down produces no-new-entry for that candidate rather than negative sizing.
 
 **CSP sizing is margin-capacity-driven.**
 A CSP's risk is the cost of taking assignment on the underlying, not the premium collected. Sizing therefore looks at how many shares the operator can absorb at the strike across the combined account base, not at premium as a percentage of portfolio value. The absolute ceiling (single-position cap) applies to the *assignment cost*, not the premium. A CSP whose assignment cost would exceed the single-position cap is too large regardless of how attractive the premium looks.
@@ -62,8 +62,8 @@ Hedges (SPY puts, VIX calls, sector inverse exposure) are sized against aggregat
 
 | Input | Owned by | How RISK consumes it |
 |---|---|---|
-| Wyckoff phase | `WYCKOFF_v3.0.md` | Sets the band ceiling: markup → upper band, accumulation pre-Spring → conditional, distribution/markdown → long-premium band closed |
-| Dealer regime (DGPI tier) | `DEALER_v3.0.md` | Narrows the band within the Wyckoff ceiling: supportive → top of band, weakening → step down |
+| Wyckoff regime + phase (A–E) | `WYCKOFF_v3.0.md` | Sets the band ceiling relative to the position's direction (per WYCKOFF's decision layer, mirrored for a long put): direction-aligned trend (`markup`/`markdown`) or post-phase-C continuation (`reaccumulation`/`redistribution`) → upper band; post-phase-C base (`accumulation`/`distribution`) → conditional-top; pre-phase-C → conditional floor (override-only); non-aligned regime / `ranging_undefined` / `UNKNOWN` → long-premium band closed |
+| Dealer regime (DGPI tier) | `DEALER_v3.0.md` | Narrows the band within the Wyckoff ceiling: dealer regime supportive of the position's direction → top of band, near-neutral/direction-adverse → step down (bullish keys on positive DGPI; bearish on the mirror — exact band per DEALER reconciliation) |
 | Near-flip flag | `DEALER_v3.0.md` | Triggers the mechanical one-tier step-down per GUARDRAILS |
 | Hostile macro flag | `DEALER_v3.0.md` (definition), `KAPMAN_GUARDRAILS_v3.0.md` (behavior) | Not a sizing input — a refusal. RISK does not size long-premium structures when hostile macro is active |
 | Volatility regime (IV/HV, IV source tier) | `VOLATILITY_v3.0.md` | Governs structure choice (naked vs. spread), which determines the sizing denominator |
@@ -86,7 +86,7 @@ Hedges (SPY puts, VIX calls, sector inverse exposure) are sized against aggregat
 **Entry point for every sizing decision.** Before emitting a position size, four confirmations must already exist in the working context:
 
 1. Eligible structure has been determined (long call, debit spread, CSP, LEAP, hedge, or refused) — this is upstream of RISK.
-2. Wyckoff phase, dealer regime, volatility regime, and chain quality are all assessed — RISK reads these as inputs.
+2. Wyckoff regime + phase (A–E), dealer regime, volatility regime, and chain quality are all assessed — RISK reads these as inputs.
 3. No active hostile-macro refusal applies to the structure under consideration, *or* an explicit override per GUARDRAILS is in effect.
 4. The real-capital denominator is established for this session — either declared by the operator or carried from a prior session. If undeclared, sizing does not proceed; the denominator is requested before output continues.
 
@@ -96,7 +96,7 @@ If any of these is missing or ambiguous, sizing does not proceed. A sizing band 
 
 - `KAPMAN_GUARDRAILS_v3.0.md` — owns override mechanics, hostile-macro refusal behavior, near-flip step-down requirement (RISK owns the step-down's destination band), and the "no invented contract specifications" honesty floor that prevents sizing fields from being fabricated.
 - `DEALER_v3.0.md` — owns the numeric definitions of DGPI tiers, hostile macro, and near-flip. RISK references these as named regimes, never as raw thresholds.
-- `WYCKOFF_v3.0.md` — owns phase identification (accumulation, markup, distribution, markdown) and the Spring confirmation criterion that distinguishes conditional from normal sizing.
+- `WYCKOFF_v3.0.md` — owns the canonical regime(7)/phase(A–E)/event vocabulary, the regime decision layer (the per-regime sizing-band ceiling RISK enforces, read direction-relative), and the phase-C confirmation criterion (`spring`/`shakeout` bullish / `utad` bearish) that distinguishes conditional-top from conditional-floor sizing.
 - `VOLATILITY_v3.0.md` — owns IV/HV bands and IV source tiering. The "elevated IV mandates spread" rule is enforced upstream of RISK; RISK only consumes the resulting structure choice.
 - `PASS2_VALIDATION_v3.0.md` — owns chain quality categorization (full / limited / weak) and the contract-count thresholds. RISK consumes the category, not the raw OI/volume numbers.
 - `PORTFOLIO_MGMT_v3.0.md` — owns enforcement of the portfolio-level limits RISK defines (sector concentration, real-capital denominator application, short-DTE cluster, cash floor, hedge ratio). RISK defines the bands; portfolio mode applies them to the live book.
@@ -106,6 +106,8 @@ If any of these is missing or ambiguous, sizing does not proceed. A sizing band 
 
 ## Legacy anchors (for legend citations and back-compat)
 
+> **Historical note (v4.0 model change).** RISK_005 below describes the v2.3 sizing ladder in the superseded four-phase vocabulary (Wyckoff markup / accumulation / distribution / markdown) and the long-only frame. It is preserved **verbatim** for legend citations and back-compat — do not rewrite it. The canonical model is now the two-axis **regime(7) + phase(A–E)** vocabulary owned by `WYCKOFF_v3.0.md`, and the sizing bands are **direction-relative** (a long put in `markdown` earns the upper band, mirroring a long call in `markup`). The v2.3 named bands and their reference percentages are unchanged; only the regime→band mapping is re-keyed and mirrored (see the Appendix sizing band table). Where RISK_005 cites the heuristic *"Wyckoff phase sets the band ceiling,"* read it as its v4.0 rename *"Wyckoff regime sets the band ceiling, relative to the position's direction."*
+
 **RISK_005** → § Principle and § Operational heuristics, "Wyckoff phase sets the band ceiling," "Dealer regime narrows the band within the Wyckoff ceiling," "Chain quality is a sizing factor, not just a structure factor," and "Volatility regime governs structure choice, which feeds back into sizing." The v2.3 sizing ladder — which expressed allocation as a stack of threshold cliffs keyed to Wyckoff phase, DGPI band, chain depth, and IV/HV ratio — is superseded in v3.0 by the band-based judgment model in those heuristics. The specific percentages from the v2.3 ladder (3%, 2%, 1%, 0.5–1%, 5% absolute ceiling) are preserved as reference points in the Appendix sizing band table, where they retain their original meaning under the original regime conditions. The v2.3 macro-gate override clause ("SPY below flip AND SPY DGPI ≤ -20 → no new long-call entries regardless of individual ticker regime") is *not* preserved in RISK; that behavior now lives in `KAPMAN_GUARDRAILS_v3.0.md` as the hostile-macro refusal. The v2.3 absolute ceiling ("No single position exceeds 5% of total portfolio") is preserved as the Principle's "no single position is ever a portfolio-shaping event" and as a numeric reference in the Appendix. The v2.3 cross-account denominator note ("Percentages apply to combined portfolio value across both Schwab and Fidelity accounts") is superseded by the real-capital-only denominator model: paper accounts are excluded from the sizing denominator regardless of whether they execute the same screening output. The v2.3 CSP anti-pattern ("NEVER apply RISK_005 percentage caps to CSP margin requirement calculations") is preserved and elevated from anti-pattern to operational heuristic ("CSP sizing is margin-capacity-driven") because v2.3 surfaced it as a recurring failure mode worth stating as principle rather than as exception. Body-text references in legacy report legends (e.g., "Rules applied: RISK_005") remain valid and will continue to be honored in report output.
 
 ## Appendix — formulas and reference tables
@@ -114,13 +116,15 @@ If any of these is missing or ambiguous, sizing does not proceed. A sizing band 
 
 | Regime composite | Sizing band | Reference allocation | Structure | v2.3 source clause |
 |---|---|---|---|---|
-| Wyckoff markup + DGPI strongly supportive (≥ 50) + full chain + IV/HV not elevated | Top of band | ~3% of real-capital denominator | Long call | v2.3 clause 1 |
-| Wyckoff markup + DGPI moderately supportive (20–49) + full chain + IV/HV not elevated | Mid band | ~2% of real-capital denominator | Long call | v2.3 clause 2 |
-| Wyckoff markup + DGPI supportive (≥ 20) + full chain + IV/HV elevated (≥ 1.2) | Mid band, spread-mandated | ~2% of real-capital denominator | Vertical spread mandatory | v2.3 clause 3 |
-| Wyckoff markup + limited chain (5–24 contracts) + any DGPI | Floor of band | ~1% of real-capital denominator, max 2–3 contracts | Long call or spread | v2.3 clause 4 |
-| Wyckoff accumulation, no confirmed Spring | Conditional | ~0.5–1% of real-capital denominator | Long call, CONDITIONAL status | v2.3 clause 5 |
-| Wyckoff distribution or markdown | Long-premium band closed | No new long-premium entries | CSPs, hedges, LEAPs only | v2.3 clause 6 |
-| Hostile macro (SPY below gamma flip AND SPY DGPI ≤ -20) | Refused | No new long-call entries | Override required per GUARDRAILS | v2.3 clause 7 |
+| Direction-aligned trend (`markup` long / `markdown` long put) + dealer regime strongly supportive of direction + full chain + IV/HV not elevated | Top of band | ~3% of real-capital denominator | Direction-aligned long-premium (long call / long put) | v2.3 clause 1 |
+| Direction-aligned trend + dealer regime moderately supportive of direction + full chain + IV/HV not elevated | Mid band | ~2% of real-capital denominator | Long call / long put | v2.3 clause 2 |
+| Direction-aligned trend + dealer regime supportive of direction + full chain + IV/HV elevated (≥ 1.2) | Mid band, spread-mandated | ~2% of real-capital denominator | Vertical spread mandatory (call debit / put debit) | v2.3 clause 3 |
+| Direction-aligned continuation branch post-phase-C (`reaccumulation` post-`spring`/`shakeout` / `redistribution` post-`utad`) + supportive dealer + full chain | Upper band (highest-odds continuation) | ~3% top / ~2% mid (dealer-narrowed) | Long call / long put | v4.0 (per WYCKOFF decision layer / SIGNAL committed prose) |
+| Direction-aligned trend or continuation + limited chain (5–24 contracts) + any dealer | Floor of band | ~1% of real-capital denominator, max 2–3 contracts | Long call / long put / spread | v2.3 clause 4 |
+| Direction-aligned base regime post-phase-C (`accumulation` post-`spring`/`shakeout` / `distribution` post-`utad`) | Conditional-top | ~1% of real-capital denominator (top of the conditional band) | Long call / long put, CONDITIONAL status | v4.0 (extends v2.3 clause 5; JD1) |
+| Direction-aligned base/continuation pre-phase-C (no confirmed phase-C — `spring`/`shakeout` bullish; `utad` bearish) | Conditional floor — default refused by the SIGNAL Wyckoff veto; sized here only under operator override | ~0.5% of real-capital denominator | Long call / long put, CONDITIONAL status | v2.3 clause 5 |
+| Regime not aligned with the position's direction (refusal set), or `ranging_undefined`, or `UNKNOWN` | Long-premium band closed | No new long-premium entries in that direction | Directionally-aligned alternatives + CSPs, hedges, LEAPs | v2.3 clause 6 (generalized) |
+| Hostile macro (SPY below gamma flip AND SPY DGPI ≤ -20) | Refused (bullish long-premium) | No new bullish long-call entries; bearish long puts remain the aligned redirect | Override required per GUARDRAILS | v2.3 clause 7 |
 
 **Absolute single-position ceiling.**
 
@@ -136,8 +140,9 @@ The 5% ceiling is the only value in this Appendix that does not move with regime
 |---|---|
 | Top of band (~3%) | Mid band (~2%) |
 | Mid band (~2%) | Floor of band (~1%) |
-| Floor of band (~1%) | Conditional (~0.5–1%) |
-| Conditional (~0.5–1%) | No new entry |
+| Floor of band (~1%) | Conditional floor (~0.5%) |
+| Conditional-top (~1%) | Conditional floor (~0.5%) |
+| Conditional floor (~0.5%) | No new entry |
 | Long-premium band closed | No change (already refused) |
 
 **CSP sizing denominator.**
