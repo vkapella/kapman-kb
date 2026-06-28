@@ -109,8 +109,14 @@ This repository separates runtime and engineering materials:
     (`kb_version 3.0.3 → 3.0.4`): re-keys the Regime exit advisory's Wyckoff branch to the **regime succession graph
     + phase regression (D→B/A)**, direction-relative (mirrors SIGNAL's committed advisory), with the phase-regression
     sub-branch consuming the entry-phase (A–E) **rider** (per D-d: regime is the exempt field, phase A–E is a non-exempt
-    rider that degrades to data-absent when missing). **P4** (dealer/flip vocab) and the remaining **consumer files**
-    (PASS1/JOURNAL/GUARDRAILS/DEALER/REPORT_FORMAT, Stages C–E) remain pending under #78.
+    rider that degrades to data-absent when missing). **Stage D — PASS1 done** — `PASS1_SCREENING_v3.0.md`
+    (`kb_version 3.0.7 → 3.0.8`): re-keys the screening body logic to the direction-aware model — hostile-macro prose
+    scoped to **bullish** long-premium (puts the aligned redirect), direction resolution made **regime-natural +
+    symmetric** (accumulation-family/`markup` → BULLISH; distribution-family/`markdown` → BEARISH; `sos`/`sow`
+    fallback) and established **before** the direction-aware veto, Wyckoff-status/degraded-tables/workflow rows
+    re-keyed to regime+phase. Behavioral completion: a confirmed bearish regime now yields an **Eligible** long put
+    (was NO_TRADE+redirect). §A1 ingest map already new-vocab (untouched). **P4** (dealer/flip vocab) and the remaining
+    **consumer files** (JOURNAL/GUARDRAILS/DEALER/WYCKOFF/SIGNAL/REPORT_FORMAT/SYSTEM_PARAMS, Stages D–E) remain pending under #78.
 
 ## v3.0 file directory
 
@@ -162,7 +168,7 @@ This repository separates runtime and engineering materials:
 |---|---|---|
 | SYSTEM_PARAMS_v3.0.md | 3.0.2 | active |
 | SIGNAL_v3.0.md | 3.0.3 | active |
-| PASS1_SCREENING_v3.0.md | 3.0.7 | active |
+| PASS1_SCREENING_v3.0.md | 3.0.8 | active |
 | WYCKOFF_v3.0.md | 3.0.7 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | active |
@@ -177,7 +183,7 @@ This repository separates runtime and engineering materials:
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.3 | 2026-06-26 |
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
 | WYCKOFF_v3.0.md | 3.0.7 | 2026-06-27 |
-| PASS1_SCREENING_v3.0.md | 3.0.7 | 2026-06-27 |
+| PASS1_SCREENING_v3.0.md | 3.0.8 | 2026-06-28 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | 2026-06-28 |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | 2026-06-28 |
 | RISK_v3.0.md | 3.0.1 | 2026-06-28 |

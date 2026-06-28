@@ -1,5 +1,44 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D consumer re-key, PASS1 (direction-aware screening) (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D (PASS1 consumer; substantive; HITL, approved turn-by-turn in session)
+
+Re-keys the PASS1 screening body logic to the committed SIGNAL (3.0.3) direction-aware model — completing the
+entry-side of the symmetric veto. The §A1 ingest map was already new-vocab (#72/#76); this is the heuristic/prose
+layer catching up. #78 stays open (P4 + remaining files).
+
+- **`llm_runtime/PASS1_SCREENING_v3.0.md`** (`kb_version 3.0.7 → 3.0.8`):
+  - **Hostile-macro prose scoped to bullish** long-premium (long calls + call debit refused); long puts/put debit
+    spreads are the directionally-aligned eligible redirect — reconciles the line-21 prose with the already-correct
+    Appendix hostile-macro redirect table and SIGNAL's dealer-timing veto.
+  - **Direction resolution made regime-natural + symmetric:** an accumulation-family regime
+    (`accumulation`/`reaccumulation`) or `markup` → BULLISH; a distribution-family regime
+    (`distribution`/`redistribution`) or `markdown` → BEARISH; `sos`/`sow` fallback (lowercased); explicit
+    operator declaration ("screen for long puts" = BEARISH). The resolved direction is an **input** to the
+    direction-aware Wyckoff veto and is established **before** the veto runs (step-4 sequence corrected to match).
+  - Wyckoff-status heuristic, degraded-input tables, and the WYCKOFF/RISK/PORTFOLIO workflow rows re-keyed to
+    regime + phase (A–E) vocabulary; "Phase and event vocabulary" → "Regime, phase, and event vocabulary".
+  - **Behavioral completion (faithful to the approved model):** a confirmed bearish regime (`distribution`
+    post-`utad` / `markdown`) now yields an **Eligible** bearish candidate (long put), where before it was
+    NO_TRADE-with-redirect — the entry-side mirror of the symmetric veto.
+  - Not touched (already correct): the §A1 ingest map + required-field contract (new-vocab from #72/#76); the
+    Appendix hostile-macro redirect table; the legacy anchors (PIPELINE_010/011, SCORING_001 — MCP/scoring, not
+    Wyckoff vocab, so no historical note).
+- **`INDEX.md`** — bumped both version tables (3.0.7 → 3.0.8) and updated the §A1 status bullet (Stage D PASS1 done).
+
+### Verification
+Adversarial workflow pass (faithfulness, completeness, apply-readiness): apply-readiness `pass` (all 13 anchors
+unique); `apply-with-fixes` — one internal sequencing regression in the step-4 summary (the `sos`/`sow` fallback
+must precede the direction-aware veto, not follow it) and two stale-`phase` leftovers (lines 29, 134); all folded
+in. `verify_frontmatter` + `verify_anchors` pass; dangling-vocab grep clean.
+
+### Scope notes — deferred under #78
+- **JOURNAL_MGMT** (Stage D): write `entry_phase` (A–E) + `phase_c_confirmed` riders + the `positions.md` grammar
+  (PORTFOLIO now consumes these).
+- **DEALER** (bearish-mirror DGPI band), **WYCKOFF** (decision-layer bearish column + "conditional-top"
+  normalization), **SIGNAL** ("floor"→"conditional floor"), **GUARDRAILS**, **REPORT_FORMAT**, **SYSTEM_PARAMS**, **P4**.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage C consumer re-key, PORTFOLIO (regime exit advisory) (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage C (PORTFOLIO consumer; substantive; HITL, approved turn-by-turn in session)
