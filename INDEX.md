@@ -158,8 +158,15 @@ This repository separates runtime and engineering materials:
     hit-rate ~Z%, as-of [date]"*) on the screening **Exit plan** subsection + the portfolio **Exit-trigger proximity**
     subsection + the SIGNAL cross-ref row — a suffix on the underlying alert level, **never** the alert price (structural+
     validated level stays the order; anti-hallucination floor intact). Faithful rendering of committed SIGNAL output;
-    compact columns + self-audit completeness rows correctly untouched. **P4** (dealer/flip vocab) and **SYSTEM_PARAMS**
-    (confluence-band tolerance + conditional-top magnitude) remain pending under #78.
+    compact columns + self-audit completeness rows correctly untouched. **Stage E — SYSTEM_PARAMS (+ RISK/SIGNAL/
+    REPORT_FORMAT wiring) done** — a coordinated 4-file slice adds two operator-set params to `SYSTEM_PARAMS_v3.0.md`
+    (`3.0.2 → 3.0.3`): `FORWARD_TEST_CONFLUENCE_BAND_PCT` = **0.5** (±% of spot, provisional/pilot-calibrated; the
+    near-coincidence tolerance for the forward-tested-target confluence annotation) and `CONDITIONAL_TOP_SIZE_PCT` = **1.0**
+    (% of denominator; promotes the conditional-top magnitude / JD1 from a RISK reference point to a named tunable). `RISK`
+    (`3.0.1 → 3.0.2`) cites `CONDITIONAL_TOP_SIZE_PCT` by name (other v2.3 band magnitudes stay reference points); `SIGNAL`
+    (`3.0.4 → 3.0.5`) + `REPORT_FORMAT` (`3.0.9 → 3.0.10`) resolve their "a SYSTEM_PARAMS follow-up" placeholders to the
+    named confluence param ("consumed by name" satisfied). **P4** (dealer/flip vocab), **PASS2** (line 94 phase→regime),
+    and the WYCKOFF↔RISK UNKNOWN floor/closed wording item remain pending under #78.
 
 ## v3.0 file directory
 
@@ -209,16 +216,16 @@ This repository separates runtime and engineering materials:
 
 | File | kb_version | status |
 |---|---|---|
-| SYSTEM_PARAMS_v3.0.md | 3.0.2 | active |
-| SIGNAL_v3.0.md | 3.0.4 | active |
+| SYSTEM_PARAMS_v3.0.md | 3.0.3 | active |
+| SIGNAL_v3.0.md | 3.0.5 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.8 | active |
 | WYCKOFF_v3.0.md | 3.0.8 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | active |
-| RISK_v3.0.md | 3.0.1 | active |
+| RISK_v3.0.md | 3.0.2 | active |
 | DEALER_v3.0.md | 3.0.1 | active |
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.4 | active |
-| REPORT_FORMAT_v3.0.md | 3.0.9 | active |
+| REPORT_FORMAT_v3.0.md | 3.0.10 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
 
 ### v3.0.1 report metadata patch
@@ -229,13 +236,14 @@ This repository separates runtime and engineering materials:
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.4 | 2026-06-28 |
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
 | WYCKOFF_v3.0.md | 3.0.8 | 2026-06-28 |
-| SIGNAL_v3.0.md | 3.0.4 | 2026-06-28 |
+| SIGNAL_v3.0.md | 3.0.5 | 2026-06-28 |
 | PASS1_SCREENING_v3.0.md | 3.0.8 | 2026-06-28 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | 2026-06-28 |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | 2026-06-28 |
-| RISK_v3.0.md | 3.0.1 | 2026-06-28 |
+| RISK_v3.0.md | 3.0.2 | 2026-06-28 |
 | DEALER_v3.0.md | 3.0.1 | 2026-06-28 |
-| REPORT_FORMAT_v3.0.md | 3.0.9 | 2026-06-28 |
+| REPORT_FORMAT_v3.0.md | 3.0.10 | 2026-06-28 |
+| SYSTEM_PARAMS_v3.0.md | 3.0.3 | 2026-06-28 |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | 2026-06-27 |
 
 ### Session 14 llm_runtime inventory verification

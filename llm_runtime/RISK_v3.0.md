@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.1
+kb_version: 3.0.2
 file_last_updated: 2026-06-28
 status: active
 tier: T1
@@ -112,7 +112,7 @@ If any of these is missing or ambiguous, sizing does not proceed. A sizing band 
 
 ## Appendix — formulas and reference tables
 
-**Sizing band reference table.** The bands below preserve the v2.3 RISK_005 ladder as reference points under the original regime conditions. They are reference points, not threshold cliffs — the Operational heuristics describe how the bands narrow and step within these reference values.
+**Sizing band reference table.** The bands below preserve the v2.3 RISK_005 ladder as reference points under the original regime conditions. They are reference points, not threshold cliffs — the Operational heuristics describe how the bands narrow and step within these reference values. The one exception is the v4.0-new **conditional-top** magnitude, which is owned as the named operator-tunable `CONDITIONAL_TOP_SIZE_PCT` in `SYSTEM_PARAMS_v3.0.md` (currently 1.0%) and referenced by name below; the other magnitudes remain v2.3 reference points.
 
 | Regime composite | Sizing band | Reference allocation | Structure | v2.3 source clause |
 |---|---|---|---|---|
@@ -121,7 +121,7 @@ If any of these is missing or ambiguous, sizing does not proceed. A sizing band 
 | Direction-aligned trend + dealer regime supportive of direction + full chain + IV/HV elevated (≥ 1.2) | Mid band, spread-mandated | ~2% of real-capital denominator | Vertical spread mandatory (call debit / put debit) | v2.3 clause 3 |
 | Direction-aligned continuation branch post-phase-C (`reaccumulation` post-`spring`/`shakeout` / `redistribution` post-`utad`) + supportive dealer + full chain | Upper band (highest-odds continuation) | ~3% top / ~2% mid (dealer-narrowed) | Long call / long put | v4.0 (per WYCKOFF decision layer / SIGNAL committed prose) |
 | Direction-aligned trend or continuation + limited chain (5–24 contracts) + any dealer | Floor of band | ~1% of real-capital denominator, max 2–3 contracts | Long call / long put / spread | v2.3 clause 4 |
-| Direction-aligned base regime post-phase-C (`accumulation` post-`spring`/`shakeout` / `distribution` post-`utad`) | Conditional-top | ~1% of real-capital denominator (top of the conditional band) | Long call / long put, CONDITIONAL status | v4.0 (extends v2.3 clause 5; JD1) |
+| Direction-aligned base regime post-phase-C (`accumulation` post-`spring`/`shakeout` / `distribution` post-`utad`) | Conditional-top | `CONDITIONAL_TOP_SIZE_PCT` per SYSTEM_PARAMS (currently 1.0% of real-capital denominator; top of the conditional band) | Long call / long put, CONDITIONAL status | v4.0 (extends v2.3 clause 5; JD1) |
 | Direction-aligned base/continuation pre-phase-C (no confirmed phase-C — `spring`/`shakeout` bullish; `utad` bearish) | Conditional floor — default refused by the SIGNAL Wyckoff veto; sized here only under operator override | ~0.5% of real-capital denominator | Long call / long put, CONDITIONAL status | v2.3 clause 5 |
 | Regime not aligned with the position's direction (refusal set), or `ranging_undefined`, or `UNKNOWN` | Long-premium band closed | No new long-premium entries in that direction | Directionally-aligned alternatives + CSPs, hedges, LEAPs | v2.3 clause 6 (generalized) |
 | Hostile macro (SPY below gamma flip AND SPY DGPI ≤ -20) | Refused (bullish long-premium) | No new bullish long-call entries; bearish long puts remain the aligned redirect | Override required per GUARDRAILS | v2.3 clause 7 |

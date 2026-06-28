@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.2
-file_last_updated: 2026-06-26
+kb_version: 3.0.3
+file_last_updated: 2026-06-28
 status: active
 tier: T3
 ---
@@ -41,6 +41,8 @@ SYSTEM_PARAMS defines values. It does not define what to do with them. The behav
 | `DTE_DECAY_WARNING_THRESHOLD` | 21 | calendar days | PORTFOLIO_MGMT | The remaining DTE at or below which PORTFOLIO_MGMT surfaces a DTE decay warning for an open position. Signals that the operator may want to roll or close rather than hold to expiration. Operator-configurable; 21 days is the default, corresponding to the point where theta decay accelerates materially for most structures. |
 | `TIER_GATE_TAU_HIGH` (`τ_high`) | 0.70 | confidence score [0–0.95] | WYCKOFF, PASS1 | **Provisional — calibrate in the Stage-1 pilot.** Auto-accept threshold for the viewer/v2 ingest tier gate. When the gating confidence — `min(regime_confidence, phase_confidence)`, or `regime_confidence` alone when `phase_confidence` is null — is at or above this value, the viewer reading is accepted as `pipeline-accepted` without a propose-confirm exchange (hard force-flags still apply per WYCKOFF). Viewer/v2 confidence is capped at 0.95, so `τ_high` must stay strictly below 0.95. Boundary value resolves to accept. |
 | `TIER_GATE_TAU_LOW` (`τ_low`) | 0.45 | confidence score [0–0.95] | WYCKOFF, PASS1 | **Provisional — calibrate in the Stage-1 pilot.** Flagged-vs-estimation boundary for the viewer/v2 ingest tier gate. When the gating confidence falls in `[τ_low, τ_high)` the reading is `pipeline-flagged` and surfaced for operator resolution; below `τ_low` the viewer reading is not usable as a pipeline reading and the ticker falls to the estimation path (propose-confirm) or UNKNOWN. Boundary value resolves to flagged (conservative). `τ_low ≤ τ_high` is an invariant. |
+| `FORWARD_TEST_CONFLUENCE_BAND_PCT` | 0.5 | percent of spot (±) | SIGNAL, REPORT_FORMAT | **Provisional — pilot-calibrated.** The near-coincidence tolerance within which the viewer's forward-tested target (`pt_*`) is treated as confluent with the SIGNAL structural+validated exit anchor, so its calibrated hit-rate (`*_prob`) rides as a confidence annotation on the alert level; beyond ±this band the target is divergent and both levels surface for operator judgment. Annotation context only — never the broker order price (anti-hallucination floor). Symmetric, anchored to spot so it scales across tickers. |
+| `CONDITIONAL_TOP_SIZE_PCT` | 1.0 | percent of real-capital denominator | RISK | The sizing magnitude for the **conditional-top** band — a direction-aligned base regime (`accumulation` long / `distribution` long put) confirmed at phase C (`spring`/`shakeout` / `utad`) but not yet broken out; sizes below a confirmed trend (JD1). Operator-tunable. RISK's other band reference magnitudes (~3%/2%/1%/0.5%, 5% ceiling) remain v2.3 reference points in RISK's Appendix; the conditional-top is the v4.0-new band promoted here as the named tunable value. |
 
 ## Workflow integration
 
@@ -48,7 +50,9 @@ This file is consumed by:
 
 - `PASS1_SCREENING_v3.0.md` — reads `SWING_DTE_BAND`, `CSP_DTE_BAND`, `LEAP_DTE_BAND` for candidate zone DTE band assembly
 - `PASS2_VALIDATION_v3.0.md` — reads the same DTE bands for expiration selection scope; reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` as spread-mandate resolution inputs
-- `SIGNAL_v3.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` for spread-mandate trigger specification; reads `SWING_DTE_BAND` and `CSP_DTE_BAND` for anti-hallucination label text
+- `SIGNAL_v3.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` for spread-mandate trigger specification; reads `SWING_DTE_BAND` and `CSP_DTE_BAND` for anti-hallucination label text; reads `FORWARD_TEST_CONFLUENCE_BAND_PCT` as the forward-tested-target confluence tolerance on the exit anchors
+- `REPORT_FORMAT_v3.0.md` — reads `FORWARD_TEST_CONFLUENCE_BAND_PCT` as the divergence boundary for rendering the forward-tested-target confidence suffix on the exit-plan / exit-trigger-proximity rows
+- `RISK_v3.0.md` — reads `CONDITIONAL_TOP_SIZE_PCT` as the conditional-top sizing-band magnitude
 - `VOLATILITY_v3.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` as the Appendix band boundary values
 - `DEALER_v3.0.md` — reads `NEAR_FLIP_BAND_PCT` as the near-flip zone Appendix band value
 - `PORTFOLIO_MGMT_v3.0.md` — reads `DTE_DECAY_WARNING_THRESHOLD` for DTE decay warning evaluation at Step 5 of the Portfolio mode workflow
@@ -72,3 +76,5 @@ Changes to individual parameter values are recorded here in addition to the top-
 | 2026-05-12 | `DTE_DECAY_WARNING_THRESHOLD` | (not previously defined) | 21 days | New parameter added in session 9 for PORTFOLIO_MGMT. 21 days is the default threshold at which theta decay accelerates materially for most structures; operator may recalibrate based on their roll/close discipline |
 | 2026-06-26 | `TIER_GATE_TAU_HIGH` | (not previously defined) | 0.70 (provisional) | New parameter for the v4.0 viewer/v2 ingest tier gate (Integration Plan §A1/§A5). Provisional default pending Stage-1 pilot calibration; the pilot's viewer→Pass-1 dry-run exists specifically to catch a τ mis-set against a manual propose-confirm run on the same 10–15 tickers. Must stay below the 0.95 confidence cap |
 | 2026-06-26 | `TIER_GATE_TAU_LOW` | (not previously defined) | 0.45 (provisional) | New parameter for the v4.0 viewer/v2 ingest tier gate (Integration Plan §A1/§A5). Provisional default pending Stage-1 pilot calibration. Invariant: `τ_low ≤ τ_high` |
+| 2026-06-28 | `FORWARD_TEST_CONFLUENCE_BAND_PCT` | (not previously defined) | 0.5 (provisional) | New v4.0 param for the SIGNAL forward-tested-target confluence annotation (#78). The near-coincidence tolerance deciding when the viewer `pt_*`/`*_prob` rides as a confidence annotation on the exit anchor vs both levels surfacing. Provisional ±0.5% of spot pending pilot calibration; resolves the "SYSTEM_PARAMS follow-up" placeholders SIGNAL/REPORT_FORMAT carried |
+| 2026-06-28 | `CONDITIONAL_TOP_SIZE_PCT` | ~1% (reference point in RISK Appendix) | 1.0 | Promotes the v4.0 conditional-top sizing magnitude (JD1) from a RISK Appendix reference point to a named operator-tunable SYSTEM_PARAMS value (#78); RISK now references it by name. Value unchanged (~1% → 1.0%); only the ownership/tunability surface changes |

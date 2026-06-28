@@ -1,5 +1,48 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage E parameters, SYSTEM_PARAMS confluence band + conditional-top (+ RISK/SIGNAL/REPORT_FORMAT wiring) (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage E (SYSTEM_PARAMS + consumer wiring; substantive; HITL, parameter values operator-approved in session)
+
+Adds the two operator-tunable parameters the prior direction-aware slices left as named-but-undefined follow-ups, and
+wires the consumers to reference them by name (the SYSTEM_PARAMS "consumed by name, not value" principle). Parameter
+values were chosen by the operator this session. Coordinated 4-file slice. #78 stays open.
+
+- **`llm_runtime/SYSTEM_PARAMS_v3.0.md`** (`kb_version 3.0.2 → 3.0.3`): adds two parameters, both with consuming-files
+  rows and Appendix change-log entries.
+  - `FORWARD_TEST_CONFLUENCE_BAND_PCT` = **0.5** (percent of spot, ±) — **provisional, pilot-calibrated** (same status as
+    `TIER_GATE_TAU_*`). The near-coincidence tolerance within which the viewer's forward-tested target (`pt_*`) is treated
+    as confluent with the SIGNAL structural+validated exit anchor, so its calibrated hit-rate (`*_prob`) rides as a
+    confidence annotation on the alert level; beyond ±this band the target diverges and both levels surface. Annotation
+    context only — never the broker price (anti-hallucination floor). Consumed by SIGNAL + REPORT_FORMAT.
+  - `CONDITIONAL_TOP_SIZE_PCT` = **1.0** (percent of real-capital denominator) — promotes the v4.0-new conditional-top
+    sizing magnitude (JD1) from a RISK Appendix reference point to a named operator-tunable parameter. Value unchanged
+    (~1% → 1.0%); only the ownership/tunability surface moves. Consumed by RISK. The other RISK band magnitudes
+    (~3%/2%/1%/0.5%, 5% ceiling) remain v2.3 reference points in RISK's Appendix.
+- **`llm_runtime/RISK_v3.0.md`** (`kb_version 3.0.1 → 3.0.2`): the Appendix sizing-band table's conditional-top row now
+  cites `CONDITIONAL_TOP_SIZE_PCT` per SYSTEM_PARAMS by name (currently 1.0%); the table intro flags the conditional-top
+  as the single parametrized exception while the other magnitudes stay v2.3 reference points. (The near-flip step-down
+  ladder keeps the inline "~1%" as a step-destination reminder.)
+- **`llm_runtime/SIGNAL_v3.0.md`** (`kb_version 3.0.4 → 3.0.5`) and **`llm_runtime/REPORT_FORMAT_v3.0.md`**
+  (`kb_version 3.0.9 → 3.0.10`): resolve the three "a SYSTEM_PARAMS follow-up" placeholders (SIGNAL Stop + Profit-target
+  exit triggers; REPORT_FORMAT Exit-plan row) to the named `FORWARD_TEST_CONFLUENCE_BAND_PCT`. No behavior change — the
+  placeholders pointed at this now-defined parameter.
+- **`INDEX.md`** — bumped all four files in both v3.0.1 version tables (added SYSTEM_PARAMS to the report-metadata table)
+  and updated the §A1 status bullet.
+
+### Verification
+Adversarial workflow across all 4 files (values + faithfulness; cross-file/bidirectional wiring; apply-readiness) +
+synthesis judge: values-faithful `pass` (0.5 / 1.0 correct; units + consumers correct; 1.0% equals the prior ~1%),
+cross-file `pass` (consuming list bidirectionally consistent — RISK + REPORT_FORMAT newly added, SIGNAL extended; all 3
+placeholders resolved with no fourth dangling; no stray hardcodes), apply-readiness `pass` (all 12 OLD blocks
+verbatim + unique across the 4 files). Judge: `apply_ready: true`, apply-as-is, zero must-fix. `verify_frontmatter` +
+`verify_anchors` pass; placeholder grep clean.
+
+### Scope notes — deferred under #78
+- **PASS2** (line 94 phase→regime + riders) — also touches the confluence behavior but consumes it indirectly via SIGNAL
+  and references no tolerance width, so it is not a SYSTEM_PARAMS consumer. **P4** (dealer_confidence/position_vs_flip) and
+  the WYCKOFF↔RISK UNKNOWN floor/closed wording item remain.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage E presentation, REPORT_FORMAT (render the forward-tested confluence suffix) (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage E (REPORT_FORMAT presentation; faithful rendering of committed SIGNAL output; applied on standing continue)

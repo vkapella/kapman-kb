@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.9
+kb_version: 3.0.10
 file_last_updated: 2026-06-28
 status: active
 tier: T3
@@ -247,7 +247,7 @@ One block per screened candidate, appearing below the screening table in the sam
 | 2 | Wyckoff phase read | 25 words | Current phase, confirming events, proposed-confirm status |
 | 3 | Dealer regime read | 25 words | DGPI tier, flip-zone, near-flip flag if active, dealer-status label |
 | 4 | Volatility regime read | 25 words | IV/HV band, IV rank tier, spread-mandate outcome, volatility-status label |
-| 5 | Exit plan | 60 words | Stop alert four fields + Profit target alert four fields as matched pair; "Pending" with reason if unavailable. When SIGNAL carries a forward-tested-target confluence annotation on an underlying alert level, render it as a suffix on that level — *"…— viewer forward-tested hit-rate ~Z%, as-of [date]"* — never as the alert price itself; the structural+validated level stays the order (anti-hallucination floor). When the forward-tested target diverges from the structural anchor beyond the near-coincidence tolerance (exact width a SYSTEM_PARAMS follow-up), both levels surface per SIGNAL and the operator weighs the divergence |
+| 5 | Exit plan | 60 words | Stop alert four fields + Profit target alert four fields as matched pair; "Pending" with reason if unavailable. When SIGNAL carries a forward-tested-target confluence annotation on an underlying alert level, render it as a suffix on that level — *"…— viewer forward-tested hit-rate ~Z%, as-of [date]"* — never as the alert price itself; the structural+validated level stays the order (anti-hallucination floor). When the forward-tested target diverges from the structural anchor beyond the near-coincidence tolerance (`FORWARD_TEST_CONFLUENCE_BAND_PCT` per SYSTEM_PARAMS), both levels surface per SIGNAL and the operator weighs the divergence |
 | 6 | Alternatives | 30 words | Present only when SIGNAL produced alternatives; descending confidence order; omitted entirely when absent |
 | 7 | Caveats | 20 words | Data gaps, near-event risk, degraded inputs, chain quality issues; omitted when nothing to flag |
 
