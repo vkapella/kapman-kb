@@ -126,8 +126,17 @@ This repository separates runtime and engineering materials:
     current reader — framed like the reserved `attack_flags[]`/`invalidation_conditions[]`). Exempt snapshot stays
     **exactly 5 regime fields + 8 SIGNAL levels**; the three riders sit outside it (categorical/boolean, not numeric
     regime reads, so the no-persist prohibition never reached them). PASS2 line 94 + GUARDRAILS line 46 still say "entry
-    Wyckoff phase" — tracked to converge in their own slices. **P4** (dealer/flip vocab) and the remaining **consumer
-    files** (GUARDRAILS/DEALER/WYCKOFF/SIGNAL/REPORT_FORMAT/SYSTEM_PARAMS, Stages D–E) remain pending under #78.
+    Wyckoff phase" — tracked to converge in their own slices. **Stage D/E — DEALER done** — `DEALER_v3.0.md`
+    (`kb_version 3.0.0 → 3.0.1`): defines the **per-ticker bearish-mirror DGPI band** (`DGPI ≥ +50` with spot well above
+    the ticker's flip — the exact sign-flipped mirror of the bullish per-ticker hostile band ≤ −50/well-below; magnitudes
+    preserved, sign read direction-relative) that SIGNAL's dealer-timing veto and RISK's dealer-narrowing reference;
+    adds a "dealer regime is read relative to the position's direction" heuristic + Appendix paragraph; **bullish-scopes**
+    the macro hostile-macro refusal everywhere (Principle, heuristic, Appendix composite, outputs-table flag row, vocab
+    row, rendered report-label) — long puts are the aligned redirect, matching committed SIGNAL/GUARDRAILS; **no** macro
+    "supportive-macro refuses puts" mirror (no consumer → would dangle; the bearish mirror is ticker-layer only). Walls +
+    GEX-slope left long-framed (SIGNAL owns wall-side direction-relativity). Legacy DEALER_001–014 untouched. **P4**
+    (dealer/flip vocab) and the remaining **consumer files** (GUARDRAILS/WYCKOFF/SIGNAL/REPORT_FORMAT/SYSTEM_PARAMS,
+    Stages D–E) remain pending under #78.
 
 ## v3.0 file directory
 
@@ -184,6 +193,7 @@ This repository separates runtime and engineering materials:
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | active |
 | RISK_v3.0.md | 3.0.1 | active |
+| DEALER_v3.0.md | 3.0.1 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
 
 ### v3.0.1 report metadata patch
@@ -198,6 +208,7 @@ This repository separates runtime and engineering materials:
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | 2026-06-28 |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | 2026-06-28 |
 | RISK_v3.0.md | 3.0.1 | 2026-06-28 |
+| DEALER_v3.0.md | 3.0.1 | 2026-06-28 |
 | REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | 2026-06-27 |
 

@@ -1,5 +1,56 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D/E consumer re-key, DEALER (bearish-mirror DGPI band) (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D/E (DEALER consumer; substantive; HITL, approved turn-by-turn in session)
+
+Defines the per-ticker bearish-mirror DGPI band that SIGNAL's dealer-timing veto (3.0.3) and RISK's dealer-narrowing
+(3.0.1) already reference as a "DEALER reconciliation" item, and makes DEALER's directional framing symmetric so a long
+put reads the dealer regime as the mirror of a long call. Operator decision this session: **symmetric mirror, v2.3
+magnitudes preserved (sign-flip only)**, ticker-layer only. #78 stays open (P4 + remaining files).
+
+- **`llm_runtime/DEALER_v3.0.md`** (`kb_version 3.0.0 → 3.0.1`):
+  - **Per-ticker bearish-mirror DGPI band defined** (Appendix + new heuristic): the ticker dealer regime *adverse to a
+    bearish position* = **DGPI ≥ +50 with spot well above the ticker's flip** — the exact sign-flipped mirror of the
+    bullish per-ticker hostile band (DGPI ≤ -50 with spot well below flip). This is the band SIGNAL line 42/254 and RISK
+    line 25/66 reference; magnitudes unchanged (≥+50/≥+20/≤-20/≤-50), only the sign is read against the position's
+    direction.
+  - **New heuristic "Dealer regime is read relative to the position's direction"** + a Principle clause: the DGPI tier
+    vocabulary and spot-vs-flip read are framed for a long; a long put reads their mirror (strongly-supportive-for-a-long
+    is strongly-adverse-for-a-put; above-flip ↔ below-flip). The ticker-layer narrowing heuristic re-keyed direction-
+    relative; the "regime that does not align with the position's direction closes the band" generalized to the WYCKOFF
+    refusal set (corrects the old "distribution and markdown" which omitted redistribution).
+  - **Macro hostile-macro refusal bullish-scoped everywhere** (Principle, the macro heuristic, the Appendix composite,
+    the outputs-table hostile-macro-flag row, the vocabulary row, and the rendered report-label string): refuses **bullish**
+    long-premium (long calls / call debit spreads); long puts / put debit spreads are the directionally-aligned eligible
+    redirect, not a refused structure — matching committed SIGNAL 3.0.3 + GUARDRAILS ("Long puts — Eligible").
+  - **No macro mirror composite** ("supportive-macro refuses long puts") added — deliberately: no committed consumer reads
+    one (SIGNAL has no bearish-adverse macro flag), so it would be a dangling capability. The bearish mirror is **ticker-
+    layer only**; a supportive macro simply makes the per-ticker bearish-mirror band the relevant stability check. Full
+    macro symmetry would be a coordinated SIGNAL+GUARDRAILS+DEALER change (out of scope, flagged).
+  - Added `SIGNAL_v3.0.md` as a consumer of the per-ticker DGPI-tier output row (it reads tier + flip-zone direction-
+    relative for the dealer-timing veto). Walls + GEX-slope prose left long-framed (SIGNAL owns wall-side direction-
+    relativity). Stale-macro mentions left direction-neutral (per committed SIGNAL, stale macro fires direction-neutral).
+    Legacy anchors DEALER_001–014 preserved verbatim; no heuristic renamed (a heading added, not renamed) → no historical
+    note needed.
+- **`INDEX.md`** — added DEALER to both v3.0.1 version tables (3.0.0 → 3.0.1) and updated the §A1 status bullet (Stage D/E
+  DEALER done).
+
+### Verification
+Adversarial workflow pass (faithfulness to SIGNAL/RISK/GUARDRAILS + the operator's symmetric-mirror decision; a dedicated
+no-dangling-capability lens on the macro-asymmetry call; completeness/dangling-framing; apply-readiness) + synthesis
+judge: faithfulness `pass`, no-dangling-capability `pass` (the ticker-mirror-only / no-macro-mirror design independently
+confirmed coherent and consumer-grounded — the per-ticker band IS consumed by SIGNAL+RISK, a macro mirror would NOT be),
+apply-readiness `pass` (all 11 OLD blocks verbatim + unique, DEALER_001–014 intact). One must-fix folded — the rendered
+"Hostile macro" report-label string (Appendix line 223) still read bare "long-premium refused" with long puts dropped
+from the eligible set, an inconsistency the bullish-scoping edits created; corrected to match the outputs table.
+`verify_frontmatter` + `verify_anchors` pass.
+
+### Scope notes — deferred under #78
+- **GUARDRAILS** (its hostile-macro language + the line-46 "entry Wyckoff phase" exempt-field wording), **WYCKOFF**
+  (decision-layer bearish column + "conditional-top" normalization + projected-markdown-target row + `utad` routing),
+  **SIGNAL** ("floor"→"conditional floor"), **PASS2** (line 94), **REPORT_FORMAT**, **SYSTEM_PARAMS**, **P4** remain.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D persistence re-key, JOURNAL_MGMT (positions.md regime grammar + riders) (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D (JOURNAL_MGMT persistence; substantive; HITL, approved turn-by-turn in session)
