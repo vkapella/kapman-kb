@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.7
-file_last_updated: 2026-06-27
+kb_version: 3.0.8
+file_last_updated: 2026-06-28
 status: active
 tier: T1
 ---
@@ -179,9 +179,10 @@ On the viewer-ingest path the inputs arrive in the pasted handoff row; on the es
 | Output | Consumed by | What the downstream file does with it |
 |---|---|---|
 | Confirmed regime (one of seven) + phase (A–E); UNKNOWN session-state | `SIGNAL_v3.0.md` | Drives the Wyckoff veto firing condition (heuristic 1); sets the entry-time regime+phase snapshot for the Regime exit advisory (heuristic 6) |
-| Confirmed regime + phase | `RISK_v3.0.md` | Sets the sizing-band ceiling per the Appendix decision layer: `markup` and `reaccumulation` (post-phase-C) authorize the upper band; `accumulation` post-phase-C the conditional range, pre-phase-C the conditional floor; `distribution`/`redistribution`/`markdown` close the long-premium band; `ranging_undefined` and UNKNOWN are the most conservative case |
-| Confirmed regime | `DEALER_v3.0.md` | The ticker's DGPI tier narrows within the Wyckoff ceiling, never above it; `distribution`, `redistribution`, and `markdown` close the long-premium band regardless of how supportive the dealer regime reads |
+| Confirmed regime + phase | `RISK_v3.0.md` | Sets the sizing-band ceiling per the Appendix decision layer, read relative to the position's direction: `markup` and `reaccumulation` (post-phase-C) authorize the upper band for a long (the bearish mirror — `markdown`/`redistribution` — for a long put); `accumulation` post-phase-C the conditional-top band, pre-phase-C the conditional floor (mirror: `distribution` for a long put); the direction's refusal set closes the long-premium band; `ranging_undefined` and UNKNOWN are the most conservative case for both directions |
+| Confirmed regime | `DEALER_v3.0.md` | The ticker's DGPI tier narrows within the Wyckoff ceiling, never above it, read relative to the position's direction; the direction's refusal set closes the long-premium band regardless of how supportive the dealer regime reads — for a long that is `distribution`/`redistribution`/`markdown`, for a long put its mirror (`accumulation`/`reaccumulation`/`markup`) |
 | Confirmed `spring` event (phase C) | `SIGNAL_v3.0.md` | Distinguishes pre-phase-C `accumulation`/`reaccumulation` (Wyckoff veto fires) from post-phase-C (eligible for long-premium entry) within heuristic 1 |
+| Confirmed `utad` event (phase C) | `SIGNAL_v3.0.md` | The bearish-side mirror of `spring`: distinguishes pre-phase-C `distribution`/`redistribution` (Wyckoff veto fires for a bearish candidate) from post-phase-C (eligible for long-put entry) within heuristic 1 |
 | Confirmed `sos` / `jac` event | `SIGNAL_v3.0.md` | Drives the directional fallback to BULLISH when primary directional signals are absent or in conflict (heuristic 11) |
 | Confirmed `sow` / `ice_break` event | `SIGNAL_v3.0.md` | Drives the directional fallback to BEARISH (heuristic 11); `sow` also gates the `markdown` regime reading (no markdown without confirmed `sow`) |
 | Confirmed regime/phase succession (unfavorable) | `SIGNAL_v3.0.md` | Fires the Regime exit advisory on an unfavorable regime move or phase regression per the Appendix succession graph (heuristic 6) |
@@ -330,11 +331,11 @@ This is the single source of truth for the regime, phase, and event vocabulary; 
 
 **Regime model and succession graph (KB decision layer — not from the glossary).**
 
-The regime is the cycle-stage axis; the phase (A–E) is the schematic stage within a range. The strict four-phase cycle is replaced by a graph — `reaccumulation`/`redistribution` are continuation branches, not steps in a loop. Eligibility and sizing key on the regime; the phase gates *when* to act within an eligible regime (phase C confirms the test, phase D is the entry window).
+The regime is the cycle-stage axis; the phase (A–E) is the schematic stage within a range. The strict four-phase cycle is replaced by a graph — `reaccumulation`/`redistribution` are continuation branches, not steps in a loop. Eligibility and sizing key on the regime; the phase gates *when* to act within an eligible regime (phase C confirms the test, phase D is the entry window). The table below is framed for a **long** (bullish) position; a bearish position (a long put) reads its exact **mirror**, spelled out beneath the table — consumers (SIGNAL's veto, RISK's bands, PORTFOLIO's advisory) read the decision layer relative to the position's direction.
 
 | Regime | Long-premium eligibility | Sizing-band ceiling | Unfavorable move (fires the Regime exit advisory) |
 |---|---|---|---|
-| `accumulation` | gated — refused pre-phase-C; eligible at phase C (`spring`) / phase D (`lps`) | conditional floor pre-C → top-of-conditional post-C | → `ranging_undefined`, `distribution`, or `markdown` |
+| `accumulation` | gated — refused pre-phase-C; eligible at phase C (`spring`) / phase D (`lps`) | conditional floor pre-C → conditional-top post-C | → `ranging_undefined`, `distribution`, or `markdown` |
 | `reaccumulation` | eligible post-phase-C (highest-odds continuation) | **upper band** | → `distribution` / `redistribution` |
 | `markup` | fully eligible | upper band | → `distribution` (on `bc`/`ut`) |
 | `distribution` | refused (veto); eligible set redirected | long-premium band closed | (already refused) |
@@ -342,7 +343,19 @@ The regime is the cycle-stage axis; the phase (A–E) is the schematic stage wit
 | `markdown` | refused (`sow`-gated) | long-premium band closed | (already refused) |
 | `ranging_undefined` | stand aside | conviction floored (~0.15) | n/a |
 
-**Favorable moves** (the advisory does not fire): `accumulation`/`reaccumulation` → `markup` (on `sos`/`jac`); `markdown` → `accumulation` (on `sc`, reversal). The Regime exit advisory (PORTFOLIO) fires on an **unfavorable regime move** (toward the refusal set) **or a phase regression** (D → B/A). `UNKNOWN` is a session-state (no read this session), treated as the most conservative case — it is not a node in this graph; `ranging_undefined` is the confirmed stand-aside node. A proposed regime change is judged against this graph, not a fixed cycle; a move that skips expected intermediate context is named as compressed or unobserved and invites operator judgment.
+**Favorable moves for a long** (the advisory does not fire): `accumulation`/`reaccumulation` → `markup` (on `sos`/`jac`); `markdown` → `accumulation` (on `sc`, reversal) — these are *unfavorable for a long put* (see the bearish mirror below). The Regime exit advisory (PORTFOLIO) fires on an **unfavorable regime move** (toward the refusal set for the position's direction) **or a phase regression** (D → B/A). `UNKNOWN` is a session-state (no read this session), treated as the most conservative case — it is not a node in this graph; `ranging_undefined` is the confirmed stand-aside node. A proposed regime change is judged against this graph, not a fixed cycle; a move that skips expected intermediate context is named as compressed or unobserved and invites operator judgment.
+
+**Direction-relative reading — the bearish mirror (long put).** The decision table and the favorable/unfavorable moves above are framed for a **long** (long call / call debit spread). The bearish side is the exact mirror; for a **long put**, swap each regime to its bearish analog:
+
+| Bullish (long call) | Bearish mirror (long put) | Shared sizing-band ceiling |
+|---|---|---|
+| `markup` — fully eligible trend | `markdown` — fully eligible trend | upper band |
+| `reaccumulation` — post-phase-C continuation | `redistribution` — post-phase-C continuation | upper band |
+| `accumulation` — gated base (phase-C `spring`/`shakeout`, entry `lps`) | `distribution` — gated base (phase-C `utad`, entry `lpsy`) | conditional floor pre-C → conditional-top post-C |
+| refusal set `distribution`/`redistribution`/`markdown` | refusal set `accumulation`/`reaccumulation`/`markup` | long-premium band closed |
+| `ranging_undefined` / `UNKNOWN` | `ranging_undefined` / `UNKNOWN` | stand aside — refuses both directions |
+
+The phase-C confirmer is `spring`/`shakeout` (bullish) ↔ `utad` (bearish); the phase-D entry-window event is `lps` (bullish) ↔ `lpsy` (bearish). Favorable/unfavorable moves mirror identically: a move favorable for a long (toward `markup`) is unfavorable for a long put, and an unfavorable move for a long put is one toward the bullish/eligible-for-a-long set. `markdown` stays `sow`-gated as a regime read (no `markdown` without confirmed `sow`) regardless of position direction; the bearish gated-base `distribution` is `utad`-gated at phase C exactly as `accumulation` is `spring`-gated.
 
 **Event-to-regime/phase mapping and priority order.**
 
@@ -424,6 +437,7 @@ Wyckoff structural levels are the price anchors that emerge from the phase and e
 | Projected markup target | Estimated by adding the accumulation range height to the Creek level; a width-of-range projection | post-`sos` `markup` | Profit target anchor zone for long entries confirmed by `sos`; expressed as a zone, not a precise price |
 | Distribution range upper | `bc` high or `ut` high — the upper boundary of the distribution range | `distribution` | Reference for short-structure entries; Stop alert anchor for short positions |
 | Distribution range lower (Ice) | `ar_dist` low or `sow` level — the lower boundary of the distribution range (`ice_break` = the confirmed crack below it) | `distribution`, `markdown` | Breakdown confirmation reference; Profit target anchor zone for short entries |
+| Projected markdown target | Estimated by subtracting the distribution range height from the Ice level; a width-of-range projection downward — the downside analog of the projected markup target | post-`sow` `markdown` | Profit target anchor zone for long-put / short entries confirmed by `sow`; expressed as a zone, not a precise price |
 
 Structural levels are expressed as zones in the report, not as precise prices, until Pass 2 validates the specific level against current chain data. The anti-hallucination floor from GUARDRAILS applies: a Wyckoff structural level is a candidate anchor zone, not a validated strike price.
 

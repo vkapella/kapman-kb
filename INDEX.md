@@ -134,9 +134,18 @@ This repository separates runtime and engineering materials:
     the macro hostile-macro refusal everywhere (Principle, heuristic, Appendix composite, outputs-table flag row, vocab
     row, rendered report-label) — long puts are the aligned redirect, matching committed SIGNAL/GUARDRAILS; **no** macro
     "supportive-macro refuses puts" mirror (no consumer → would dangle; the bearish mirror is ticker-layer only). Walls +
-    GEX-slope left long-framed (SIGNAL owns wall-side direction-relativity). Legacy DEALER_001–014 untouched. **P4**
-    (dealer/flip vocab) and the remaining **consumer files** (GUARDRAILS/WYCKOFF/SIGNAL/REPORT_FORMAT/SYSTEM_PARAMS,
-    Stages D–E) remain pending under #78.
+    GEX-slope left long-framed (SIGNAL owns wall-side direction-relativity). Legacy DEALER_001–014 untouched. **Stage D/E —
+    WYCKOFF done** — `WYCKOFF_v3.0.md` (`kb_version 3.0.7 → 3.0.8`): adds an explicit **bearish-mirror block** beneath the
+    long-framed decision-layer table (markup↔markdown / reaccumulation↔redistribution trend+continuation → upper;
+    accumulation↔distribution gated-base → conditional floor pre-C → conditional-top post-C; refusal sets mirror;
+    ranging_undefined/UNKNOWN refuse both; phase-C `spring`/`shakeout`↔`utad`, entry `lps`↔`lpsy`); normalizes the two
+    naming stragglers (`conditional range`/`top-of-conditional` → **`conditional-top`**, RISK's committed name); adds a
+    **projected-markdown-target** structural row (downside analog of the projected-markup target, the Ice-level projection
+    SIGNAL references for long-put exits); adds a **`utad` downstream-routing row** (bearish phase-C mirror of the `spring`
+    row); makes the line-182 RISK + line-183 DEALER downstream rows direction-relative. Canonical-vocabulary glossary +
+    legacy WYCKOFF_PHASE_*/EVENT_* anchors untouched (D-e). Known-but-deferred: WYCKOFF↔RISK UNKNOWN wording (lines 20/143
+    "conditional floor" vs RISK "band closed" — converges behaviorally). **P4** (dealer/flip vocab) and the remaining
+    **consumer files** (GUARDRAILS/SIGNAL/REPORT_FORMAT/SYSTEM_PARAMS, Stages D–E) remain pending under #78.
 
 ## v3.0 file directory
 
@@ -189,7 +198,7 @@ This repository separates runtime and engineering materials:
 | SYSTEM_PARAMS_v3.0.md | 3.0.2 | active |
 | SIGNAL_v3.0.md | 3.0.3 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.8 | active |
-| WYCKOFF_v3.0.md | 3.0.7 | active |
+| WYCKOFF_v3.0.md | 3.0.8 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | active |
 | RISK_v3.0.md | 3.0.1 | active |
@@ -203,7 +212,7 @@ This repository separates runtime and engineering materials:
 | REPORT_TEMPLATE_PASS1_v3.0.html | 3.0.5 | 2026-05-14 |
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.3 | 2026-06-26 |
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
-| WYCKOFF_v3.0.md | 3.0.7 | 2026-06-27 |
+| WYCKOFF_v3.0.md | 3.0.8 | 2026-06-28 |
 | PASS1_SCREENING_v3.0.md | 3.0.8 | 2026-06-28 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | 2026-06-28 |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | 2026-06-28 |

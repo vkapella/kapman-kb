@@ -1,5 +1,54 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D/E anchor refinement, WYCKOFF (decision-layer bearish mirror + conditional-top + projected-markdown + utad routing) (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D/E (WYCKOFF canonical model; substantive; HITL, approved turn-by-turn in session)
+
+Makes the canonical decision-layer file direction-symmetric so consumers no longer have to *infer* the bearish mirror,
+normalizes the band name the consumers already committed to, and adds the two downside structural/routing analogs the
+direction-aware SIGNAL/RISK/PORTFOLIO slices reference. Faithful application of the already-approved symmetric model to
+its source file. #78 stays open (P4 + remaining files).
+
+- **`llm_runtime/WYCKOFF_v3.0.md`** (`kb_version 3.0.7 → 3.0.8`):
+  - **Decision-layer bearish-mirror block.** The decision table stays long-framed (the canonical bullish reference); a
+    compact mirror block + note is added beneath it spelling out the bearish reading a long put gets — `markup`↔`markdown`
+    and `reaccumulation`↔`redistribution` (trend + post-phase-C continuation → upper band); `accumulation`↔`distribution`
+    (gated base → conditional floor pre-C → conditional-top post-C); refusal sets swap; `ranging_undefined`/`UNKNOWN`
+    refuse both directions. phase-C confirmer `spring`/`shakeout`↔`utad`, phase-D entry `lps`↔`lpsy`; favorable/unfavorable
+    moves mirror. Matches committed RISK 3.0.1 / SIGNAL 3.0.3 / PORTFOLIO 3.0.4 verbatim in intent (not a 5th column — a
+    mirror block, the way those consumers already read the layer direction-relative). The intro sentence + the line-182
+    RISK and line-183 DEALER downstream-flow rows were made direction-relative to match.
+  - **`conditional-top` normalization.** The two naming stragglers — `conditional range` (downstream RISK row) and
+    `top-of-conditional` (decision table) — normalized to **`conditional-top`**, the name RISK committed to. `conditional
+    floor` preserved everywhere (unchanged).
+  - **Projected-markdown-target structural row** added to the structural-levels table — the exact downside analog of the
+    projected-markup target (distribution range height projected *down* from the Ice level; post-`sow` `markdown`), the
+    Ice-level projection SIGNAL line references for long-put profit-target anchors.
+  - **`utad` downstream-routing row** added — the bearish phase-C mirror of the `spring` routing row, so SIGNAL's pre/post-
+    `utad` veto distinction has the same downstream routing the bullish `spring` has.
+  - Untouched (correctly): the canonical-vocabulary Appendix glossary (verbatim viewer/v2), the legacy
+    WYCKOFF_PHASE_*/EVENT_* anchors + historical note (D-e). `utad` confirmed at phase C throughout (not phase E).
+- **`INDEX.md`** — bumped WYCKOFF in both v3.0.1 version tables (3.0.7 → 3.0.8) and updated the §A1 status bullet (Stage D/E
+  WYCKOFF done).
+
+### Verification
+Adversarial workflow pass (a dedicated bearish-mirror-correctness lens hunting sign inversions; cross-file consistency vs
+RISK/SIGNAL/PORTFOLIO; completeness/straggler sweep; apply-readiness) + synthesis judge: **mirror-correctness `pass`** (every
+bullish↔bearish pairing + shared ceiling verified, no inversion), **cross-file `pass`** (matches the committed consumers
+exactly; `conditional-top` is RISK's name), **apply-readiness `pass`** (all 8 OLD blocks verbatim + unique; glossary +
+legacy anchors outside the edit range), judge **apply-as-is, zero must-fix**. The line-183 DEALER-row direction-relative
+annotation was folded from a completeness nit (DEALER reconciliation already landed this session, so annotated rather than
+deferred). `verify_frontmatter` + `verify_anchors` pass; straggler grep clean (`conditional range`/`top-of-conditional`
+both gone).
+
+### Scope notes — deferred under #78
+- **Known WYCKOFF↔RISK item:** WYCKOFF lines 20/143 describe UNKNOWN as closing to the "conditional floor" while RISK
+  routes UNKNOWN to "long-premium band closed entirely." Behaviorally convergent (floor + veto-fires-on-UNKNOWN ⇒ no normal
+  entry); a documentation-tone reconciliation tracked for a later #78 pass (not a `conditional-top` naming straggler;
+  `conditional floor` must not change).
+- **GUARDRAILS** (hostile-macro language + line-46 "entry Wyckoff phase"), **SIGNAL** ("floor"→"conditional floor"),
+  **PASS2** (line 94), **REPORT_FORMAT**, **SYSTEM_PARAMS**, **P4** remain.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D/E consumer re-key, DEALER (bearish-mirror DGPI band) (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D/E (DEALER consumer; substantive; HITL, approved turn-by-turn in session)
