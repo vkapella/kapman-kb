@@ -1,5 +1,41 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage E presentation, REPORT_FORMAT (render the forward-tested confluence suffix) (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage E (REPORT_FORMAT presentation; faithful rendering of committed SIGNAL output; applied on standing continue)
+
+SIGNAL 3.0.3/3.0.4 added a forward-tested-target confluence annotation to the Stop & Profit-target exit triggers — the
+viewer's `pt_*`/`*_prob` calibrated hit-rate rides as a confidence annotation on the structural+validated underlying
+alert level, never as the price. This slice specifies how REPORT_FORMAT renders that annotation. No new behavior — the
+judgment landed in the SIGNAL slice; this is the presentation layer catching up. #78 stays open.
+
+- **`llm_runtime/REPORT_FORMAT_v3.0.md`** (`kb_version 3.0.8 → 3.0.9`):
+  - The screening per-ticker **Exit plan** subsection and the portfolio **Exit-trigger proximity** subsection now render
+    the confluence suffix — *"…— viewer forward-tested hit-rate ~Z%, as-of [date]"* (verbatim from SIGNAL lines 65/76) —
+    as a suffix on the underlying alert level when SIGNAL carries it, **never** as the alert price; the structural+validated
+    level stays the broker order (anti-hallucination floor). On divergence beyond the near-coincidence tolerance, both
+    levels surface per SIGNAL; the portfolio row notes overflow to footnote per the cap discipline.
+  - The `SIGNAL_v3.0.md` cross-reference row records the annotation as a rendered output (suffix on the alert level, never
+    the price).
+  - Untouched (correctly): the compact 20-char screening "Exit"/"Stop Alert"/"Profit Alert" columns (too tight; annotation
+    lives in the detail/footnote); the Portfolio pre-output self-audit underlying-level rows (a required-field completeness
+    gate, not a rendering spec); the Macro Regime card eligible-set redirect (already lists long puts).
+- **`INDEX.md`** — bumped REPORT_FORMAT in the report-metadata table (3.0.8 → 3.0.9), added it to the v3.0.1 version/status
+  table (was absent), and updated the §A1 status bullet (Stage E REPORT_FORMAT done).
+
+### Verification
+Focused adversarial workflow (faithfulness to SIGNAL's committed annotation; placement/completeness; apply-readiness) +
+synthesis judge: faithfulness `pass` (suffix a character-for-character match to SIGNAL 65/76; anti-hallucination framing
+intact), placement `pass` (Exit plan + Exit-trigger proximity confirmed the right homes; rows 311/315 and the compact
+columns correctly excluded), apply-readiness `pass` (all 4 OLD blocks verbatim + unique). Judge: `apply_ready: true`,
+apply-as-is, zero must-fix. The "near-coincidence tolerance" wording was aligned to SIGNAL. `verify_frontmatter` +
+`verify_anchors` pass.
+
+### Scope notes — deferred under #78
+- **SYSTEM_PARAMS** (the confluence-band/near-coincidence tolerance width + the conditional-top magnitude / JD1),
+  **PASS2** (line 94 phase→regime + riders), **P4** (dealer_confidence/position_vs_flip), and the WYCKOFF↔RISK UNKNOWN
+  floor/closed wording item remain.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D/E consumer re-key, KAPMAN_GUARDRAILS (hostile-macro bullish-scope + exempt-field phase→regime) (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D/E (KAPMAN_GUARDRAILS T0 floor; substantive; HITL, approved turn-by-turn in session)

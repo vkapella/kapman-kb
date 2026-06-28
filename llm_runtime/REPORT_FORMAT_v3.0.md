@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.8
-file_last_updated: 2026-05-29
+kb_version: 3.0.9
+file_last_updated: 2026-06-28
 status: active
 tier: T3
 ---
@@ -123,7 +123,7 @@ When REPORT_FORMAT and a T1 or T2 file appear to conflict on a structural questi
 | Source file | What REPORT_FORMAT consumes | How REPORT_FORMAT uses it |
 |---|---|---|
 | `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Hard-cap mandate; rule-ID-legend-only rule; override acknowledgment requirement; data-quality vocabulary; mode discipline | REPORT_FORMAT enforces caps numerically; places rule IDs in legend/footer only; places override acknowledgment in subtitle or footnote per heuristic; uses GUARDRAILS vocabulary in source bar flags |
-| `SIGNAL_v3.0.md` (T1) | Label vocabulary for trigger states; four-field exit-trigger output format; NO_TRADE/WAIT consistency rule; confidence ordering rule; anti-hallucination floor substitution labels | REPORT_FORMAT renders trigger-state labels verbatim; renders the four exit-trigger fields as a matched pair per position; enforces NO_TRADE/WAIT row structure; renders alternatives in descending confidence order; renders zone substitutions per pass label discipline |
+| `SIGNAL_v3.0.md` (T1) | Label vocabulary for trigger states; four-field exit-trigger output format; the forward-tested-target confluence annotation on the underlying alert level; NO_TRADE/WAIT consistency rule; confidence ordering rule; anti-hallucination floor substitution labels | REPORT_FORMAT renders trigger-state labels verbatim; renders the four exit-trigger fields as a matched pair per position, with the forward-tested-target confluence annotation rendered as a suffix on the underlying alert level when SIGNAL carries it (never as the alert price); enforces NO_TRADE/WAIT row structure; renders alternatives in descending confidence order; renders zone substitutions per pass label discipline |
 | `DEALER_v3.0.md` (T1) | DGPI tier names; flip-zone labels; dealer-status labels (FULL/LIMITED/INVALID); hostile-macro flag | REPORT_FORMAT renders DGPI tier in the screening table and Macro Regime card; renders flip-zone in rationale where relevant; renders dealer-status in the source bar and chain quality badge |
 | `VOLATILITY_v3.0.md` (T1) | IV/HV band labels; IV rank tier labels; volatility-status labels; stale-data flag | REPORT_FORMAT renders volatility regime in the screening table; renders "Stretched IV" annotation for extreme tier; renders stale-data flag in source bar with timestamp |
 | `WYCKOFF_v3.0.md` (T1) | Phase labels; event labels | REPORT_FORMAT renders Wyckoff phase in the screening table and portfolio detail; renders confirmed events in rationale |
@@ -247,7 +247,7 @@ One block per screened candidate, appearing below the screening table in the sam
 | 2 | Wyckoff phase read | 25 words | Current phase, confirming events, proposed-confirm status |
 | 3 | Dealer regime read | 25 words | DGPI tier, flip-zone, near-flip flag if active, dealer-status label |
 | 4 | Volatility regime read | 25 words | IV/HV band, IV rank tier, spread-mandate outcome, volatility-status label |
-| 5 | Exit plan | 60 words | Stop alert four fields + Profit target alert four fields as matched pair; "Pending" with reason if unavailable |
+| 5 | Exit plan | 60 words | Stop alert four fields + Profit target alert four fields as matched pair; "Pending" with reason if unavailable. When SIGNAL carries a forward-tested-target confluence annotation on an underlying alert level, render it as a suffix on that level — *"…— viewer forward-tested hit-rate ~Z%, as-of [date]"* — never as the alert price itself; the structural+validated level stays the order (anti-hallucination floor). When the forward-tested target diverges from the structural anchor beyond the near-coincidence tolerance (exact width a SYSTEM_PARAMS follow-up), both levels surface per SIGNAL and the operator weighs the divergence |
 | 6 | Alternatives | 30 words | Present only when SIGNAL produced alternatives; descending confidence order; omitted entirely when absent |
 | 7 | Caveats | 20 words | Data gaps, near-event risk, degraded inputs, chain quality issues; omitted when nothing to flag |
 
@@ -329,7 +329,7 @@ One block per open position, appearing below the portfolio view table in the sam
 |---|---|---|---|
 | 1 | Current regime summary | 35 words | Dealer regime (DGPI tier, flip-zone), volatility regime (IV/HV band, IV rank tier), Wyckoff phase if confirmed this session |
 | 2 | Regime exit advisory | 50 words | Present only when State = Advisory; names each active decay branch; omitted entirely when no advisory active |
-| 3 | Exit-trigger proximity | 30 words | Distance of current spot from Stop alert and Profit target alert levels; directional framing |
+| 3 | Exit-trigger proximity | 30 words | Distance of current spot from Stop alert and Profit target alert levels; directional framing. When SIGNAL carries a forward-tested-target confluence annotation on an alert level (position context held a fresh viewer target), render the same suffix as the screening Exit plan — *"…— viewer forward-tested hit-rate ~Z%, as-of [date]"* — never as the price (overflow to footnote per cap discipline) |
 | 4 | DTE decay warning | 20 words | Present only when DTE ≤ DTE_DECAY_WARNING_THRESHOLD (per SYSTEM_PARAMS, currently 21 days); names DTE and threshold; omitted when DTE is above threshold |
 | 5 | Position notes | 25 words | Operator-supplied notes from position context; omitted when position context contains no notes field |
 

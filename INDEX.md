@@ -153,8 +153,13 @@ This repository separates runtime and engineering materials:
     as the directionally-aligned redirect (Principle, macro-default heuristic, Appendix eligible-set intro); line-46 exempt
     field "entry Wyckoff phase" → "entry Wyckoff **regime**" (D-d; exempt set stays exactly 5 regime fields + 8 SIGNAL
     levels — label change, not count); line-158 DEALER-freshness (DEALER 3.0.1 rewrite landed, magnitude preserved). The
-    eligible-set table + VALIDATION_001 anchor untouched. **P4** (dealer/flip vocab) and the remaining **consumer files**
-    (REPORT_FORMAT/SYSTEM_PARAMS, Stages D–E) remain pending under #78.
+    eligible-set table + VALIDATION_001 anchor untouched. **Stage E — REPORT_FORMAT done** — `REPORT_FORMAT_v3.0.md`
+    (`kb_version 3.0.8 → 3.0.9`): renders the SIGNAL forward-tested-target **confluence suffix** (*"…— viewer forward-tested
+    hit-rate ~Z%, as-of [date]"*) on the screening **Exit plan** subsection + the portfolio **Exit-trigger proximity**
+    subsection + the SIGNAL cross-ref row — a suffix on the underlying alert level, **never** the alert price (structural+
+    validated level stays the order; anti-hallucination floor intact). Faithful rendering of committed SIGNAL output;
+    compact columns + self-audit completeness rows correctly untouched. **P4** (dealer/flip vocab) and **SYSTEM_PARAMS**
+    (confluence-band tolerance + conditional-top magnitude) remain pending under #78.
 
 ## v3.0 file directory
 
@@ -213,6 +218,7 @@ This repository separates runtime and engineering materials:
 | RISK_v3.0.md | 3.0.1 | active |
 | DEALER_v3.0.md | 3.0.1 | active |
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.4 | active |
+| REPORT_FORMAT_v3.0.md | 3.0.9 | active |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | active |
 
 ### v3.0.1 report metadata patch
@@ -229,7 +235,7 @@ This repository separates runtime and engineering materials:
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | 2026-06-28 |
 | RISK_v3.0.md | 3.0.1 | 2026-06-28 |
 | DEALER_v3.0.md | 3.0.1 | 2026-06-28 |
-| REPORT_FORMAT_v3.0.md | 3.0.8 | 2026-05-29 |
+| REPORT_FORMAT_v3.0.md | 3.0.9 | 2026-06-28 |
 | KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md | 3.0.4 | 2026-06-27 |
 
 ### Session 14 llm_runtime inventory verification
