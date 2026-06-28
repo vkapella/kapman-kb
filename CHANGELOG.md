@@ -1,5 +1,30 @@
 # KapMan KB Changelog
 
+## 2026-06-27 — Stage 1b: §A1 Wyckoff-vocabulary reconciliation — P1 force-flag value fix (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, P1 of 4 (substantive; HITL, approved turn-by-turn in session)
+
+A real Copy Pass-1 export + the viewer's canonical Wyckoff glossary (operator-supplied) showed the KB §A1 layer
+assumed value encodings the producer does not emit. Design (D1–D4) approved with the operator: adopt the viewer's
+two-axis regime(7)+phase(A–E) model and lowercase ~27-event vocabulary. Landing in parts under #78; this is **P1,
+the safety fix** (the issue stays open until P4).
+
+- **`llm_runtime/WYCKOFF_v3.0.md`** (`kb_version 3.0.5 → 3.0.6`) — re-keyed the two hard force-flags to the real
+  string encodings: `structure_conflict == "conflict"` (was boolean `true`) and `weekly_agrees == "conflict"` (was
+  boolean `false`; values are `"agree"`/`"conflict"`/`"neutral"` — only `"conflict"` fires, `"neutral"` does not
+  fire but is not clear confirmation). Updated the force-flag-input-completeness examples to the string encodings.
+  Without this the force-flags silently never fired against live data, so a structurally-conflicted or
+  HTF-disagreeing reading could auto-accept.
+- **`INDEX.md`** — recorded the bump in both version tables and added a §A1-reconciliation status bullet (P1 done;
+  P2–P4 pending).
+
+### Scope notes
+- Pending under #78: **P2** (event vocabulary — adopt the lowercase ~27-event set + classic a.k.a.; `AR_TOP`→`ar_dist`);
+  **P3** (regime/phase two-axis model — regime(7) incl. reaccumulation/redistribution/ranging_undefined + phase A–E);
+  **P4** (viewer `dealer_confidence`/`position_vs_flip` vocab vs Schwab Pass-2 dealer-status).
+- The viewer producer already emits these values correctly; this unit aligns the KB consumer.
+- New v4.0-era cross-references are version-less per the Stage-1 convention.
+
 ## 2026-06-27 — Stage 1b: §12 PASS2 hygiene — viewer/v2 outputs are Pass-1 context, not Pass-2 truth (closes #77)
 
 ### Changed — §12 PASS2 hygiene (substantive; HITL, approved turn-by-turn in session)

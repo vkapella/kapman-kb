@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.5
+kb_version: 3.0.6
 file_last_updated: 2026-06-27
 status: active
 tier: T1
@@ -54,17 +54,17 @@ A reading that passes the validity gate is then resolved by the **confidence tie
 
 | Force-flag condition | Detection |
 |---|---|
-| Structural cross-check conflict | viewer `structure_conflict: true` |
-| Higher-timeframe disagreement | viewer `weekly_agrees: false` against the regime's directional bias |
+| Structural cross-check conflict | viewer `structure_conflict == "conflict"` (string field; `""` = clear) |
+| Higher-timeframe disagreement | viewer `weekly_agrees == "conflict"` (string field, values `"agree"` / `"conflict"` / `"neutral"`; only `"conflict"` fires) |
 | Stale snapshot | viewer `as_of` / `data_through` outside the run's freshness window |
 | SOW-gated markdown | `regime` is Markdown with no confirmed Sign of Weakness in `last_event` / `setup_tags` |
 
 **Force-flag input completeness.** A hard force-flag can override a high confidence only if the handoff carries the field it reads. Distinguish two states explicitly:
 
-- **Present and clear** — e.g. `weekly_agrees: true` (aligned with the regime's directional bias) and `structure_conflict: false`: the force-flag was evaluated and does not fire; a `g ≥ τ_high` reading proceeds on this dimension.
-- **Absent** — the `weekly_agrees` and/or `structure_conflict` key is not present in the handoff (a missing key is not a `false` value), or is present-but-null: the force-flag cannot be evaluated.
+- **Present and clear** — `weekly_agrees` is `"agree"` (or `"neutral"`) and `structure_conflict` is `""`: the force-flag was evaluated and does not fire; a `g ≥ τ_high` reading proceeds on this dimension. (A `"neutral"` weekly read does not fire the force-flag, but it is not strong confirmation either — it is carried as context.)
+- **Absent** — the `weekly_agrees` and/or `structure_conflict` key is not present in the handoff (a missing key is not the same as `"agree"` / `""`), or is present-but-null: the force-flag cannot be evaluated.
 
-When a force-flag input field is absent, a reading that would otherwise be `pipeline-accepted` is downgraded to `pipeline-flagged` and routed to the flagged-reading exchange, with the named reason "force-flags unevaluated — weekly_agrees/structure_conflict not in handoff" (naming whichever is missing). The reading remains UNKNOWN until the operator resolves it, exactly as for any other `pipeline-flagged` reading. Absence never fires a force-flag as if it were `true`; it only withholds auto-accept. This rule is scoped to `weekly_agrees` and `structure_conflict` — the stale-snapshot force-flag is already covered by the `as_of` / `data_through` freshness requirement, and SOW-gated markdown is itself an absence-detector.
+When a force-flag input field is absent, a reading that would otherwise be `pipeline-accepted` is downgraded to `pipeline-flagged` and routed to the flagged-reading exchange, with the named reason "force-flags unevaluated — weekly_agrees/structure_conflict not in handoff" (naming whichever is missing). The reading remains UNKNOWN until the operator resolves it, exactly as for any other `pipeline-flagged` reading. Absence never fires a force-flag as if the field read `"conflict"`; it only withholds auto-accept. This rule is scoped to `weekly_agrees` and `structure_conflict` — the stale-snapshot force-flag is already covered by the `as_of` / `data_through` freshness requirement, and SOW-gated markdown is itself an absence-detector.
 
 **Viewer-ingest pipeline-accepted behavior.** When the validity gate passes, `g ≥ τ_high`, every force-flag input field is present, and no hard force-flag is present:
 
