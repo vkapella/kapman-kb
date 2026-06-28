@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.8
+kb_version: 3.0.9
 file_last_updated: 2026-06-28
 status: active
 tier: T2
@@ -46,6 +46,10 @@ In the v4.0 runtime the candidate list is most often a filtered viewer/v2 watchl
 | `price`, `as_of` / `data_through` | decision anchor + freshness label | `price` = underlying_ref anchor |
 
 The viewer handoff is Pass-1 triage context, not Pass-2 truth: dealer fields are re-fetched live from Schwab at Pass 2 and the IV fields carry the *Needs chain validation* label, exactly as when those reads are fetched directly. Ingesting the handoff does not relax the Pass 1 → Pass 2 boundary; it only changes where the Pass-1 starting context comes from.
+
+Two viewer dealer fields use vocabularies that must not be conflated with their Pass-2 counterparts:
+- **`dealer_confidence`** (`high`/`medium`/`low`/`invalid`; the viewer marks `high`/`medium` as trusted) is the viewer's **Pass-1 data-quality self-rating on its own dealer read** — a separate layer from the Schwab **Pass-2 dealer-status `FULL`/`LIMITED`/`INVALID`** that `DEALER_v3.0.md` resolves independently from live Schwab chain depth. The two share a four-value shape but are not one renamed scale: `dealer_confidence` qualifies the viewer's Pass-1 dealer triage, while `FULL`/`LIMITED`/`INVALID` is determined at Pass 2. A trusted Pass-1 `dealer_confidence` never substitutes for the Pass-2 dealer-status, and a degraded one never forces it — the dealer regime is re-fetched and re-rated at Pass 2 regardless.
+- **`position_vs_flip`** (`above_flip`/`below_flip`/`at_flip`/`unknown`) is a **coarse Pass-1 triage** that maps onto `DEALER_v3.0.md`'s flip-zone vocabulary: `at_flip` ≈ **Near-flip**, `above_flip` / `below_flip` ≈ above / below the flip. The precise **Well above / Near-flip / Well below** resolution — keyed on the `NEAR_FLIP_BAND_PCT` band around the flip per SYSTEM_PARAMS — is a **Pass-2 determination** from the live Schwab flip distance; the viewer's three-way read is a starting hint, not that resolution. `unknown` is no Pass-1 flip hint — the dealer-timing triage proceeds without one, and Pass 2 re-fetches the live flip regardless.
 
 **The §A1 ingest has a required-field contract; absence degrades, never silently passes.**
 

@@ -1,5 +1,50 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage E tail: P4 two-layer dealer vocab (PASS1) + WYCKOFF↔RISK UNKNOWN wording (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage E tail (two faithful clarifications; HITL — P4 softened after a verify catch)
+
+The last two #78 reconciliation items before Stage F. Both are faithful documentation alignments, not new behavior.
+After these, every consumer/parameter slice under #78 is done; only the Stage F closeout remains. #78 stays open.
+
+- **`llm_runtime/PASS1_SCREENING_v3.0.md`** (`kb_version 3.0.8 → 3.0.9`) — **P4 (D-c two-layer dealer vocabulary).** Adds a
+  clarifying paragraph to the §A1 ingest map distinguishing the two dealer layers that share a four-value shape:
+  - `dealer_confidence` (`high`/`medium`/`low`/`invalid`; viewer marks high/medium trusted) is the viewer's **Pass-1**
+    data-quality self-rating on its own dealer read — a **separate layer** from the Schwab **Pass-2** dealer-status
+    `FULL`/`LIMITED`/`INVALID` that `DEALER_v3.0.md` resolves independently. A trusted Pass-1 read never substitutes for the
+    Pass-2 status, and a degraded one never forces it (dealer regime re-fetched at Pass 2 regardless).
+  - `position_vs_flip` (`above_flip`/`below_flip`/`at_flip`/`unknown`) is a **coarse Pass-1 triage** that maps onto DEALER's
+    flip-zone (`at_flip` ≈ Near-flip; `above_flip`/`below_flip` ≈ above/below); the precise Well-above/Near-flip/Well-below
+    resolution (per `NEAR_FLIP_BAND_PCT`) is a **Pass-2 determination** from the live Schwab flip distance.
+  - **Scoped to faithful restatement.** The adversarial verify flagged a first draft for asserting *new* degradation
+    behavior (a `dealer_confidence` reduced-weight/drop-at-invalid rule; a `position_vs_flip` "degrades per the
+    required-field contract" reference to a clause that doesn't enumerate it) — unratified judgment per CLAUDE.md rule 3.
+    Both were removed; the committed text states only the established two-layer distinction, the value mapping, and the
+    already-committed Pass-1 → Pass-2 boundary. DEALER (its Schwab-layer pipeline confidence) and PASS2 (already correct)
+    untouched.
+- **`llm_runtime/WYCKOFF_v3.0.md`** (`kb_version 3.0.8 → 3.0.9`) — **WYCKOFF↔RISK UNKNOWN wording reconciliation.** The two
+  UNKNOWN/unconfirmed degradation sites (the estimation-path-decline list and the UNKNOWN behavioral-consequences list)
+  said the sizing band "closes to the **conditional floor**"; re-keyed to "the long-premium sizing band **closes
+  entirely** (the most conservative case per RISK — distinct from the pre-phase-C conditional floor)". This aligns WYCKOFF
+  to RISK 3.0.2 (UNKNOWN / non-aligned / `ranging_undefined` → long-premium band closed entirely) and to WYCKOFF's own
+  decision layer (UNKNOWN = "the most conservative case"). The legitimate **pre-phase-C** conditional-floor references
+  (decision table + downstream RISK row + bearish-mirror block) are correctly unchanged.
+- **`INDEX.md`** — bumped PASS1 + WYCKOFF in both v3.0.1 version tables (3.0.8 → 3.0.9 each) and updated the §A1 status
+  bullet (P4 + UNKNOWN done; all consumer/parameter slices complete, only Stage F remains).
+
+### Verification
+P4: focused adversarial workflow (faithfulness/correctness + apply-readiness) + judge returned **apply-with-fixes** —
+the two-layer distinction and the coarse→precise flip mapping verified correct and boundary-respecting, with two
+should-fixes for the unratified degradation assertions; both folded out (the committed text is strictly the faithful
+subset). WYCKOFF UNKNOWN: faithful two-occurrence phrase alignment to RISK's committed wording (manually verified the
+`replace_all` hit only the two UNKNOWN sites, not the pre-phase-C conditional-floor references). `verify_frontmatter` +
+`verify_anchors` pass.
+
+### Scope notes — remaining under #78
+- **Stage F closeout only:** structural validate; golden pilot on the operator's real 73-row BULLISH Copy Pass-1 export +
+  an operator-produced BEARISH fixture; completeness critic; estimation-path regression; then the `_v3.0 → _v4.0`
+  filename rename sweep. **Blocked on the operator-produced BEARISH viewer fixture.**
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D consumer re-key, PASS2 (entry-snapshot phase→regime + riders) (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D (PASS2 persistence-capture; faithful no-judgment re-key; applied on standing continue)

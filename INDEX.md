@@ -169,8 +169,17 @@ This repository separates runtime and engineering materials:
     (`kb_version 3.0.3 → 3.0.4`): the entry-time-snapshot capture heuristic re-keyed "entry Wyckoff **phase**" → "entry
     Wyckoff **regime**" (matching JOURNAL/PORTFOLIO/GUARDRAILS) and now names the best-effort non-exempt riders (entry
     phase A–E, `phase_c_confirmed`, `entry_wyckoff_event`) captured alongside; the exempt set stays exactly 5 regime fields
-    + 8 SIGNAL levels (riders + `option_mid` explicitly outside the exemption). **P4** (dealer/flip vocab) and the
-    WYCKOFF↔RISK UNKNOWN floor/closed wording item remain pending under #78.
+    + 8 SIGNAL levels (riders + `option_mid` explicitly outside the exemption). **Stage E — P4 + UNKNOWN-wording done** —
+    `PASS1_SCREENING_v3.0.md` (`3.0.8 → 3.0.9`): adds a §A1-ingest clarification that the viewer's Pass-1 `dealer_confidence`
+    (high/med/low/invalid) is a **separate layer** from the Schwab Pass-2 dealer-status `FULL/LIMITED/INVALID` (D-c — two
+    layers, not conflated), and maps the coarse `position_vs_flip` (above/below/at_flip/unknown) onto DEALER's flip-zone
+    with the precise Well-above/Near-flip/Well-below being a Pass-2 determination (faithful clarification — no new behavioral
+    rule, per the verify catch). `WYCKOFF_v3.0.md` (`3.0.8 → 3.0.9`): the two UNKNOWN/unconfirmed degradation sites
+    (lines 20/143) re-keyed from "sizing band ceiling closes to the **conditional floor**" → "the long-premium sizing band
+    **closes entirely**" (aligns to RISK's UNKNOWN→band-closed + WYCKOFF's own "most conservative case"; the conditional
+    floor is the distinct pre-phase-C override-only band). **All #78 consumer/parameter slices are now done; only Stage F
+    closeout remains** (structural validate + golden/BEARISH pilot + completeness critic + estimation-path regression +
+    `_v3.0 → _v4.0` rename sweep) — **blocked on the operator-produced BEARISH viewer fixture**.
 
 ## v3.0 file directory
 
@@ -222,8 +231,8 @@ This repository separates runtime and engineering materials:
 |---|---|---|
 | SYSTEM_PARAMS_v3.0.md | 3.0.3 | active |
 | SIGNAL_v3.0.md | 3.0.5 | active |
-| PASS1_SCREENING_v3.0.md | 3.0.8 | active |
-| WYCKOFF_v3.0.md | 3.0.8 | active |
+| PASS1_SCREENING_v3.0.md | 3.0.9 | active |
+| WYCKOFF_v3.0.md | 3.0.9 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.4 | active |
 | RISK_v3.0.md | 3.0.2 | active |
@@ -239,9 +248,9 @@ This repository separates runtime and engineering materials:
 | REPORT_TEMPLATE_PASS1_v3.0.html | 3.0.5 | 2026-05-14 |
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.4 | 2026-06-28 |
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
-| WYCKOFF_v3.0.md | 3.0.8 | 2026-06-28 |
+| WYCKOFF_v3.0.md | 3.0.9 | 2026-06-28 |
 | SIGNAL_v3.0.md | 3.0.5 | 2026-06-28 |
-| PASS1_SCREENING_v3.0.md | 3.0.8 | 2026-06-28 |
+| PASS1_SCREENING_v3.0.md | 3.0.9 | 2026-06-28 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | 2026-06-28 |
 | PASS2_VALIDATION_v3.0.md | 3.0.4 | 2026-06-28 |
 | RISK_v3.0.md | 3.0.2 | 2026-06-28 |

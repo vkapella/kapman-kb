@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.8
+kb_version: 3.0.9
 file_last_updated: 2026-06-28
 status: active
 tier: T1
@@ -17,7 +17,7 @@ Phase identification follows a **two-path runtime**: the **viewer-ingest path** 
 
 **Viewer-ingest path.** The KapMan viewer (Polygon-fed) is the live pipeline source. When a viewer reading is present and passes the validity gate (recognized regime, current snapshot, clean fields), the runtime applies the **confidence tier gate** to the reading's `regime_confidence` and `phase_confidence`. The gating confidence is `min(regime_confidence, phase_confidence)`, or `regime_confidence` alone when `phase_confidence` is null (the ticker is trending with no active phase). When the gating confidence is at or above `τ_high` (per SYSTEM_PARAMS), the force-flag inputs are present, and no hard force-flag is present, the reading is accepted as authoritative for the session without a propose-confirm exchange; the confirmation status is `pipeline-accepted`. When it falls in `[τ_low, τ_high)` — or when a hard force-flag is present at any confidence — the reading is surfaced to the operator under the flagged-reading exchange; the status is `pipeline-flagged` until the operator resolves it. When it falls below `τ_low`, the viewer reading is not usable as a pipeline reading and the runtime falls to the estimation path. Viewer/v2 confidence already prices in dealer and volatility cross-check disagreement and is capped below certainty, so the value is itself a meaningful gate — unlike the prior pipeline, which pinned confidence to a constant and could not be gated on it.
 
-**Estimation path.** When no viewer reading is available for the ticker, the reading falls below `τ_low`, or the reading fails the validity gate for reasons other than a flaggable quality condition, the runtime falls back to the estimation path: live price and volume metrics (RVOL, VSI, historical volatility, and candle price action — from the Polygon and Schwab tool surfaces) serve as building blocks; the runtime assembles those building blocks into a proposed phase-and-event reading with explicit reasoning; the operator confirms or corrects; and only the operator-confirmed reading is authoritative. When the operator declines to confirm or the propose-confirm protocol is not run, all Wyckoff-dependent triggers degrade to their conservative defaults: the Wyckoff veto fires, the sizing band ceiling closes to the conditional floor, and the directional fallback reads NEUTRAL.
+**Estimation path.** When no viewer reading is available for the ticker, the reading falls below `τ_low`, or the reading fails the validity gate for reasons other than a flaggable quality condition, the runtime falls back to the estimation path: live price and volume metrics (RVOL, VSI, historical volatility, and candle price action — from the Polygon and Schwab tool surfaces) serve as building blocks; the runtime assembles those building blocks into a proposed phase-and-event reading with explicit reasoning; the operator confirms or corrects; and only the operator-confirmed reading is authoritative. When the operator declines to confirm or the propose-confirm protocol is not run, all Wyckoff-dependent triggers degrade to their conservative defaults: the Wyckoff veto fires, the long-premium sizing band closes entirely (the most conservative case per RISK — distinct from the pre-phase-C conditional floor), and the directional fallback reads NEUTRAL.
 
 A confirmed reading — by any path — is scoped to the current session and is not memory-persisted between sessions. A new conversation begins with all tickers in UNKNOWN state regardless of what was confirmed in any prior session.
 
@@ -140,7 +140,7 @@ The viewer reading's `range` block returns `support`, `resistance`, and `midpoin
 
 **When the viewer-ingest path is not taken, all unconfirmed tickers degrade conservatively.**
 
-An unconfirmed ticker — one that is UNKNOWN, pipeline-flagged and deferred, or on the estimation path with no operator confirmation — reads as UNKNOWN for all downstream triggers. The behavioral consequences of UNKNOWN are identical across all dependent triggers: the Wyckoff veto fires as if the regime were `distribution` or `markdown`, the sizing band ceiling closes to the conditional floor, and the directional fallback reads NEUTRAL. There is no middle state where some triggers engage and others do not based on partial metric evidence. `pipeline-accepted` is the only non-operator-confirmation status that preserves full trigger engagement.
+An unconfirmed ticker — one that is UNKNOWN, pipeline-flagged and deferred, or on the estimation path with no operator confirmation — reads as UNKNOWN for all downstream triggers. The behavioral consequences of UNKNOWN are identical across all dependent triggers: the Wyckoff veto fires as if the regime were `distribution` or `markdown`, the long-premium sizing band closes entirely (the most conservative case per RISK — distinct from the pre-phase-C conditional floor), and the directional fallback reads NEUTRAL. There is no middle state where some triggers engage and others do not based on partial metric evidence. `pipeline-accepted` is the only non-operator-confirmation status that preserves full trigger engagement.
 
 
 ## Workflow integration
