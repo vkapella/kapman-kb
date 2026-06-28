@@ -1,5 +1,31 @@
 # KapMan KB Changelog
 
+## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage E consumer re-key, SIGNAL ("floor" → "conditional floor") (#78)
+
+### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage E (SIGNAL terminology; substantive but no-judgment; applied on standing continue)
+
+A faithful one-term disambiguation: now that RISK (3.0.1) distinguishes the **conditional floor** (a direction-aligned
+range regime pre-phase-C, override-only) from the **closed** band (non-aligned / `ranging_undefined` / `UNKNOWN`),
+SIGNAL's committed band-ladder sentence carrying a bare "floor" for the pre-phase-C band is ambiguous. Tightened to match
+RISK's name. No judgment change; not brought for separate sign-off (faithful no-judgment re-key per the slice cadence).
+#78 stays open.
+
+- **`llm_runtime/SIGNAL_v3.0.md`** (`kb_version 3.0.3 → 3.0.4`): in the Wyckoff-veto heuristic's sizing-band-ceiling
+  sentence, "pre-phase-C the **floor**" → "pre-phase-C the **conditional floor**" — the band RISK names. The other "floor"
+  uses in the file (the *anti-hallucination floor*, and structural *range/candidate floor* anchors) are unrelated and
+  untouched.
+- **`INDEX.md`** — bumped SIGNAL in the v3.0.1 version/status table (3.0.3 → 3.0.4), added the missing SIGNAL row to the
+  report-metadata patch table, and updated the §A1 status bullet (Stage E SIGNAL done).
+
+### Verification
+`verify_frontmatter` + `verify_anchors` pass. OLD string confirmed unique (the band-ladder sentence). No multi-lens
+workflow run — disproportionate for a faithful single-term re-key with a committed-consumer (RISK) referent.
+
+### Scope notes — deferred under #78
+- **GUARDRAILS** (hostile-macro language bullish-scope + line-46 "entry Wyckoff phase"), **PASS2** (line 94),
+  **REPORT_FORMAT** (forward-tested-confidence suffix), **SYSTEM_PARAMS** (confluence-band tolerance + conditional-top
+  magnitude), **P4** (dealer_confidence/position_vs_flip), and the WYCKOFF↔RISK UNKNOWN floor/closed wording item remain.
+
 ## 2026-06-28 — Stage 1b: §A1 reconciliation — Stage D/E anchor refinement, WYCKOFF (decision-layer bearish mirror + conditional-top + projected-markdown + utad routing) (#78)
 
 ### Changed — §A1 Wyckoff-vocabulary reconciliation, Stage D/E (WYCKOFF canonical model; substantive; HITL, approved turn-by-turn in session)

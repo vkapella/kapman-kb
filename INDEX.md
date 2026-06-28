@@ -144,8 +144,11 @@ This repository separates runtime and engineering materials:
     SIGNAL references for long-put exits); adds a **`utad` downstream-routing row** (bearish phase-C mirror of the `spring`
     row); makes the line-182 RISK + line-183 DEALER downstream rows direction-relative. Canonical-vocabulary glossary +
     legacy WYCKOFF_PHASE_*/EVENT_* anchors untouched (D-e). Known-but-deferred: WYCKOFF↔RISK UNKNOWN wording (lines 20/143
-    "conditional floor" vs RISK "band closed" — converges behaviorally). **P4** (dealer/flip vocab) and the remaining
-    **consumer files** (GUARDRAILS/SIGNAL/REPORT_FORMAT/SYSTEM_PARAMS, Stages D–E) remain pending under #78.
+    "conditional floor" vs RISK "band closed" — converges behaviorally). **Stage E — SIGNAL "floor"→"conditional floor"
+    done** — `SIGNAL_v3.0.md` (`kb_version 3.0.3 → 3.0.4`): the committed band-ladder sentence's bare pre-phase-C "floor"
+    tightened to **"conditional floor"** (faithful no-judgment re-key disambiguating it from RISK's "band closed", now that
+    RISK has two floors). **P4** (dealer/flip vocab) and the remaining **consumer files** (GUARDRAILS/REPORT_FORMAT/
+    SYSTEM_PARAMS, Stages D–E) remain pending under #78.
 
 ## v3.0 file directory
 
@@ -196,7 +199,7 @@ This repository separates runtime and engineering materials:
 | File | kb_version | status |
 |---|---|---|
 | SYSTEM_PARAMS_v3.0.md | 3.0.2 | active |
-| SIGNAL_v3.0.md | 3.0.3 | active |
+| SIGNAL_v3.0.md | 3.0.4 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.8 | active |
 | WYCKOFF_v3.0.md | 3.0.8 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | active |
@@ -213,6 +216,7 @@ This repository separates runtime and engineering materials:
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.3 | 2026-06-26 |
 | REPORT_STYLE_v3.0.md | 3.0.4 | 2026-05-31 |
 | WYCKOFF_v3.0.md | 3.0.8 | 2026-06-28 |
+| SIGNAL_v3.0.md | 3.0.4 | 2026-06-28 |
 | PASS1_SCREENING_v3.0.md | 3.0.8 | 2026-06-28 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.4 | 2026-06-28 |
 | PASS2_VALIDATION_v3.0.md | 3.0.3 | 2026-06-28 |
