@@ -129,5 +129,19 @@ MRVL invalidation breach) rather than rubber-stamping Pass-1 — the boundary ho
   whether Pass-2 sets profit targets from a live continuation structure.
 - [PROC] Move the deterministic screen into a tested implementation (see
   `CODE_VS_JUDGMENT_ASSESSMENT_2026-06-29.md`).
-- Still untouched from §13: the Portfolio dry-run (§13.3) and the feedback smoke
-  test (§13.4).
+- [KB] **Pin the operator-absent FLAGGED-candidate disposition (NO_TRADE vs WAIT).**
+  The model/effort matrix (`MODEL_MATRIX_2026-06-29.md`) found the configs split on
+  this identical read — Opus-High → NO_TRADE (unattended UNKNOWN lets the Wyckoff veto
+  fire), Opus-Med/Sonnet-High → WAIT (pending the operator exchange), Opus-Low →
+  NO_TRADE. Every config reaches `FLAGGED → UNKNOWN` identically; the KB doesn't specify
+  how that renders, so it's a coin-flip. PASS1/SIGNAL should pin it (WAIT is arguably the
+  more faithful — reversible, pending-operator). This single gap dominated the matrix's
+  agreement metric.
+- [PROC] Portfolio dry-run (§13.3) **done** — first live Portfolio-mode pass on
+  `TL-20260629-2032-01` (see the Portfolio-pilot record in `kapman-journal`); central
+  finding: the Regime-exit advisory can't run on pre-pipeline positions (no entry-time
+  baseline). Still untouched from §13: the feedback smoke test (§13.4).
+- See `MODEL_MATRIX_2026-06-29.md` for the model/effort comparison (deterministic ¾ is
+  model-invariant; judgment ¼ — anomaly catch-rate + flagged disposition — is where
+  cheaper configs diverge) and its harness lessons (`args` subset filter unreliable;
+  rate-limit recovered via resume/cache).
