@@ -9,6 +9,33 @@ Companion to [CODE_VS_JUDGMENT_ASSESSMENT_2026-06-29.md](CODE_VS_JUDGMENT_ASSESS
 that empirically by running the *same* KB on the *same* frozen inputs under five
 model/effort configs and measuring where the outputs diverge.
 
+## What this means (plain language)
+
+The experiment set out to answer "can a cheaper model run the KB?" — but the two things
+it actually taught us are bigger than that.
+
+- **Cheaper can match expensive here — and "more reasoning" is not automatically better.**
+  The *cheapest* config (Sonnet-Med) scored best and a *more expensive* one (Sonnet-High)
+  scored worst. The KB is largely a strict rulebook, and Sonnet-High — given more reasoning
+  budget — started "improving" on it (it invented a rule that wasn't there and skipped a
+  step). Sonnet-Med followed the instructions literally. **For running a checklist-like
+  system you want a model that obeys the spec, not one that reasons around it.**
+- **The most valuable result wasn't about models — it found a hole in the rulebook.** Most
+  of the apparent model "disagreement" was an illusion: when a candidate is *flagged*
+  (needs the operator to weigh in) and no operator is present, the KB never says what to do,
+  so each model guessed (some NO_TRADE, some WAIT). That's the **KB being silent, not a
+  model being wrong.** Pin that one rule and the disagreement disappears. No single-model
+  run would have exposed it.
+- **It confirmed the strategic call: move the mechanical part into code.** The mechanical ¾
+  of the pipeline runs identically across capable models — *except* when a weaker or
+  over-eager config quietly broke a rule and flipped a trade decision (a "material
+  regression"). **Code never breaks a rule it was given.** So the cracks are the argument for
+  codifying the screen and reserving a capable model only for the genuine judgment (e.g.
+  spotting odd data — MU's strike, the cross-account covered call).
+- **The caution:** this is one run, five data points per model — a strong *hint*, not a
+  verdict. Don't switch the production model on it; confirm with a small multi-seed re-run
+  of Sonnet-Med vs the Opus baseline first.
+
 ## Design
 
 - **Matrix:** 5 configs × 5 datasets. Configs: **Opus-High (baseline)**, Opus-Med,
