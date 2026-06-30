@@ -141,7 +141,11 @@ MRVL invalidation breach) rather than rubber-stamping Pass-1 — the boundary ho
   `TL-20260629-2032-01` (see the Portfolio-pilot record in `kapman-journal`); central
   finding: the Regime-exit advisory can't run on pre-pipeline positions (no entry-time
   baseline). Still untouched from §13: the feedback smoke test (§13.4).
-- See `MODEL_MATRIX_2026-06-29.md` for the model/effort comparison (deterministic ¾ is
-  model-invariant; judgment ¼ — anomaly catch-rate + flagged disposition — is where
-  cheaper configs diverge) and its harness lessons (`args` subset filter unreliable;
-  rate-limit recovered via resume/cache).
+- See `MODEL_MATRIX_2026-06-29.md` for the model/effort comparison. Headline: the
+  deterministic ¾ is reproduced cleanly by capable configs (Sonnet-Med, Opus-Med) but
+  **does crack** under others (Opus-Low gate-leak; Sonnet-High invents a veto-scoping rule)
+  — which sharpens the case for codifying it. Effort is **non-monotonic** (Sonnet-Med ranked
+  #1, Sonnet-High last — more reasoning invited it to override the spec). Provisional
+  production read: Sonnet-Med holds parity at the cheapest tier (n=5/single-run — confirm
+  multi-seed). Harness lessons: `args` subset filter unreliable; rate-limit recovered via
+  resume/cache.
