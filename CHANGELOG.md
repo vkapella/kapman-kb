@@ -1,5 +1,19 @@
 # KapMan KB Changelog
 
+## 2026-07-02 — Pipeline-feed spec: record viewer screen v1.1 — stale-snapshot force-flag + ISO macro as_of (closes #87)
+
+### Changed — engineering-only contract tracking (no runtime change; `llm_runtime/` untouched)
+
+**`engineering_only/PIPELINE_FEED_VIEW_SPEC_v4.0.md`** (`4.0.0 → 4.0.1`): records viewer screen **v1.1** (viewer #54,
+commit 1aa40ea — shipped off the Stage-F SATS finding). SCREEN_VERSION reference 1.0 → 1.1; the "all four hard
+force-flags" tier cell (previously an overstatement — v1.0 implemented three) is now accurate with a v1.1 provenance
+note; the envelope paragraph notes `macro_context.as_of` is ISO 8601 since v1.1 (v1.0 leaked the header's epoch float);
+a new contract-readings bullet records the **stale-snapshot force-flag** semantics — viewer-pinned
+`STALE_SNAPSHOT_MAX_LAG_DAYS = 4` calendar days (echoed in `screen_thresholds`, deliberately not a SYSTEM_PARAMS name),
+absent/unparseable dates never fire it, and **the KB's own §A1 ingest freshness check remains the authoritative layer**
+(the screen flag is defense-in-depth). Also recorded viewer-side that session: the viewer's `KbParityTests` drift guard
+repointed to `SYSTEM_PARAMS_v4.0.md` after the #78 rename sweep (it had been silently skipping).
+
 ## 2026-07-02 — Tooling: harden `verify_anchors.sh` against a vacuous pass when `rg` is unavailable (closes #86)
 
 ### Changed — validation script only (no KB content)

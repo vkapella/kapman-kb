@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 4.0.0
+kb_version: 4.0.1
 file_last_updated: 2026-07-02
 status: active
 tier: —
@@ -114,15 +114,16 @@ fallback.
 
 The Stage-1 pilot's conclusion (`docs/CODE_VS_JUDGMENT_ASSESSMENT_2026-06-29.md`) is
 implemented: the viewer computes the deterministic Pass-1 screen per row
-(`backend/app/pass1_screen.py`, `SCREEN_VERSION 1.0`) and the export carries the
-disposition, not just the raw fields.
+(`backend/app/pass1_screen.py`, `SCREEN_VERSION 1.1` — v1.1 shipped 2026-07-02,
+viewer #54, off the Stage-F SATS finding) and the export carries the disposition,
+not just the raw fields.
 
 **Five screen columns**, on the three **long-premium** Export views only (the CSP
 view stays raw — the premium-sell screen contract is unpinned):
 
 | Column | id | What it carries |
 |---|---|---|
-| Screen Tier | `screen_tier` | WYCKOFF validity gate + confidence tier gate (τ per SYSTEM_PARAMS) + all four hard force-flags → `ACCEPT` / `FLAGGED` / `ESTIMATION` |
+| Screen Tier | `screen_tier` | WYCKOFF validity gate + confidence tier gate (τ per SYSTEM_PARAMS) + all four hard force-flags (weekly conflict, structure conflict, SOW-gated markdown; the **stale-snapshot** flag since v1.1 — v1.0 implemented three) → `ACCEPT` / `FLAGGED` / `ESTIMATION` |
 | Screen Disposition | `screen_disposition` | SIGNAL trigger sequence (direction-aware Wyckoff veto → dealer-timing veto) for the resolved direction → `ELIGIBLE` / `NO_TRADE` / `WAIT` |
 | Screen Structure | `screen_structure` | `LONG_CALL` / `LONG_PUT`, or `CALL_DEBIT_SPREAD` / `PUT_DEBIT_SPREAD` when the spread-mandate fires; `NONE` otherwise |
 | Screen Sizing | `screen_sizing` | RISK band note: regime ceiling → dealer-tier narrowing → vol/confidence floors → near-flip step-down |
@@ -132,7 +133,8 @@ view stays raw — the premium-sell screen contract is unpinned):
 CSP export they are the row's long-premium read). The envelope adds
 `screen_version`, `screen_thresholds` (echoed from `/api/catalog`, single source of
 truth = the viewer module), and `macro_context` (as_of, market_open, the full SPY
-MarketSignal from the header market-context). The §A1 ingest-map addition landed in
+MarketSignal from the header market-context; `macro_context.as_of` is ISO 8601
+since v1.1 — v1.0 leaked the header state's raw epoch float). The §A1 ingest-map addition landed in
 `PASS1_SCREENING_v4.0.md` 3.0.13 — the KB consumes the disposition and verifies
 rather than re-derives; Step-0 earnings, the macro gate, and flagged/estimation
 resolution stay KB-side.
@@ -150,6 +152,19 @@ resolution stay KB-side.
   table: direction-relative DGPI ≤ −`DGPI_NEUTRAL_BAND` floors; |DGPI| <
   `DGPI_NEUTRAL_BAND` steps down one tier.
 - **Operator-absent FLAGGED/ESTIMATION → WAIT** (pinned in PASS1 3.0.13).
+- **Stale-snapshot force-flag (v1.1, viewer #54):** fires when the row's `as_of`
+  (fallback `data_through`) lags the scan date by more than the **viewer-pinned**
+  `STALE_SNAPSHOT_MAX_LAG_DAYS = 4` calendar days (echoed in `screen_thresholds`;
+  deliberately NOT a SYSTEM_PARAMS name — the KB keeps run-level freshness a
+  judgment, the deterministic screen needs a pinned rule). Absent/unparseable
+  dates never fire it (missing-date degradation stays with the KB's §A1
+  required-field contract). Provenance: the Stage-F SATS row — v2 stamps `as_of`
+  from the **last price bar**, so a halted/non-printing ticker re-scans "fresh"
+  forever with a frozen read (refresh-fresh ≠ data-fresh); v1.0 screened it
+  ACCEPT/ELIGIBLE. **The KB's own ingest freshness check (WYCKOFF stale-snapshot
+  force-flag) remains the authoritative layer** — the screen flag is
+  defense-in-depth so the export's tier column stops asserting eligibility the
+  KB will flag anyway.
 - **Phase-C confirmation** uses the completed-phase evidence set (pinned in SIGNAL
   3.0.8).
 - **Deliberate exclusions** (in the module docstring): Step-0 earnings (no viewer
