@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.12
-file_last_updated: 2026-06-28
+kb_version: 3.0.13
+file_last_updated: 2026-07-01
 status: active
 tier: T2
 ---
@@ -44,12 +44,17 @@ In the v4.0 runtime the candidate list is most often a filtered viewer/v2 watchl
 | `dealer_consistent`, `volatility_consistent` | informational — surfaced in the reading; no independent gate or trim | from v2 `cross_checks`; already priced into `regime_confidence` per WYCKOFF, so re-gating or trimming on them double-counts. A `false` is visible context only — it has already pulled `regime_confidence` down and may push the tier gate to the flagged-reading exchange |
 | `pt_up_*`, `pt_down_*` + `*_prob` | candidate zone + expectancy context | calibrated hit-rates |
 | `price`, `as_of` / `data_through` | decision anchor + freshness label | `price` = underlying_ref anchor |
+| `screen_tier`, `screen_disposition`, `screen_structure`, `screen_sizing`, `screen_reasons` | the pre-computed deterministic screen (viewer `pass1_screen.py`, stamped by the envelope's `screen_version`) | **long-premium strategies only** — PASS1 consumes the disposition as the deterministic tier-gate + trigger-sequence result and *verifies* rather than re-derives; the runtime still owns Step-0 earnings, the Step-1 macro gate, and flagged/estimation resolution (the screen's WAIT rows are its queue). On the CSP view these fields are the row's long-premium read, not a CSP verdict. Absent (older exports) → PASS1 derives from the raw §A1 fields as before |
 
 The viewer handoff is Pass-1 triage context, not Pass-2 truth: dealer fields are re-fetched live from Schwab at Pass 2 and the IV fields carry the *Needs chain validation* label, exactly as when those reads are fetched directly. Ingesting the handoff does not relax the Pass 1 → Pass 2 boundary; it only changes where the Pass-1 starting context comes from.
 
 Two viewer dealer fields use vocabularies that must not be conflated with their Pass-2 counterparts:
 - **`dealer_confidence`** (`high`/`medium`/`low`/`invalid`; `high`/`medium` are trusted) is the viewer's **Pass-1 data-quality self-rating on its own dealer read**. It is the **same four-value `confidence` field** the Schwab Pass-2 producer also emits — not a different vocabulary. The Pass-1↔Pass-2 distinction is **provenance and timing, not naming**: the viewer's `dealer_confidence` rates a Pass-1 triage read computed over the kapman-polygon-mcp-v2 option universe, while the Schwab `confidence` rates the live re-fetched read over the Schwab option universe, spot-anchored to the live flip. Because the two are computed over different universes, a trusted Pass-1 `dealer_confidence` never substitutes for the Pass-2 read and a degraded one never forces it — the dealer regime is re-fetched and re-rated at Pass 2 regardless, and the two are expected to **agree by confidence value and DGPI direction, not by exact value**.
 - **`position_vs_flip`** (`above_flip`/`below_flip`/`at_flip`/`unknown`) is a **coarse Pass-1 triage** that maps onto `DEALER_v3.0.md`'s flip-zone vocabulary: `at_flip` ≈ **Near-flip**, `above_flip` / `below_flip` ≈ above / below the flip. The precise **Well above / Near-flip / Well below** resolution — keyed on the `NEAR_FLIP_BAND_PCT` band around the flip per SYSTEM_PARAMS — is a **Pass-2 determination** from the live Schwab flip distance; the viewer's three-way read is a starting hint, not that resolution. `unknown` is no Pass-1 flip hint — the dealer-timing triage proceeds without one, and Pass 2 re-fetches the live flip regardless.
+
+**The handoff envelope may carry screen provenance and a macro-context block; both are triage context, never authority.**
+
+A viewer export that carries the `screen_*` fields also carries `screen_version` (the implementation that produced them — cite it in the run's data-quality surface so dispositions stay attributable) and `screen_thresholds` (the τ / IV-HV / DGPI values that implementation used). When `screen_thresholds` disagree with SYSTEM_PARAMS, **SYSTEM_PARAMS governs**: the run flags the drift, treats the pre-computed dispositions as stale, and re-derives from the raw §A1 fields. The envelope's `macro_context` block (the viewer's SPY dealer read — signed DGPI, flip, `position_vs_flip`, `confidence` — as of export time) seeds the Step-1 macro gate exactly as a pasted SPY reading would; the gate is still evaluated by the runtime per DEALER, and a stale or absent block degrades to a live SPY fetch, never to an assumed-supportive macro.
 
 **The §A1 ingest has a required-field contract; absence degrades, never silently passes.**
 
@@ -68,7 +73,7 @@ The Pass 1 → Pass 2 boundary is unchanged by this contract: dealer fields are 
 
 **Wyckoff status is checked per candidate, in sequence, before trigger evaluation for that candidate.**
 
-For each ticker in the candidate list, the first per-candidate question is whether an operator-confirmed Wyckoff regime (and phase A–E) reading exists in the current session. If a confirmed reading exists — either from the propose-confirm protocol run earlier in this session, or from an operator declaration at session start — the confirmed regime/phase and any confirmed events are consumed directly and trigger evaluation proceeds. If no confirmed reading exists, WYCKOFF resolves the ticker before evaluation: when the viewer handoff carries a reading for the ticker, WYCKOFF's confidence tier gate resolves it (auto-accept at or above `τ_high`, else the flagged-reading exchange); when no viewer reading is present, the propose-confirm protocol runs inline against live price and volume metrics, assembles a regime/phase-and-event proposal with explicit metric reasoning, presents it to the operator, and waits for confirmation. Only after the operator confirms or corrects does trigger evaluation proceed for that ticker. If the operator declines to confirm or asks to skip the Wyckoff read for a ticker, that ticker is assigned UNKNOWN regime and all Wyckoff-dependent triggers degrade to their conservative defaults; trigger evaluation proceeds immediately on the conservative read without further delay. This inline-sequential ordering — propose-confirm for ticker N, evaluate ticker N, then move to ticker N+1 — keeps the propose-confirm exchange tightly coupled to the evaluation it governs and avoids front-loading the operator with a batch of confirmation prompts before any output is visible. The runtime does not re-propose for a ticker that already has a confirmed reading in the current session, even if the ticker appears multiple times in the candidate list.
+For each ticker in the candidate list, the first per-candidate question is whether an operator-confirmed Wyckoff regime (and phase A–E) reading exists in the current session. If a confirmed reading exists — either from the propose-confirm protocol run earlier in this session, or from an operator declaration at session start — the confirmed regime/phase and any confirmed events are consumed directly and trigger evaluation proceeds. If no confirmed reading exists, WYCKOFF resolves the ticker before evaluation: when the viewer handoff carries a reading for the ticker, WYCKOFF's confidence tier gate resolves it (auto-accept at or above `τ_high`, else the flagged-reading exchange); when no viewer reading is present, the propose-confirm protocol runs inline against live price and volume metrics, assembles a regime/phase-and-event proposal with explicit metric reasoning, presents it to the operator, and waits for confirmation. Only after the operator confirms or corrects does trigger evaluation proceed for that ticker. If the operator declines to confirm or asks to skip the Wyckoff read for a ticker, that ticker is assigned UNKNOWN regime and all Wyckoff-dependent triggers degrade to their conservative defaults; trigger evaluation proceeds immediately on the conservative read without further delay. A *pending* flagged reading is not a declined one: when a reading is `pipeline-flagged` (or on the estimation path) and the operator has **not yet resolved it** — including operator-absent or unattended runs where no exchange is possible — the candidate's disposition is **WAIT** (reversible, pending the flagged-reading exchange), never NO_TRADE. A NO_TRADE on Wyckoff grounds requires a *resolved* reading: either a confirmed regime the veto refuses, or an operator who explicitly declined/skipped (UNKNOWN → conservative veto). This pins the operator-absent disposition the Stage-1 pilot found unspecified (the model-matrix agreement gap): FLAGGED → WAIT, ESTIMATION → WAIT. This inline-sequential ordering — propose-confirm for ticker N, evaluate ticker N, then move to ticker N+1 — keeps the propose-confirm exchange tightly coupled to the evaluation it governs and avoids front-loading the operator with a batch of confirmation prompts before any output is visible. The runtime does not re-propose for a ticker that already has a confirmed reading in the current session, even if the ticker appears multiple times in the candidate list.
 
 **Trigger evaluation applies SIGNAL's entry-side contracts in a fixed sequence.**
 
@@ -93,6 +98,7 @@ When any regime input is degraded, the dependent SIGNAL trigger fires at its con
 | Degraded input | Conservative default behavior | Pass 1 output |
 |---|---|---|
 | Wyckoff regime unconfirmed (propose-confirm declined or skipped) | Wyckoff veto fires | NO_TRADE — Wyckoff regime unconfirmed; WAIT alternative |
+| Wyckoff reading `pipeline-flagged` / estimation-path, operator not yet resolved (incl. unattended runs) | No trigger evaluation — the reading is pending, not refused | WAIT — pending flagged-reading exchange |
 | Dealer `confidence` = `invalid` (per-ticker) | Dealer-timing veto fires for long-premium candidates | NO_TRADE — dealer regime absent; WAIT alternative |
 | Dealer `confidence` = `low` (per-ticker) | Full dealer read; sizing restricted to floor-of-band | Eligible at floor sizing; rationale notes low-confidence data |
 | SPY dealer `confidence` = `invalid` or stale | Macro layer read with reduced confidence; conservative macro read applied | Eligible set treated as mixed-macro; rationale notes degraded SPY data |
@@ -230,7 +236,8 @@ Specific base-confidence values and confidence deltas are MCP-internal output-fo
 
 | Degraded input | Trigger consequence | Primary output | Alternative |
 |---|---|---|---|
-| Wyckoff regime unconfirmed | Wyckoff veto fires | NO_TRADE | WAIT |
+| Wyckoff regime unconfirmed (operator declined/skipped) | Wyckoff veto fires | NO_TRADE | WAIT |
+| Wyckoff reading flagged/estimation, operator not yet resolved | None — pending | WAIT | — |
 | Dealer `confidence` = `invalid` (ticker) | Dealer-timing veto fires (long-premium) | NO_TRADE | WAIT |
 | Dealer `confidence` = `low` (ticker) | No veto; floor-of-band sizing | Eligible — floor sizing noted | — |
 | SPY dealer `confidence` = `invalid` / stale | Mixed macro; conservative read | Eligible set treated as mixed-macro | — |

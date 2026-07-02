@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.0
-file_last_updated: 2026-06-28
+kb_version: 3.0.1
+file_last_updated: 2026-07-01
 status: active
 tier: —
 ---
@@ -110,6 +110,69 @@ Pass 2 re-fetches the producer fresh regardless. The single/batch live fetch is 
 the path for tickers fetched directly (no handoff reading) and the fire-by-default
 fallback.
 
+## The deterministic Pass-1 screen columns (2026-07-01, viewer #53 / KB #84)
+
+The Stage-1 pilot's conclusion (`docs/CODE_VS_JUDGMENT_ASSESSMENT_2026-06-29.md`) is
+implemented: the viewer computes the deterministic Pass-1 screen per row
+(`backend/app/pass1_screen.py`, `SCREEN_VERSION 1.0`) and the export carries the
+disposition, not just the raw fields.
+
+**Five screen columns**, on the three **long-premium** Export views only (the CSP
+view stays raw — the premium-sell screen contract is unpinned):
+
+| Column | id | What it carries |
+|---|---|---|
+| Screen Tier | `screen_tier` | WYCKOFF validity gate + confidence tier gate (τ per SYSTEM_PARAMS) + all four hard force-flags → `ACCEPT` / `FLAGGED` / `ESTIMATION` |
+| Screen Disposition | `screen_disposition` | SIGNAL trigger sequence (direction-aware Wyckoff veto → dealer-timing veto) for the resolved direction → `ELIGIBLE` / `NO_TRADE` / `WAIT` |
+| Screen Structure | `screen_structure` | `LONG_CALL` / `LONG_PUT`, or `CALL_DEBIT_SPREAD` / `PUT_DEBIT_SPREAD` when the spread-mandate fires; `NONE` otherwise |
+| Screen Sizing | `screen_sizing` | RISK band note: regime ceiling → dealer-tier narrowing → vol/confidence floors → near-flip step-down |
+| Screen Reasons | `screen_reasons` | semicolon-joined audit trail (named causes + tier-gate value) |
+
+`A1_FIELDS` carries the five fields for **every** view (fixed §A1 projection; on the
+CSP export they are the row's long-premium read). The envelope adds
+`screen_version`, `screen_thresholds` (echoed from `/api/catalog`, single source of
+truth = the viewer module), and `macro_context` (as_of, market_open, the full SPY
+MarketSignal from the header market-context). The §A1 ingest-map addition landed in
+`PASS1_SCREENING_v3.0.md` 3.0.13 — the KB consumes the disposition and verifies
+rather than re-derives; Step-0 earnings, the macro gate, and flagged/estimation
+resolution stay KB-side.
+
+**Contract readings the implementation follows** (recorded so code and prose agree):
+
+- **LIMITED (`ATM_FALLBACK_BAND`) does not mandate a spread** — floor sizing +
+  *spread preferred* per VOLATILITY's behavioral table; a fallback-based ratio ≥
+  `IV_HV_ELEVATED_THRESHOLD` still mandates via the ratio branch.
+- **Direction resolution** per PASS1's priority: v2 `bias` when directional, else
+  the regime's natural direction, else the `sos`/`sow` fallback — so v2's
+  neutral-bias pre-phase-C rows receive the *named* conditional Wyckoff veto
+  (NO_TRADE), not a WAIT.
+- **Dealer-tier sizing narrowing** is a coarse encoding of DEALER's ticker-layer
+  table: direction-relative DGPI ≤ −`DGPI_NEUTRAL_BAND` floors; |DGPI| <
+  `DGPI_NEUTRAL_BAND` steps down one tier.
+- **Operator-absent FLAGGED/ESTIMATION → WAIT** (pinned in PASS1 3.0.13).
+- **Phase-C confirmation** uses the completed-phase evidence set (pinned in SIGNAL
+  3.0.8).
+- **Deliberate exclusions** (in the module docstring): Step-0 earnings (no viewer
+  earnings field — dispositions are pre-event-screen), macro gate (envelope-only),
+  IV-rank mandate arm (producer emits no IV rank), SOW-*recency* (absence-only
+  detector until a recency window is pinned in SYSTEM_PARAMS), CSP screen.
+
+**Drift discipline:** the viewer's `test_pass1_screen.py::KbParityTests` parses
+`SYSTEM_PARAMS_v3.0.md` from the sibling checkout (τ_high / τ_low /
+IV_HV_ELEVATED_THRESHOLD / DGPI_STRONG_BAND / DGPI_NEUTRAL_BAND) and
+`KbDriftTests` anchors the same numbers in the viewer docs — a SYSTEM_PARAMS
+recalibration trips viewer `pytest`. Semantic changes (veto tables, force-flag
+set, mandate branches, band ladder) have **no guardrail** — re-read
+`pass1_screen.py` on any change to WYCKOFF/SIGNAL/DEALER/VOLATILITY/RISK/PASS1,
+and expect a `SCREEN_VERSION` bump on any behavioral change.
+
+**4.x self-measuring note:** the screen fields freeze into
+`forward_panel.payload_json` automatically, but the viewer's snapshot writer
+prefers the **no-options** cache — frozen verdicts read "NO_TRADE — dealer regime
+absent" regardless of the live options-on grid. Before the self-measuring loop
+consumes frozen screen verdicts, either flip the snapshot preference to the
+options cache (viewer change) or treat frozen screen fields as options-off reads.
+
 ## Status tracking
 
 | Item | Side | Status |
@@ -118,7 +181,10 @@ fallback.
 | Surface ATM IV / IV-HV / status as grid columns | viewer | **Landed** |
 | Four `Export - …` pipeline-feed presets | viewer | **Landed** |
 | Carry the canonical IV/HV + full dealer/Wyckoff in the §A1 export | viewer (`A1_FIELDS`) | **Landed** |
-| §A1 ingest map consumes `atm_iv` / `iv_hv_ratio` / `iv_hv_status` from the handoff | KB (`PASS1_SCREENING_v3.0.md` 3.0.12) | **Landed** (this change) |
+| §A1 ingest map consumes `atm_iv` / `iv_hv_ratio` / `iv_hv_status` from the handoff | KB (`PASS1_SCREENING_v3.0.md` 3.0.12) | **Landed** |
+| Deterministic Pass-1 screen columns + envelope (`screen_version` / `screen_thresholds` / `macro_context`) | viewer (#53, `pass1_screen.py` 1.0) | **Landed** (8f83693..52aa887) |
+| §A1 ingest map consumes `screen_*`; FLAGGED→WAIT pin; phase-C predicate pin; near-flip prose fix | KB (#84; PASS1 3.0.13, SIGNAL 3.0.8) | **Landed** (this change) |
+| SOW-recency window parameter (operator calibration) | KB (SYSTEM_PARAMS, follow-up issue) | **Open** |
 
 ## Related
 

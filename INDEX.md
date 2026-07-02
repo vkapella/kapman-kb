@@ -262,8 +262,8 @@ This repository separates runtime and engineering materials:
 | File | kb_version | status |
 |---|---|---|
 | SYSTEM_PARAMS_v3.0.md | 3.0.4 | active |
-| SIGNAL_v3.0.md | 3.0.7 | active |
-| PASS1_SCREENING_v3.0.md | 3.0.12 | active |
+| SIGNAL_v3.0.md | 3.0.8 | active |
+| PASS1_SCREENING_v3.0.md | 3.0.13 | active |
 | WYCKOFF_v3.0.md | 3.0.9 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.5 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.6 | active |

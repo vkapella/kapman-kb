@@ -1,5 +1,50 @@
 # KapMan KB Changelog
 
+## 2026-07-01 — Deterministic Pass-1 screen reconciliation — viewer ships the screen; §A1 consumes the disposition; three pilot-surfaced pins land (#84)
+
+### Changed — §A1 screen ingest + operator-absent disposition pin (substantive; HITL, operator-directed; viewer #53 shipped the implementation)
+
+The viewer now computes the deterministic Pass-1 screen per row (`kapman-polygon-viewer` #53, `backend/app/pass1_screen.py`,
+`SCREEN_VERSION 1.0` — the CODE_VS_JUDGMENT_ASSESSMENT recommendation, Integration Plan Stage 2 accelerated).
+**`PASS1_SCREENING_v3.0.md`** (`3.0.12 → 3.0.13`): the §A1 ingest map adds the five `screen_*` fields — consumed as the
+pre-computed tier-gate + trigger-sequence result for the long-premium strategies (PASS1 *verifies* rather than re-derives;
+Step-0 earnings, the Step-1 macro gate, and flagged/estimation resolution stay runtime-owned; CSP rows carry a long-premium
+read, not a CSP verdict; absence degrades to raw-field derivation). New envelope paragraph: `screen_version` /
+`screen_thresholds` (SYSTEM_PARAMS governs on disagreement — drift flags, dispositions re-derived) and `macro_context`
+(seeds the macro gate like a pasted SPY reading; stale/absent → live fetch, never assumed-supportive). **Pinned the
+operator-absent FLAGGED disposition** (Pilot Lessons §8, the model-matrix agreement gap): a *pending* flagged/estimation
+reading — operator not yet resolved, incl. unattended runs — is **WAIT**, never NO_TRADE; NO_TRADE on Wyckoff grounds
+requires a resolved reading (confirmed-and-vetoed, or operator declined/skipped → UNKNOWN). Both degraded-input tables gain
+the pending row.
+
+### Changed — SIGNAL: near-flip prose aligned to the firing-condition table + phase-C evidence set pinned (substantive)
+
+**`SIGNAL_v3.0.md`** (`3.0.7 → 3.0.8`): (1) the dealer-timing veto prose sentence "only when near-flip combines with
+weakening or hostile DGPI does the trigger fire" contradicted the trigger's own firing-condition table (adverse-tier DGPI
+AND spot *well* beyond the flip on the adverse side) — adversarial review of the viewer implementation surfaced the
+internal contradiction; resolved in favor of the table: near-flip never fires the veto; near-flip + weakening/hostile DGPI
+is a sizing consequence (RISK dealer-tier narrowing floors the band on top of the near-flip step-down), with the Pass-2
+fresh flip read resolving the side. (2) The Wyckoff veto's conditional branch pins the **completed-phase evidence set**
+for phase-C confirmation on the viewer-ingest path: the phase-C event itself (`spring`/`shakeout`; `utad`/`ut`) or
+later-phase evidence that presupposes it (bull tags `phase_c_spring_long`/`phase_d_lps_long`/`sos_breakout_long`, events
+`sos`/`jac`; bear tags `phase_c_utad_short`/`lpsy_short`/`sow_breakdown_short`, event `sow`) — demanding the phase-C event
+as the *latest* event would re-veto structures that have already advanced.
+
+### Changed — engineering-only spec records the shipped surface (mechanical)
+
+**`engineering_only/PIPELINE_FEED_VIEW_SPEC_v3.0.md`** (`3.0.0 → 3.0.1`): new section for the five screen columns (three
+long-premium Export views only), the `A1_FIELDS` + envelope additions, the contract readings the implementation follows
+(LIMITED = preferred-not-mandated; PASS1 direction resolution; coarse dealer-tier narrowing; deliberate exclusions incl.
+the SOW-recency absence-only detector), the viewer-side drift discipline (KbParityTests parse SYSTEM_PARAMS from the
+sibling checkout), and the 4.x self-measuring note (snapshot writer prefers the no-options cache — flip before the loop
+consumes frozen screen verdicts). Status table updated; **open**: the SOW-recency window parameter needs operator
+calibration (follow-up issue; no parameter value set autonomously per SYSTEM_PARAMS discipline).
+
+### Verification
+Structural — `scripts/verify_frontmatter.sh` + `scripts/verify_anchors.sh` pass. Viewer side validated in its own repo
+(239 backend tests incl. KbDrift/KbParity green against this checkout; live end-to-end against the v2 feed; multi-agent
+adversarial review with refute-verify preceded the push).
+
 ## 2026-06-28 — Pipeline-feed view spec + §A1 self-contained reconciliation — viewer "Export -" views ship the canonical ATM IV / IV-HV; Pass-1 consumes it from the handoff
 
 ### Changed — §A1 ingest-map reconciliation (substantive; HITL, operator-approved; closes the self-contained loop)
