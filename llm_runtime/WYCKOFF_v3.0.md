@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.9
-file_last_updated: 2026-06-28
+kb_version: 3.0.10
+file_last_updated: 2026-07-02
 status: active
 tier: T1
 ---
@@ -92,7 +92,7 @@ The viewer reading carries event and structural context in three field groups, w
 | `setup_tags` | The viewer's setup classification (e.g., `phase_c_spring_long`) encoding phase, event, and intended direction | The setup class that corroborates the regime/event reading and seeds direction; consumed by PASS1 as the confirmed setup class |
 | `range` block (`support`, `resistance`, `midpoint`, `type`, `started`, `duration_bars`) | The active trading range the viewer fit, with boundaries and duration | Supporting structural context — candidate support/resistance shelves and range maturity; not a substitute for named-event structural levels |
 
-`last_event_date` governs event recency: a `last_event` whose date is well outside the run's freshness window is historical context, not a current regime assertion, and should not by itself drive a phase reading. A `markdown` regime requires a confirmed `sow` in `last_event` / `setup_tags`; a stale or absent `sow` under a `markdown` regime forces the flagged-reading exchange via the SOW-gated-markdown force-flag.
+`last_event_date` governs event recency: a `last_event` whose date is well outside the run's freshness window is historical context, not a current regime assertion, and should not by itself drive a phase reading. A `markdown` regime requires a confirmed `sow` in `last_event` / `setup_tags`; a stale or absent `sow` under a `markdown` regime forces the flagged-reading exchange via the SOW-gated-markdown force-flag. The two halves resolve differently on the deterministic viewer-ingest path: the **absence** half is code-detectable and the viewer's deterministic screen implements it (a `markdown` with no `sow` in `last_event` / `setup_tags` force-flags); the **staleness** half stays a run-level freshness judgment, not a pinned numeric window (kb#85, decided 2026-07-02). It is not parameterized because the stale-snapshot force-flag (`as_of` / `data_through`) already catches a whole-reading gone stale, `structure_conflict` catches a `markdown` label sitting in an accumulation structure, and `weekly_agrees` catches the higher-timeframe turn — while a present-but-old `sow` under a *current* snapshot is the normal `markdown_continuation` shape (markdowns do not re-print a `sow` each bar), so a recency window would re-flag healthy continuations. When those other flags are clear and the operator still judges the confirming `sow` too old to carry the regime, that is a discretionary flagged-reading call, not an automatic one.
 
 **The estimation path — propose-confirm protocol.**
 

@@ -1,5 +1,26 @@
 # KapMan KB Changelog
 
+## 2026-07-02 — SOW-staleness decision — resolve the SOW-recency window as a judgment call, not a parameter (closes #85)
+
+### Changed — WYCKOFF SOW-gated-markdown recency clarification (substantive; HITL, operator-decided)
+
+**`WYCKOFF_v3.0.md`** (`3.0.9 → 3.0.10`): the `last_event_date`/SOW paragraph now separates the flag's two halves on the
+deterministic viewer-ingest path — the **absence** half is code-detectable (the viewer screen implements it: a `markdown`
+with no `sow` in `last_event`/`setup_tags` force-flags), the **staleness** half stays a run-level freshness judgment, not a
+pinned numeric window. Operator decision (#85): do NOT parameterize it. Rationale recorded inline — the stale-snapshot flag
+(`as_of`/`data_through`) already catches a whole-reading gone stale, `structure_conflict` catches a `markdown` label in an
+accumulation structure, `weekly_agrees` catches the higher-timeframe turn, and a present-but-old `sow` under a *current*
+snapshot is the normal `markdown_continuation` shape (markdowns don't re-print a `sow` each bar), so a recency window would
+re-flag healthy continuations. A discretionary too-old-`sow` call remains available to the operator; it is not automatic.
+
+**`engineering_only/PIPELINE_FEED_VIEW_SPEC_v3.0.md`** (`3.0.1 → 3.0.2`): the SOW-recency exclusion note and status row
+change from "pending a SYSTEM_PARAMS pin" to the resolved decision (not parameterized; staleness is a run-level judgment).
+
+### Verification
+Structural — `scripts/verify_frontmatter.sh` + `scripts/verify_anchors.sh` pass; archive untouched. No SYSTEM_PARAMS
+change (that is the point of the decision). No viewer code change — the shipped absence-only detector is the faithful
+implementation; the viewer's `pass1_screen.py` docstring exclusion note is updated to cite the resolved decision.
+
 ## 2026-07-01 — Deterministic Pass-1 screen reconciliation — viewer ships the screen; §A1 consumes the disposition; three pilot-surfaced pins land (#84)
 
 ### Changed — §A1 screen ingest + operator-absent disposition pin (substantive; HITL, operator-directed; viewer #53 shipped the implementation)

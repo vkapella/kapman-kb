@@ -264,7 +264,7 @@ This repository separates runtime and engineering materials:
 | SYSTEM_PARAMS_v3.0.md | 3.0.4 | active |
 | SIGNAL_v3.0.md | 3.0.8 | active |
 | PASS1_SCREENING_v3.0.md | 3.0.13 | active |
-| WYCKOFF_v3.0.md | 3.0.9 | active |
+| WYCKOFF_v3.0.md | 3.0.10 | active |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.5 | active |
 | PASS2_VALIDATION_v3.0.md | 3.0.6 | active |
 | VOLATILITY_v3.0.md | 3.0.1 | active |
@@ -282,7 +282,7 @@ This repository separates runtime and engineering materials:
 | REPORT_TEMPLATE_PASS1_v3.0.html | 3.0.5 | 2026-05-14 |
 | KAPMAN_GUARDRAILS_v3.0.md | 3.0.5 | 2026-06-28 |
 | REPORT_STYLE_v3.0.md | 3.0.5 | 2026-06-28 |
-| WYCKOFF_v3.0.md | 3.0.9 | 2026-06-28 |
+| WYCKOFF_v3.0.md | 3.0.10 | 2026-07-02 |
 | SIGNAL_v3.0.md | 3.0.7 | 2026-06-28 |
 | PASS1_SCREENING_v3.0.md | 3.0.11 | 2026-06-28 |
 | PORTFOLIO_MGMT_v3.0.md | 3.0.5 | 2026-06-28 |

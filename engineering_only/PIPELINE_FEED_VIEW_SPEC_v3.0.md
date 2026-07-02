@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.1
-file_last_updated: 2026-07-01
+kb_version: 3.0.2
+file_last_updated: 2026-07-02
 status: active
 tier: —
 ---
@@ -154,8 +154,10 @@ resolution stay KB-side.
   3.0.8).
 - **Deliberate exclusions** (in the module docstring): Step-0 earnings (no viewer
   earnings field — dispositions are pre-event-screen), macro gate (envelope-only),
-  IV-rank mandate arm (producer emits no IV rank), SOW-*recency* (absence-only
-  detector until a recency window is pinned in SYSTEM_PARAMS), CSP screen.
+  IV-rank mandate arm (producer emits no IV rank), SOW-*recency* (the screen
+  implements the code-detectable **absence** half; staleness stays a run-level
+  freshness judgment — **kb#85 decided not to parameterize it**, see WYCKOFF_v3.0
+  3.0.10), CSP screen.
 
 **Drift discipline:** the viewer's `test_pass1_screen.py::KbParityTests` parses
 `SYSTEM_PARAMS_v3.0.md` from the sibling checkout (τ_high / τ_low /
@@ -184,7 +186,7 @@ options cache (viewer change) or treat frozen screen fields as options-off reads
 | §A1 ingest map consumes `atm_iv` / `iv_hv_ratio` / `iv_hv_status` from the handoff | KB (`PASS1_SCREENING_v3.0.md` 3.0.12) | **Landed** |
 | Deterministic Pass-1 screen columns + envelope (`screen_version` / `screen_thresholds` / `macro_context`) | viewer (#53, `pass1_screen.py` 1.0) | **Landed** (8f83693..52aa887) |
 | §A1 ingest map consumes `screen_*`; FLAGGED→WAIT pin; phase-C predicate pin; near-flip prose fix | KB (#84; PASS1 3.0.13, SIGNAL 3.0.8) | **Landed** (this change) |
-| SOW-recency window parameter (operator calibration) | KB (SYSTEM_PARAMS, follow-up issue) | **Open** |
+| SOW-recency window parameter (operator calibration) | KB (#85) | **Decided — not parameterized** (staleness stays a run-level judgment; WYCKOFF 3.0.10) |
 
 ## Related
 
