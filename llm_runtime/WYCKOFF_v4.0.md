@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.10
+kb_version: 4.0.0
 file_last_updated: 2026-07-02
 status: active
 tier: T1
@@ -178,34 +178,34 @@ On the viewer-ingest path the inputs arrive in the pasted handoff row; on the es
 
 | Output | Consumed by | What the downstream file does with it |
 |---|---|---|
-| Confirmed regime (one of seven) + phase (A–E); UNKNOWN session-state | `SIGNAL_v3.0.md` | Drives the Wyckoff veto firing condition (heuristic 1); sets the entry-time regime+phase snapshot for the Regime exit advisory (heuristic 6) |
-| Confirmed regime + phase | `RISK_v3.0.md` | Sets the sizing-band ceiling per the Appendix decision layer, read relative to the position's direction: `markup` and `reaccumulation` (post-phase-C) authorize the upper band for a long (the bearish mirror — `markdown`/`redistribution` — for a long put); `accumulation` post-phase-C the conditional-top band, pre-phase-C the conditional floor (mirror: `distribution` for a long put); the direction's refusal set closes the long-premium band; `ranging_undefined` and UNKNOWN are the most conservative case for both directions |
-| Confirmed regime | `DEALER_v3.0.md` | The ticker's DGPI tier narrows within the Wyckoff ceiling, never above it, read relative to the position's direction; the direction's refusal set closes the long-premium band regardless of how supportive the dealer regime reads — for a long that is `distribution`/`redistribution`/`markdown`, for a long put its mirror (`accumulation`/`reaccumulation`/`markup`) |
-| Confirmed `spring` event (phase C) | `SIGNAL_v3.0.md` | Distinguishes pre-phase-C `accumulation`/`reaccumulation` (Wyckoff veto fires) from post-phase-C (eligible for long-premium entry) within heuristic 1 |
-| Confirmed `utad` event (phase C) | `SIGNAL_v3.0.md` | The bearish-side mirror of `spring`: distinguishes pre-phase-C `distribution`/`redistribution` (Wyckoff veto fires for a bearish candidate) from post-phase-C (eligible for long-put entry) within heuristic 1 |
-| Confirmed `sos` / `jac` event | `SIGNAL_v3.0.md` | Drives the directional fallback to BULLISH when primary directional signals are absent or in conflict (heuristic 11) |
-| Confirmed `sow` / `ice_break` event | `SIGNAL_v3.0.md` | Drives the directional fallback to BEARISH (heuristic 11); `sow` also gates the `markdown` regime reading (no markdown without confirmed `sow`) |
-| Confirmed regime/phase succession (unfavorable) | `SIGNAL_v3.0.md` | Fires the Regime exit advisory on an unfavorable regime move or phase regression per the Appendix succession graph (heuristic 6) |
-| Confirmed structural levels (support shelf, resistance shelf, range boundaries) | `SIGNAL_v3.0.md` | Candidate alert-price anchors for the Stop alert and Profit target alert when no dealer wall is closer; the Wyckoff structural level is the fallback anchor |
-| Confirmed regime, phase, and events | `PASS1_SCREENING_v3.0.md` | Regime gates the eligible-set determination; `ranging_undefined`/UNKNOWN tickers are screened as the most conservative case for long-premium eligibility |
-| Confirmed regime, phase, and events | `PASS2_VALIDATION_v3.0.md` | Regime/phase/event confirmation status is carried into structure validation context |
-| Confirmed regime + phase and confirmation status | `REPORT_FORMAT_v3.0.md` | Rendered in the Wyckoff regime field of the recommendation row; confirmation status (pipeline-accepted / confirmed / declared / pipeline-flagged / unconfirmed) surfaces in the data-quality section |
+| Confirmed regime (one of seven) + phase (A–E); UNKNOWN session-state | `SIGNAL_v4.0.md` | Drives the Wyckoff veto firing condition (heuristic 1); sets the entry-time regime+phase snapshot for the Regime exit advisory (heuristic 6) |
+| Confirmed regime + phase | `RISK_v4.0.md` | Sets the sizing-band ceiling per the Appendix decision layer, read relative to the position's direction: `markup` and `reaccumulation` (post-phase-C) authorize the upper band for a long (the bearish mirror — `markdown`/`redistribution` — for a long put); `accumulation` post-phase-C the conditional-top band, pre-phase-C the conditional floor (mirror: `distribution` for a long put); the direction's refusal set closes the long-premium band; `ranging_undefined` and UNKNOWN are the most conservative case for both directions |
+| Confirmed regime | `DEALER_v4.0.md` | The ticker's DGPI tier narrows within the Wyckoff ceiling, never above it, read relative to the position's direction; the direction's refusal set closes the long-premium band regardless of how supportive the dealer regime reads — for a long that is `distribution`/`redistribution`/`markdown`, for a long put its mirror (`accumulation`/`reaccumulation`/`markup`) |
+| Confirmed `spring` event (phase C) | `SIGNAL_v4.0.md` | Distinguishes pre-phase-C `accumulation`/`reaccumulation` (Wyckoff veto fires) from post-phase-C (eligible for long-premium entry) within heuristic 1 |
+| Confirmed `utad` event (phase C) | `SIGNAL_v4.0.md` | The bearish-side mirror of `spring`: distinguishes pre-phase-C `distribution`/`redistribution` (Wyckoff veto fires for a bearish candidate) from post-phase-C (eligible for long-put entry) within heuristic 1 |
+| Confirmed `sos` / `jac` event | `SIGNAL_v4.0.md` | Drives the directional fallback to BULLISH when primary directional signals are absent or in conflict (heuristic 11) |
+| Confirmed `sow` / `ice_break` event | `SIGNAL_v4.0.md` | Drives the directional fallback to BEARISH (heuristic 11); `sow` also gates the `markdown` regime reading (no markdown without confirmed `sow`) |
+| Confirmed regime/phase succession (unfavorable) | `SIGNAL_v4.0.md` | Fires the Regime exit advisory on an unfavorable regime move or phase regression per the Appendix succession graph (heuristic 6) |
+| Confirmed structural levels (support shelf, resistance shelf, range boundaries) | `SIGNAL_v4.0.md` | Candidate alert-price anchors for the Stop alert and Profit target alert when no dealer wall is closer; the Wyckoff structural level is the fallback anchor |
+| Confirmed regime, phase, and events | `PASS1_SCREENING_v4.0.md` | Regime gates the eligible-set determination; `ranging_undefined`/UNKNOWN tickers are screened as the most conservative case for long-premium eligibility |
+| Confirmed regime, phase, and events | `PASS2_VALIDATION_v4.0.md` | Regime/phase/event confirmation status is carried into structure validation context |
+| Confirmed regime + phase and confirmation status | `REPORT_FORMAT_v4.0.md` | Rendered in the Wyckoff regime field of the recommendation row; confirmation status (pipeline-accepted / confirmed / declared / pipeline-flagged / unconfirmed) surfaces in the data-quality section |
 
 **Cross-references this file expects to be honored.**
 
-- `KAPMAN_GUARDRAILS_v3.0.md` — owns the data-quality vocabulary that WYCKOFF's confirmation-status labels align with; owns the override discipline that applies when an operator declares a phase without running propose-confirm; owns the anti-hallucination floor that prevents the runtime from asserting a confirmed phase it has not actually confirmed. When this file and GUARDRAILS appear to conflict, GUARDRAILS wins per the T0/T1 tier discipline.
-- `SIGNAL_v3.0.md` — consumes the confirmed phase and event outputs; owns what happens when those outputs are consumed by the Wyckoff veto, the directional fallback, and the Regime exit advisory. WYCKOFF does not know about SIGNAL's trigger contracts; SIGNAL does not know how confirmation happened.
-- `RISK_v3.0.md` — consumes the confirmed phase as the sizing-band ceiling; owns the specific band ladder that the phase ceiling authorizes. WYCKOFF names the phase; RISK translates the phase into a sizing range.
-- `DEALER_v3.0.md` — runs in parallel with WYCKOFF as a separate regime read; the dealer regime narrows within the Wyckoff ceiling. WYCKOFF does not read dealer outputs and DEALER does not read Wyckoff outputs; SIGNAL and RISK are the compositing layers.
-- `VOLATILITY_v3.0.md` — runs in parallel with WYCKOFF as a separate regime read; no direct dependency in either direction.
-- `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` (forthcoming) — owns the specific tool-surface contracts, z-score thresholds, boolean configuration flags, source file references, and the sequence confidence formula. The LLM runtime reads building-block metrics and applies qualitative reasoning patterns; the engineering-only reference holds the numeric parameters that the viewer/v2 pipeline uses to compute those metrics.
+- `KAPMAN_GUARDRAILS_v4.0.md` — owns the data-quality vocabulary that WYCKOFF's confirmation-status labels align with; owns the override discipline that applies when an operator declares a phase without running propose-confirm; owns the anti-hallucination floor that prevents the runtime from asserting a confirmed phase it has not actually confirmed. When this file and GUARDRAILS appear to conflict, GUARDRAILS wins per the T0/T1 tier discipline.
+- `SIGNAL_v4.0.md` — consumes the confirmed phase and event outputs; owns what happens when those outputs are consumed by the Wyckoff veto, the directional fallback, and the Regime exit advisory. WYCKOFF does not know about SIGNAL's trigger contracts; SIGNAL does not know how confirmation happened.
+- `RISK_v4.0.md` — consumes the confirmed phase as the sizing-band ceiling; owns the specific band ladder that the phase ceiling authorizes. WYCKOFF names the phase; RISK translates the phase into a sizing range.
+- `DEALER_v4.0.md` — runs in parallel with WYCKOFF as a separate regime read; the dealer regime narrows within the Wyckoff ceiling. WYCKOFF does not read dealer outputs and DEALER does not read Wyckoff outputs; SIGNAL and RISK are the compositing layers.
+- `VOLATILITY_v4.0.md` — runs in parallel with WYCKOFF as a separate regime read; no direct dependency in either direction.
+- `engineering_only/WYCKOFF_MCP_REFERENCE_v4.0.md` (forthcoming) — owns the specific tool-surface contracts, z-score thresholds, boolean configuration flags, source file references, and the sequence confidence formula. The LLM runtime reads building-block metrics and applies qualitative reasoning patterns; the engineering-only reference holds the numeric parameters that the viewer/v2 pipeline uses to compute those metrics.
 
 
 ## Legacy anchors (for legend citations and back-compat)
 
 > **Historical note (v4.0 model change).** The anchors below describe the superseded **four-phase** model (Accumulation → Markup → Distribution → Markdown) and its v2.3 event codes (including `AR_TOP`, now `ar_dist`). They are preserved **verbatim** for legend citations and back-compat — do not rewrite them. The canonical model is now the two-axis **regime (7) + phase (A–E) + event** vocabulary embedded in the Appendix ("Wyckoff canonical vocabulary"). Where an anchor points to "the Appendix phase-succession table," read that as the Appendix **"Regime model and succession graph"**; any Title-case phase name below maps to its lowercase regime token, and `AR_TOP` maps to `ar_dist`.
 
-**WYCKOFF_PHASE_001** → § Operational heuristics, "The minimum history guard applies before any proposal is made." The v2.3 rule enforced a hard minimum-bars constraint (`min_bars_in_range = 20`) that aborted all event and phase detection on insufficient history. The LLM runtime analog is the qualitative history guard in the heuristic: proposals on thin history are marked low-confidence rather than refused, because the operator can supply judgment the tool surface cannot. The specific bar-count threshold lives in `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` (forthcoming). Body-text references in legacy report legends remain valid.
+**WYCKOFF_PHASE_001** → § Operational heuristics, "The minimum history guard applies before any proposal is made." The v2.3 rule enforced a hard minimum-bars constraint (`min_bars_in_range = 20`) that aborted all event and phase detection on insufficient history. The LLM runtime analog is the qualitative history guard in the heuristic: proposals on thin history are marked low-confidence rather than refused, because the operator can supply judgment the tool surface cannot. The specific bar-count threshold lives in `engineering_only/WYCKOFF_MCP_REFERENCE_v4.0.md` (forthcoming). Body-text references in legacy report legends remain valid.
 
 **WYCKOFF_PHASE_002** → § Principle, phase vocabulary (Accumulation). The v2.3 rule defined Accumulation as the phase spanning from Selling Climax to Sign of Strength. The Appendix phase-succession table preserves this boundary logic. Body-text references remain valid.
 
@@ -215,9 +215,9 @@ On the viewer-ingest path the inputs arrive in the pasted handoff row; on the es
 
 **WYCKOFF_PHASE_005** → § Principle, phase vocabulary (Markdown). The v2.3 rule defined Markdown as spanning from Sign of Weakness to the next Selling Climax or the final available bar. The Appendix phase-succession table preserves this. Body-text references remain valid.
 
-**WYCKOFF_PHASE_006** → § Operational heuristics, "Markdown requires a confirmed Sign of Weakness; soft markdown without SOW is not active." The v2.3 rule made the soft-markdown fallback a disabled-by-default config option (`allow_soft_markdown_without_sow = False`). The v3.0 heuristic encodes the same behavioral default as a standing runtime posture on both paths. The config parameter lives in `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` (forthcoming). Body-text references remain valid.
+**WYCKOFF_PHASE_006** → § Operational heuristics, "Markdown requires a confirmed Sign of Weakness; soft markdown without SOW is not active." The v2.3 rule made the soft-markdown fallback a disabled-by-default config option (`allow_soft_markdown_without_sow = False`). The v3.0 heuristic encodes the same behavioral default as a standing runtime posture on both paths. The config parameter lives in `engineering_only/WYCKOFF_MCP_REFERENCE_v4.0.md` (forthcoming). Body-text references remain valid.
 
-**WYCKOFF_PHASE_007** → `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` (forthcoming). The v2.3 rule governed extending the first and last detected structural phases to chart edges. This is a chart-rendering behavior with no LLM runtime effect. Body-text references in legacy report legends remain valid.
+**WYCKOFF_PHASE_007** → `engineering_only/WYCKOFF_MCP_REFERENCE_v4.0.md` (forthcoming). The v2.3 rule governed extending the first and last detected structural phases to chart edges. This is a chart-rendering behavior with no LLM runtime effect. Body-text references in legacy report legends remain valid.
 
 **WYCKOFF_PHASE_008** → § Operational heuristics, "The priority order governs readings when multiple event signals appear in the same session." The v2.3 rule specified a deterministic event-to-regime mapping with fixed priority: SC → SPRING → SOS → BC → UT → SOW. The heuristic preserves this priority order as the governing read when multiple signals appear. Body-text references remain valid.
 
@@ -229,7 +229,7 @@ On the viewer-ingest path the inputs arrive in the pasted handoff row; on the es
 
 **WYCKOFF_PHASE_012** → § Operational heuristics, "The priority order governs readings when multiple event signals appear in the same session" (sequence eligibility aspect) and § Appendix, event reading guide (SOS and SOW sequence eligibility notes). The v2.3 rule gated terminal-event sequence eligibility on the prior regime. The v3.0 Appendix event reading guide carries this as a reading-context qualifier for SOS and SOW proposals. Body-text references remain valid.
 
-**WYCKOFF_PHASE_013** → `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` (forthcoming). The v2.3 rule specified the sequence confidence formula: `min(1.0, round(0.6 + 0.1 × max(0, n), 4))`. Pipeline computation parameter with no LLM runtime effect. Body-text references remain valid.
+**WYCKOFF_PHASE_013** → `engineering_only/WYCKOFF_MCP_REFERENCE_v4.0.md` (forthcoming). The v2.3 rule specified the sequence confidence formula: `min(1.0, round(0.6 + 0.1 × max(0, n), 4))`. Pipeline computation parameter with no LLM runtime effect. Body-text references remain valid.
 
 **WYCKOFF_EVENT_001** → § Operational heuristics, "The minimum history guard applies before any proposal is made." Shared destination with WYCKOFF_PHASE_001. Body-text references remain valid.
 
@@ -253,7 +253,7 @@ On the viewer-ingest path the inputs arrive in the pasted handoff row; on the es
 
 **WYCKOFF_EVENT_011** → § Appendix, event reading guide (Sign of Weakness — SOW). The v2.3 rule specified SOW: close below support with `tr_z >= 1.5`. The Appendix entry carries the qualitative pattern. Specific threshold in engineering-only. Body-text references remain valid.
 
-**WYCKOFF_EVENT_012** → `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` (forthcoming). The v2.3 rule specified the event score payload formula: `vol_z` for SC, BC, Spring; `tr_z` for AR, AR_TOP, UT, SOS, SOW. Pipeline scalar with no LLM runtime effect. Body-text references remain valid.
+**WYCKOFF_EVENT_012** → `engineering_only/WYCKOFF_MCP_REFERENCE_v4.0.md` (forthcoming). The v2.3 rule specified the event score payload formula: `vol_z` for SC, BC, Spring; `tr_z` for AR, AR_TOP, UT, SOS, SOW. Pipeline scalar with no LLM runtime effect. Body-text references remain valid.
 
 **WYCKOFF_EVENT_013** → § Operational heuristics, "The Secondary Test is not delivered by the viewer/v2 tool surface." ST parameters exist in configuration but no detection branch is implemented. ST observations appear in proposal reasoning as supporting context only; never proposed as confirmed events. Body-text references remain valid.
 
@@ -375,7 +375,7 @@ When multiple events are observed in the same period, the priority order determi
 
 **Event reading guide — qualitative patterns for proposal assembly.**
 
-The following table is the estimation-path detection subset — the regime-setting events the runtime can reason to from live price/volume metrics. The full canonical event vocabulary (including the entry-timing and VSA events the viewer detects) is in "Wyckoff canonical vocabulary" above; this table gives the qualitative price/volume patterns for assembling a proposal. Specific z-score thresholds and configuration parameters are in `engineering_only/WYCKOFF_MCP_REFERENCE_v3.0.md` (forthcoming).
+The following table is the estimation-path detection subset — the regime-setting events the runtime can reason to from live price/volume metrics. The full canonical event vocabulary (including the entry-timing and VSA events the viewer detects) is in "Wyckoff canonical vocabulary" above; this table gives the qualitative price/volume patterns for assembling a proposal. Specific z-score thresholds and configuration parameters are in `engineering_only/WYCKOFF_MCP_REFERENCE_v4.0.md` (forthcoming).
 
 | Event | Price pattern | Volume pattern | Prior context required | Notes |
 |---|---|---|---|---|

@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 3.0.11
-file_last_updated: 2026-06-28
+kb_version: 4.0.0
+file_last_updated: 2026-07-02
 status: active
 tier: T3
 ---
@@ -97,7 +97,7 @@ The run start timestamp is the moment the first MCP call of the run fires: the S
 
 - The default output for all Pass 1 triage reports, Pass 2 validation reports, and portfolio reports is markdown (pipe-delimited tables with GitHub Flavored Markdown syntax).
 - HTML output is produced only when the operator explicitly requests it: "give me the HTML report", "render as HTML", or equivalent.
-- When markdown is the output mode, REPORT_TEMPLATE_PASS1_v3.0.html is not used. The section order, field caps, footnote convention, and all content rules in this file still apply — only the rendering surface changes.
+- When markdown is the output mode, REPORT_TEMPLATE_PASS1_v4.0.html is not used. The section order, field caps, footnote convention, and all content rules in this file still apply — only the rendering surface changes.
 - Markdown column alignment follows REPORT_STYLE column-alignment rules: left-align for text/rationale columns, left-align for all headers (`:---` separator syntax).
 - When switching from markdown to HTML mid-session on operator request, Claude produces the full HTML block in one pass from already-computed intermediate data. Claude does not re-run MCP calls to produce the HTML version of a report already computed in markdown.
 
@@ -122,17 +122,17 @@ When REPORT_FORMAT and a T1 or T2 file appear to conflict on a structural questi
 
 | Source file | What REPORT_FORMAT consumes | How REPORT_FORMAT uses it |
 |---|---|---|
-| `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Hard-cap mandate; rule-ID-legend-only rule; override acknowledgment requirement; data-quality vocabulary; mode discipline | REPORT_FORMAT enforces caps numerically; places rule IDs in legend/footer only; places override acknowledgment in subtitle or footnote per heuristic; uses GUARDRAILS vocabulary in source bar flags |
-| `SIGNAL_v3.0.md` (T1) | Label vocabulary for trigger states; four-field exit-trigger output format; the forward-tested-target confluence annotation on the underlying alert level; NO_TRADE/WAIT consistency rule; confidence ordering rule; anti-hallucination floor substitution labels | REPORT_FORMAT renders trigger-state labels verbatim; renders the four exit-trigger fields as a matched pair per position, with the forward-tested-target confluence annotation rendered as a suffix on the underlying alert level when SIGNAL carries it (never as the alert price); enforces NO_TRADE/WAIT row structure; renders alternatives in descending confidence order; renders zone substitutions per pass label discipline |
-| `DEALER_v3.0.md` (T1) | DGPI tier names; flip-zone labels; dealer-confidence labels (high/medium/low/invalid); hostile-macro flag | REPORT_FORMAT renders DGPI tier in the screening table and Macro Regime card; renders flip-zone in rationale where relevant; renders dealer confidence in the source bar |
-| `VOLATILITY_v3.0.md` (T1) | IV/HV band labels; IV rank tier labels; volatility-status labels; stale-data flag | REPORT_FORMAT renders volatility regime in the screening table; renders "Stretched IV" annotation for extreme tier; renders stale-data flag in source bar with timestamp |
-| `WYCKOFF_v3.0.md` (T1) | Phase labels; event labels | REPORT_FORMAT renders Wyckoff phase in the screening table and portfolio detail; renders confirmed events in rationale |
-| `PASS1_SCREENING_v3.0.md` (T2) | Eligible/NO_TRADE/WAIT determinations; candidate zones; alternatives with confidence; Pass 1 data-quality labels; macro gate result; override acknowledgments | REPORT_FORMAT renders the screening table and per-ticker detail from Pass 1 output; applies zone rendering to all Pass 1 strike and expiration fields |
-| `PASS2_VALIDATION_v3.0.md` (T2) | Validated/Flagged/Rejected states; exact strikes and expirations; chain quality label; dealer-confidence label; entry price range; sizing band | REPORT_FORMAT renders exact values for Pass 2 validated candidates; renders Flagged and Rejected states with named reasons; renders chain quality badge in source bar |
-| `PORTFOLIO_MGMT_v3.0.md` (T2) | Position context schema; lifecycle state labels (Open/Advisory/Exited/Expired); advisory flag format; DTE decay warning format; Regime exit advisory decay reasons | REPORT_FORMAT renders the portfolio view table and per-position detail from position context; renders advisory flag with named decay reason; renders DTE decay warning when active; renders Exited and Expired summary sections when present |
-| `SYSTEM_PARAMS_v3.0.md` | DTE band values (SWING_DTE_BAND, CSP_DTE_BAND, DTE_DECAY_WARNING_THRESHOLD) | REPORT_FORMAT uses DTE band values as the canonical expiration-band labels in Pass 1 zone rendering; uses DTE_DECAY_WARNING_THRESHOLD to determine when the decay warning renders in the portfolio detail |
+| `KAPMAN_GUARDRAILS_v4.0.md` (T0) | Hard-cap mandate; rule-ID-legend-only rule; override acknowledgment requirement; data-quality vocabulary; mode discipline | REPORT_FORMAT enforces caps numerically; places rule IDs in legend/footer only; places override acknowledgment in subtitle or footnote per heuristic; uses GUARDRAILS vocabulary in source bar flags |
+| `SIGNAL_v4.0.md` (T1) | Label vocabulary for trigger states; four-field exit-trigger output format; the forward-tested-target confluence annotation on the underlying alert level; NO_TRADE/WAIT consistency rule; confidence ordering rule; anti-hallucination floor substitution labels | REPORT_FORMAT renders trigger-state labels verbatim; renders the four exit-trigger fields as a matched pair per position, with the forward-tested-target confluence annotation rendered as a suffix on the underlying alert level when SIGNAL carries it (never as the alert price); enforces NO_TRADE/WAIT row structure; renders alternatives in descending confidence order; renders zone substitutions per pass label discipline |
+| `DEALER_v4.0.md` (T1) | DGPI tier names; flip-zone labels; dealer-confidence labels (high/medium/low/invalid); hostile-macro flag | REPORT_FORMAT renders DGPI tier in the screening table and Macro Regime card; renders flip-zone in rationale where relevant; renders dealer confidence in the source bar |
+| `VOLATILITY_v4.0.md` (T1) | IV/HV band labels; IV rank tier labels; volatility-status labels; stale-data flag | REPORT_FORMAT renders volatility regime in the screening table; renders "Stretched IV" annotation for extreme tier; renders stale-data flag in source bar with timestamp |
+| `WYCKOFF_v4.0.md` (T1) | Phase labels; event labels | REPORT_FORMAT renders Wyckoff phase in the screening table and portfolio detail; renders confirmed events in rationale |
+| `PASS1_SCREENING_v4.0.md` (T2) | Eligible/NO_TRADE/WAIT determinations; candidate zones; alternatives with confidence; Pass 1 data-quality labels; macro gate result; override acknowledgments | REPORT_FORMAT renders the screening table and per-ticker detail from Pass 1 output; applies zone rendering to all Pass 1 strike and expiration fields |
+| `PASS2_VALIDATION_v4.0.md` (T2) | Validated/Flagged/Rejected states; exact strikes and expirations; chain quality label; dealer-confidence label; entry price range; sizing band | REPORT_FORMAT renders exact values for Pass 2 validated candidates; renders Flagged and Rejected states with named reasons; renders chain quality badge in source bar |
+| `PORTFOLIO_MGMT_v4.0.md` (T2) | Position context schema; lifecycle state labels (Open/Advisory/Exited/Expired); advisory flag format; DTE decay warning format; Regime exit advisory decay reasons | REPORT_FORMAT renders the portfolio view table and per-position detail from position context; renders advisory flag with named decay reason; renders DTE decay warning when active; renders Exited and Expired summary sections when present |
+| `SYSTEM_PARAMS_v4.0.md` | DTE band values (SWING_DTE_BAND, CSP_DTE_BAND, DTE_DECAY_WARNING_THRESHOLD) | REPORT_FORMAT uses DTE band values as the canonical expiration-band labels in Pass 1 zone rendering; uses DTE_DECAY_WARNING_THRESHOLD to determine when the decay warning renders in the portfolio detail |
 
-The HTML render artifact for Pass 1 reports is `REPORT_TEMPLATE_PASS1_v3.0.html` — the executable expression of the screening table column spec in this file's Appendix. The template fills at render time; this file remains the authoritative column-spec source. When the spec changes, the template is updated to match; the template never overrides the spec.
+The HTML render artifact for Pass 1 reports is `REPORT_TEMPLATE_PASS1_v4.0.html` — the executable expression of the screening table column spec in this file's Appendix. The template fills at render time; this file remains the authoritative column-spec source. When the spec changes, the template is updated to match; the template never overrides the spec.
 
 **What REPORT_FORMAT does not own.**
 
@@ -140,22 +140,22 @@ The HTML render artifact for Pass 1 reports is `REPORT_TEMPLATE_PASS1_v3.0.html`
 |---|---|
 | Content of any field | T1 and T2 files |
 | Behavioral rules that determine what content is produced | SIGNAL, GUARDRAILS, runbooks |
-| Visual presentation (typography, color, HTML/CSS) | `REPORT_STYLE_v3.0.md` |
+| Visual presentation (typography, color, HTML/CSS) | `REPORT_STYLE_v4.0.md` |
 | Label vocabulary (DGPI tier names, dealer-confidence labels, chain quality labels) | Respective T1 files |
-| Override discipline | `KAPMAN_GUARDRAILS_v3.0.md` |
-| Regime exit advisory firing condition | `SIGNAL_v3.0.md` |
-| DTE band numeric values | `SYSTEM_PARAMS_v3.0.md` |
+| Override discipline | `KAPMAN_GUARDRAILS_v4.0.md` |
+| Regime exit advisory firing condition | `SIGNAL_v4.0.md` |
+| DTE band numeric values | `SYSTEM_PARAMS_v4.0.md` |
 | MCP tool-surface contracts | `engineering_only/` files |
 
 **Where REPORT_FORMAT constraints flow downstream.**
 
 | Constraint | Consumed by | How |
 |---|---|---|
-| Field cap numeric values | `REPORT_STYLE_v3.0.md` | REPORT_STYLE implements the caps visually (column width CSS); REPORT_FORMAT owns the word/line counts that drive those widths |
-| Footnote numbering convention | `REPORT_STYLE_v3.0.md` | REPORT_STYLE owns the superscript CSS; REPORT_FORMAT owns the sequential numbering rule |
+| Field cap numeric values | `REPORT_STYLE_v4.0.md` | REPORT_STYLE implements the caps visually (column width CSS); REPORT_FORMAT owns the word/line counts that drive those widths |
+| Footnote numbering convention | `REPORT_STYLE_v4.0.md` | REPORT_STYLE owns the superscript CSS; REPORT_FORMAT owns the sequential numbering rule |
 | Section presence and ordering rules | Every T2 runbook | Runbooks assemble output knowing where it will be placed; PASS1, PASS2, and PORTFOLIO_MGMT produce content in the sequence REPORT_FORMAT will render it |
-| Source bar placement rule | `REPORT_STYLE_v3.0.md` | REPORT_STYLE owns source bar visual styling; REPORT_FORMAT owns that it appears below the subtitle and above the first table |
-| Legend/footer internal order | `REPORT_STYLE_v3.0.md` | REPORT_STYLE owns legend/footer visual styling; REPORT_FORMAT owns the element sequence within it |
+| Source bar placement rule | `REPORT_STYLE_v4.0.md` | REPORT_STYLE owns source bar visual styling; REPORT_FORMAT owns that it appears below the subtitle and above the first table |
+| Legend/footer internal order | `REPORT_STYLE_v4.0.md` | REPORT_STYLE owns legend/footer visual styling; REPORT_FORMAT owns the element sequence within it |
 
 **Entry point for every report output.**
 
@@ -171,16 +171,16 @@ Before rendering any section, three structural checks apply:
 
 **Origin of REPORT_FORMAT content in v2.3.**
 
-REPORT_FORMAT_v3.0.md has no direct v2.3 antecedent file. Its content was distributed across two v2.3 sources that mixed format and behavioral content:
+REPORT_FORMAT_v4.0.md has no direct v2.3 antecedent file. Its content was distributed across two v2.3 sources that mixed format and behavioral content:
 
 - `KAPMAN_PROJECT_INSTRUCTIONS_v2.3.md` — contained section ordering, field sequence, the Macro Regime card format, the trade-sheet table structure, and the communication style rules that are now cleanly separated into GUARDRAILS (behavioral) and REPORT_FORMAT (structural).
-- `KAPMAN_REPORT_STYLE_GLOSSARY_v2.3.md` — contained column width caps (rationale-col 180px, action-col 165px, scale-col 70px, stop-col 50px, note-col 150px), the footnote section structure, the source bar placement and content, and the legend/footer element list. These are FORMAT-scoped; the CSS implementation of these constraints migrates to REPORT_STYLE_v3.0.md.
+- `KAPMAN_REPORT_STYLE_GLOSSARY_v2.3.md` — contained column width caps (rationale-col 180px, action-col 165px, scale-col 70px, stop-col 50px, note-col 150px), the footnote section structure, the source bar placement and content, and the legend/footer element list. These are FORMAT-scoped; the CSS implementation of these constraints migrates to REPORT_STYLE_v4.0.md.
 
-**PIPELINE_011** → § Operational heuristics, "Pass label discipline" heuristic. The v2.3 compaction guard rule (always re-fetch Schwab dealer metrics at Pass 2; never reuse Pass 1 values even if visible in context) is absorbed into PASS2_VALIDATION_v3.0.md as the authoritative location. REPORT_FORMAT's pass label discipline (zone rendering for Pass 1 outputs, exact rendering for Pass 2 outputs) is the rendering expression of the same contract. Body-text references in legacy report legends citing PIPELINE_011 remain valid.
+**PIPELINE_011** → § Operational heuristics, "Pass label discipline" heuristic. The v2.3 compaction guard rule (always re-fetch Schwab dealer metrics at Pass 2; never reuse Pass 1 values even if visible in context) is absorbed into PASS2_VALIDATION_v4.0.md as the authoritative location. REPORT_FORMAT's pass label discipline (zone rendering for Pass 1 outputs, exact rendering for Pass 2 outputs) is the rendering expression of the same contract. Body-text references in legacy report legends citing PIPELINE_011 remain valid.
 
 **VALIDATION_001** → § Operational heuristics, "Pass label discipline" heuristic. The anti-hallucination floor — zone substitutions in place of unvalidated strikes and expirations — is the rendering manifestation of VALIDATION_001. GUARDRAILS owns the floor as standing behavior; REPORT_FORMAT owns how zone substitutions appear in the rendered output. Body-text references in legacy report legends citing VALIDATION_001 remain valid.
 
-**RISK_005** → § Operational heuristics, "Confidence renders as a labeled band" heuristic (indirectly). The v2.3 position size cap table (3%/2%/1%/0.5–1%/0%) is owned by RISK_v3.0.md. REPORT_FORMAT owns that the sizing band notation appears in the candidate row and per-position detail, but does not own the band values themselves. Body-text references in legacy report legends citing RISK_005 remain valid and are honored by RISK_v3.0.md.
+**RISK_005** → § Operational heuristics, "Confidence renders as a labeled band" heuristic (indirectly). The v2.3 position size cap table (3%/2%/1%/0.5–1%/0%) is owned by RISK_v4.0.md. REPORT_FORMAT owns that the sizing band notation appears in the candidate row and per-position detail, but does not own the band values themselves. Body-text references in legacy report legends citing RISK_005 remain valid and are honored by RISK_v4.0.md.
 
 **Macro Regime card** → § Operational heuristics, "The Macro Regime card appears above the screening table when hostile macro is active." The v2.3 card format appeared inline in `KAPMAN_PROJECT_INSTRUCTIONS_v2.3.md` Communication Style: `"SPY $X | Below flip ($Y) | DGPI [Z] | Regime: MARKDOWN | Long-call entries blocked. CSP / hedge / LEAPs eligible only."` The v3.0 card expands this to five named elements with explicit ordering (SPY spot, flip level, DGPI tier, regime label, eligible-set redirect) and clarifies that the card is a distinct block, not a table row. The pipe-delimited inline format from v2.3 is a valid rendering of the five elements and remains compatible with v3.0 structure.
 

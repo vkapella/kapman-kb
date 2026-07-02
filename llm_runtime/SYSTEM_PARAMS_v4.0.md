@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.4
-file_last_updated: 2026-06-28
+kb_version: 4.0.0
+file_last_updated: 2026-07-02
 status: active
 tier: T3
 ---
@@ -51,16 +51,16 @@ SYSTEM_PARAMS defines values. It does not define what to do with them. The behav
 
 This file is consumed by:
 
-- `PASS1_SCREENING_v3.0.md` — reads `SWING_DTE_BAND`, `CSP_DTE_BAND`, `LEAP_DTE_BAND` for candidate zone DTE band assembly
-- `PASS2_VALIDATION_v3.0.md` — reads the same DTE bands for expiration selection scope; reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` as spread-mandate resolution inputs
-- `SIGNAL_v3.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` for spread-mandate trigger specification; reads `SWING_DTE_BAND` and `CSP_DTE_BAND` for anti-hallucination label text; reads `FORWARD_TEST_CONFLUENCE_BAND_PCT` as the forward-tested-target confluence tolerance on the exit anchors
-- `REPORT_FORMAT_v3.0.md` — reads `FORWARD_TEST_CONFLUENCE_BAND_PCT` as the divergence boundary for rendering the forward-tested-target confidence suffix on the exit-plan / exit-trigger-proximity rows
-- `RISK_v3.0.md` — reads `CONDITIONAL_TOP_SIZE_PCT` as the conditional-top sizing-band magnitude
-- `VOLATILITY_v3.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` as the Appendix band boundary values
-- `DEALER_v3.0.md` — reads `NEAR_FLIP_BAND_PCT` as the near-flip zone Appendix band value, and `DGPI_NEUTRAL_BAND` / `DGPI_STRONG_BAND` / `HOSTILE_MACRO_DGPI_MAX` as the DGPI tier cutpoints and hostile-macro DGPI threshold
-- `PORTFOLIO_MGMT_v3.0.md` — reads `DTE_DECAY_WARNING_THRESHOLD` for DTE decay warning evaluation at Step 5 of the Portfolio mode workflow
-- `WYCKOFF_v3.0.md` — reads `TIER_GATE_TAU_HIGH` and `TIER_GATE_TAU_LOW` as the viewer/v2 ingest tier-gate boundaries that resolve a pasted reading to `pipeline-accepted`, `pipeline-flagged`, or estimation-path
-- `PASS1_SCREENING_v3.0.md` — reads `TIER_GATE_TAU_HIGH` and `TIER_GATE_TAU_LOW` indirectly via WYCKOFF when ingesting a viewer/v2 handoff as the candidate source; PASS1 does not re-implement the gate, it consumes WYCKOFF's resolved confirmation status
+- `PASS1_SCREENING_v4.0.md` — reads `SWING_DTE_BAND`, `CSP_DTE_BAND`, `LEAP_DTE_BAND` for candidate zone DTE band assembly
+- `PASS2_VALIDATION_v4.0.md` — reads the same DTE bands for expiration selection scope; reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` as spread-mandate resolution inputs
+- `SIGNAL_v4.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` for spread-mandate trigger specification; reads `SWING_DTE_BAND` and `CSP_DTE_BAND` for anti-hallucination label text; reads `FORWARD_TEST_CONFLUENCE_BAND_PCT` as the forward-tested-target confluence tolerance on the exit anchors
+- `REPORT_FORMAT_v4.0.md` — reads `FORWARD_TEST_CONFLUENCE_BAND_PCT` as the divergence boundary for rendering the forward-tested-target confidence suffix on the exit-plan / exit-trigger-proximity rows
+- `RISK_v4.0.md` — reads `CONDITIONAL_TOP_SIZE_PCT` as the conditional-top sizing-band magnitude
+- `VOLATILITY_v4.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` as the Appendix band boundary values
+- `DEALER_v4.0.md` — reads `NEAR_FLIP_BAND_PCT` as the near-flip zone Appendix band value, and `DGPI_NEUTRAL_BAND` / `DGPI_STRONG_BAND` / `HOSTILE_MACRO_DGPI_MAX` as the DGPI tier cutpoints and hostile-macro DGPI threshold
+- `PORTFOLIO_MGMT_v4.0.md` — reads `DTE_DECAY_WARNING_THRESHOLD` for DTE decay warning evaluation at Step 5 of the Portfolio mode workflow
+- `WYCKOFF_v4.0.md` — reads `TIER_GATE_TAU_HIGH` and `TIER_GATE_TAU_LOW` as the viewer/v2 ingest tier-gate boundaries that resolve a pasted reading to `pipeline-accepted`, `pipeline-flagged`, or estimation-path
+- `PASS1_SCREENING_v4.0.md` — reads `TIER_GATE_TAU_HIGH` and `TIER_GATE_TAU_LOW` indirectly via WYCKOFF when ingesting a viewer/v2 handoff as the candidate source; PASS1 does not re-implement the gate, it consumes WYCKOFF's resolved confirmation status
 
 This file does not consume any other runtime file. It has no upstream dependencies within `llm_runtime/`.
 

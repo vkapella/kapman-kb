@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.0-alpha
-file_last_updated: 2026-05-13
+kb_version: 4.0.0-alpha
+file_last_updated: 2026-07-02
 status: draft
 tier: —
 ---
@@ -11,7 +11,7 @@ tier: —
 
 ## Purpose
 
-This file documents the SIGNAL persistence-normalization and backend-output mechanics extracted from `llm_runtime/SIGNAL_v3.0.md`. The runtime SIGNAL file owns trigger vocabulary and behavioral output discipline; this file owns persistence-boundary enum mappings, schema quantization, tuple-null enforcement, and v2.3 fallback confidence constants.
+This file documents the SIGNAL persistence-normalization and backend-output mechanics extracted from `llm_runtime/SIGNAL_v4.0.md`. The runtime SIGNAL file owns trigger vocabulary and behavioral output discipline; this file owns persistence-boundary enum mappings, schema quantization, tuple-null enforcement, and v2.3 fallback confidence constants.
 
 ## Contents
 

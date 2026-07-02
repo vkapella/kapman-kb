@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.0-alpha
-file_last_updated: 2026-05-13
+kb_version: 4.0.0-alpha
+file_last_updated: 2026-07-02
 status: draft
 tier: —
 ---
@@ -11,7 +11,7 @@ tier: —
 
 ## Purpose
 
-This file documents the Pass 2 MCP and chain-fetch mechanics extracted from `llm_runtime/PASS2_VALIDATION_v3.0.md`. The runtime PASS2 file owns validation behavior and output-state consequences; this file owns endpoint names, parameter shapes, chain-quality thresholds, truncation detection, strike-count reduction mechanics, and persistence-boundary controls.
+This file documents the Pass 2 MCP and chain-fetch mechanics extracted from `llm_runtime/PASS2_VALIDATION_v4.0.md`. The runtime PASS2 file owns validation behavior and output-state consequences; this file owns endpoint names, parameter shapes, chain-quality thresholds, truncation detection, strike-count reduction mechanics, and persistence-boundary controls.
 
 ## Contents
 

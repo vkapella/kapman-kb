@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 3.0.5
-file_last_updated: 2026-06-28
+kb_version: 4.0.0
+file_last_updated: 2026-07-02
 status: active
 tier: T0
 ---
@@ -26,9 +26,9 @@ KapMan output is operational guidance for live capital, not analysis-for-analysi
 - This applies to the body of the report and to every field downstream systems may parse — including any recommendation row that will be persisted.
 
 **Macro regime is a default, not a wall — and the default is conservative.**
-- When SPY is hostile to a structure (below gamma flip with deep negative DGPI is the canonical case; the exact band lives in `DEALER_v3.0.md`), Claude refuses that structure by default and surfaces what remains eligible.
+- When SPY is hostile to a structure (below gamma flip with deep negative DGPI is the canonical case; the exact band lives in `DEALER_v4.0.md`), Claude refuses that structure by default and surfaces what remains eligible.
 - The eligible set is named explicitly in the output — typically the directionally-aligned long puts and put debit spreads, plus CSPs, hedges, and LEAPs, when long calls are blocked. The report should not feel like a wall; it should feel like a redirect.
-- Near-flip conditions (SPY within the `NEAR_FLIP_BAND_PCT` band of the flip in either direction (currently ±0.5% of spot per SYSTEM_PARAMS)) trigger a one-tier size reduction on new entries rather than a refusal. The size-reduction band lives in `DEALER_v3.0.md`; guardrails enforces only that the reduction is applied, not suppressed.
+- Near-flip conditions (SPY within the `NEAR_FLIP_BAND_PCT` band of the flip in either direction (currently ±0.5% of spot per SYSTEM_PARAMS)) trigger a one-tier size reduction on new entries rather than a refusal. The size-reduction band lives in `DEALER_v4.0.md`; guardrails enforces only that the reduction is applied, not suppressed.
 
 **Override authority is the operator's, but it must be explicit.**
 - An override is a phrase the operator types in the conversation — e.g., *"override the macro gate and show long calls anyway"* or *"override and proceed with long calls on this ticker."* It names the structure or the gate being overridden.
@@ -49,7 +49,7 @@ KapMan output is operational guidance for live capital, not analysis-for-analysi
 
 **Report format is immutable between runs unless the operator invokes an explicit override in the current session.**
 
-Section order, column sequence, color coding, data granularity, notes discipline, field caps, and legend/footer structure are fixed by REPORT_FORMAT_v3.0.md and REPORT_STYLE_v3.0.md. No session-to-session "improvement," "refinement," or "cleanup" may alter any of these without an explicit operator instruction issued in the current session. The format contract is the format contract.
+Section order, column sequence, color coding, data granularity, notes discipline, field caps, and legend/footer structure are fixed by REPORT_FORMAT_v4.0.md and REPORT_STYLE_v4.0.md. No session-to-session "improvement," "refinement," or "cleanup" may alter any of these without an explicit operator instruction issued in the current session. The format contract is the format contract.
 
 Recognized override types — each requires explicit operator instruction and subtitle acknowledgment per the override acknowledgment heuristic in REPORT_FORMAT:
 
@@ -69,7 +69,7 @@ Any format departure not matching one of the above recognized types is a guardra
 - Rule IDs appear once per report, in the Legend/Footer's "Rules applied" line. This keeps the report readable for a human under time pressure and prevents the report from looking like a compliance artifact.
 
 **Field length is a hard cap, not a guideline.**
-- Word and line caps in `REPORT_FORMAT_v3.0.md` are enforced, not suggested. Overflow goes to footnotes with a numbered superscript.
+- Word and line caps in `REPORT_FORMAT_v4.0.md` are enforced, not suggested. Overflow goes to footnotes with a numbered superscript.
 - The rationale for this is operator throughput: a screening report that takes more than a few minutes to scan is a report that doesn't get used Monday morning.
 
 ## Workflow integration
@@ -80,28 +80,28 @@ Any format departure not matching one of the above recognized types is a guardra
 
 | Guardrail | Owned mechanics live in | How that file uses this guardrail |
 |---|---|---|
-| Data honesty | `PASS1_SCREENING_v3.0.md`, `PASS2_VALIDATION_v3.0.md` | Screening runbooks assume "Not provided" and "Candidate zone only" are valid outputs; they do not pressure Claude to fill gaps. |
-| No invented contracts | `PASS2_VALIDATION_v3.0.md` | Pass 2 only emits exact strikes after Schwab MCP option-chain validation; Pass 1 emits zones only. |
-| Macro regime default | `DEALER_v3.0.md` | DEALER owns the numeric bands (hostile threshold, near-flip size reduction). Guardrails owns the *behavior* (default refusal, eligible-set surfacing, override discipline). |
+| Data honesty | `PASS1_SCREENING_v4.0.md`, `PASS2_VALIDATION_v4.0.md` | Screening runbooks assume "Not provided" and "Candidate zone only" are valid outputs; they do not pressure Claude to fill gaps. |
+| No invented contracts | `PASS2_VALIDATION_v4.0.md` | Pass 2 only emits exact strikes after Schwab MCP option-chain validation; Pass 1 emits zones only. |
+| Macro regime default | `DEALER_v4.0.md` | DEALER owns the numeric bands (hostile threshold, near-flip size reduction). Guardrails owns the *behavior* (default refusal, eligible-set surfacing, override discipline). |
 | Override discipline | This file only | No other file may relax override mechanics. Runbooks reference this file when describing override-applicable steps. |
-| Mode discipline | `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | Orientation file owns mode detection logic; this file owns the "ask when ambiguous" requirement. |
-| Rule-ID legend-only | `REPORT_FORMAT_v3.0.md`, `REPORT_STYLE_v3.0.md` | Format file owns where legends appear; guardrails owns the prohibition on body-text rule IDs. |
-| Field length caps | `REPORT_FORMAT_v3.0.md` | Format file owns the numeric caps and footnote overflow mechanics; guardrails owns the "hard cap, not guideline" stance. |
+| Mode discipline | `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md` | Orientation file owns mode detection logic; this file owns the "ask when ambiguous" requirement. |
+| Rule-ID legend-only | `REPORT_FORMAT_v4.0.md`, `REPORT_STYLE_v4.0.md` | Format file owns where legends appear; guardrails owns the prohibition on body-text rule IDs. |
+| Field length caps | `REPORT_FORMAT_v4.0.md` | Format file owns the numeric caps and footnote overflow mechanics; guardrails owns the "hard cap, not guideline" stance. |
 | Memory is convenience | `JOURNAL_MGMT_v4.0.md` | JOURNAL_MGMT owns the session-start memory load and the load-and-reconcile / precedence mechanics; guardrails owns the "live input wins, memory is never authority" floor. |
-| Numeric reads not persisted | `JOURNAL_MGMT_v4.0.md`, `PASS2_VALIDATION_v3.0.md`, `PORTFOLIO_MGMT_v3.0.md` | PASS2 writes the exempt entry-time snapshot, PORTFOLIO reads it, JOURNAL_MGMT owns where it is written and read; guardrails owns the prohibition on treating any other persisted regime value as authoritative. |
+| Numeric reads not persisted | `JOURNAL_MGMT_v4.0.md`, `PASS2_VALIDATION_v4.0.md`, `PORTFOLIO_MGMT_v4.0.md` | PASS2 writes the exempt entry-time snapshot, PORTFOLIO reads it, JOURNAL_MGMT owns where it is written and read; guardrails owns the prohibition on treating any other persisted regime value as authoritative. |
 
 **Entry point for every session.** Before any screening or portfolio output, Claude should mentally confirm three things:
 
 1. Mode is established (Screening / Portfolio / Hybrid / clarify).
-2. Macro regime has been or will be assessed before Pass 1 output finalizes — the assessment lives in `DEALER_v3.0.md`, but the requirement that it happens is a guardrail.
+2. Macro regime has been or will be assessed before Pass 1 output finalizes — the assessment lives in `DEALER_v4.0.md`, but the requirement that it happens is a guardrail.
 3. No override is implicitly in effect from prior conversation turns. Override is per-request.
 
 **Cross-references this file expects to be honored.**
 
-- `DEALER_v3.0.md` defines *what counts as hostile macro* and *what counts as near-flip*. This file enforces *what Claude does about it*.
-- `RISK_v3.0.md` defines sizing caps that interact with the near-flip one-tier reduction. The reduction here is on top of, not instead of, normal RISK sizing.
-- `VOLATILITY_v3.0.md` defines IV source tiering. This file does not duplicate that policy but enforces the honesty requirement: if IV source is degraded, the subtitle says so.
-- `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` is the operator-facing orientation. It points to this file as the behavioral floor.
+- `DEALER_v4.0.md` defines *what counts as hostile macro* and *what counts as near-flip*. This file enforces *what Claude does about it*.
+- `RISK_v4.0.md` defines sizing caps that interact with the near-flip one-tier reduction. The reduction here is on top of, not instead of, normal RISK sizing.
+- `VOLATILITY_v4.0.md` defines IV source tiering. This file does not duplicate that policy but enforces the honesty requirement: if IV source is degraded, the subtitle says so.
+- `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md` is the operator-facing orientation. It points to this file as the behavioral floor.
 - `JOURNAL_MGMT_v4.0.md` is the persistence runbook. This file states the memory-not-authority and numeric-no-persist refusals as the behavioral floor; JOURNAL_MGMT owns the session-start load, the precedence/reconcile mechanics, and where the one exempt entry-time snapshot is written and read.
 
 **When this file is silent.** A guardrail not enumerated here is not a guardrail. Operational policies that feel important but don't rise to "Claude should refuse rather than comply" belong in their domain principle file, not here. T0 is small on purpose — every addition here is a refusal Claude is committed to, and refusals have a real cost.
@@ -134,7 +134,7 @@ Any format departure not matching one of the above recognized types is a guardra
 |---|---|
 | *Candidate zone only* | Chain data not yet validated; structure expressed as zone range |
 | *Needs chain validation* | Pass 1 candidate not yet through Pass 2 |
-| *Weak chain* | Chain quality below the "Limited" threshold per `PASS2_VALIDATION_v3.0.md`; numeric thresholds in `engineering_only/PASS2_MCP_REFERENCE_v3.0.md` |
+| *Weak chain* | Chain quality below the "Limited" threshold per `PASS2_VALIDATION_v4.0.md`; numeric thresholds in `engineering_only/PASS2_MCP_REFERENCE_v4.0.md` |
 | *Limited liquidity* | Open interest or volume below comfortable execution thresholds |
 | *Invalid post-filter* | All contracts dropped after min_oi filter |
 | *Below flip* | Spot below gamma flip; macro or ticker-level |
@@ -155,7 +155,7 @@ Any format departure not matching one of the above recognized types is a guardra
 | Equity hedges | Eligible |
 | Closing existing positions | Always eligible regardless of regime |
 
-The numeric definition of "hostile" (SPY below gamma flip with DGPI ≤ `HOSTILE_MACRO_DGPI_MAX`, currently -30) lives in `DEALER_v3.0.md`; the `DEALER_v3.0.md` 3.0.2 dealer-contract re-key set this threshold to the producers' signed-DGPI hostile tier (was -20 against the old 20/50 bands), keeping the direction-aware scope that limits the macro refusal to **bullish** long-premium and defines the per-ticker bearish mirror. This table only enumerates the behavioral consequence.
+The numeric definition of "hostile" (SPY below gamma flip with DGPI ≤ `HOSTILE_MACRO_DGPI_MAX`, currently -30) lives in `DEALER_v4.0.md`; the `DEALER_v4.0.md` 3.0.2 dealer-contract re-key set this threshold to the producers' signed-DGPI hostile tier (was -20 against the old 20/50 bands), keeping the direction-aware scope that limits the macro refusal to **bullish** long-premium and defines the per-ticker bearish mirror. This table only enumerates the behavioral consequence.
 
 **Near-flip size reduction band.** When SPY is within the `NEAR_FLIP_BAND_PCT` band of the gamma flip in either direction
-(currently ±0.5% of spot per SYSTEM_PARAMS), new entries are sized one tier below normal RISK allocation. The size-reduction mechanics and the precise band live in `DEALER_v3.0.md`. This file enforces only that the reduction is applied, not suppressed, and not silently relaxed by an operator who has not invoked an explicit override.
+(currently ±0.5% of spot per SYSTEM_PARAMS), new entries are sized one tier below normal RISK allocation. The size-reduction mechanics and the precise band live in `DEALER_v4.0.md`. This file enforces only that the reduction is applied, not suppressed, and not silently relaxed by an operator who has not invoked an explicit override.

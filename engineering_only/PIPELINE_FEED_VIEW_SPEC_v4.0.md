@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.2
+kb_version: 4.0.0
 file_last_updated: 2026-07-02
 status: active
 tier: —
@@ -19,8 +19,8 @@ that closes the self-contained loop.
 
 It is engineering coordination between `kapman-polygon-viewer` (the producer of
 the handoff) and `kapman-kb` (the consumer). It is **not** a runtime principle:
-the source-authority rules live in `llm_runtime/VOLATILITY_v3.0.md`, and the §A1
-ingest contract lives in `llm_runtime/PASS1_SCREENING_v3.0.md`. This file names
+the source-authority rules live in `llm_runtime/VOLATILITY_v4.0.md`, and the §A1
+ingest contract lives in `llm_runtime/PASS1_SCREENING_v4.0.md`. This file names
 *which columns the viewer exports for which strategy* and *what the §A1 map must
 change to consume the new IV/HV fields* — the mechanical detail, not the
 judgment.
@@ -54,7 +54,7 @@ fetch and no second source.
 
 `iv_hv_status` reports mechanical availability only — the FULL/LIMITED/INVALID
 volatility-status the runtime weights is **derived by the KB** from this status +
-freshness, per VOLATILITY_v3.0 ("Volatility-status is derived by the runtime").
+freshness, per VOLATILITY_v4.0 ("Volatility-status is derived by the runtime").
 `atm_iv_source` is available in the scan but not surfaced as a column; the
 `ATM_FALLBACK_BAND` status already flags the band-average fallback.
 
@@ -90,7 +90,7 @@ up ladder + spring). The CSP view is bullish-to-neutral: it carries the bull
 surface and the spring but sorts by IV/HV richness because the operator sells
 premium where implied leads realized.
 
-## §A1 ingest-map reconciliation (LANDED — `PASS1_SCREENING_v3.0.md` 3.0.12)
+## §A1 ingest-map reconciliation (LANDED — `PASS1_SCREENING_v4.0.md` 3.0.12)
 
 The viewer export (`A1_FIELDS`) carries the canonical IV/HV, and the KB §A1 ingest
 map now consumes it from the handoff rather than reaching to the Polygon MCP live:
@@ -133,7 +133,7 @@ CSP export they are the row's long-premium read). The envelope adds
 `screen_version`, `screen_thresholds` (echoed from `/api/catalog`, single source of
 truth = the viewer module), and `macro_context` (as_of, market_open, the full SPY
 MarketSignal from the header market-context). The §A1 ingest-map addition landed in
-`PASS1_SCREENING_v3.0.md` 3.0.13 — the KB consumes the disposition and verifies
+`PASS1_SCREENING_v4.0.md` 3.0.13 — the KB consumes the disposition and verifies
 rather than re-derives; Step-0 earnings, the macro gate, and flagged/estimation
 resolution stay KB-side.
 
@@ -156,11 +156,11 @@ resolution stay KB-side.
   earnings field — dispositions are pre-event-screen), macro gate (envelope-only),
   IV-rank mandate arm (producer emits no IV rank), SOW-*recency* (the screen
   implements the code-detectable **absence** half; staleness stays a run-level
-  freshness judgment — **kb#85 decided not to parameterize it**, see WYCKOFF_v3.0
+  freshness judgment — **kb#85 decided not to parameterize it**, see WYCKOFF_v4.0
   3.0.10), CSP screen.
 
 **Drift discipline:** the viewer's `test_pass1_screen.py::KbParityTests` parses
-`SYSTEM_PARAMS_v3.0.md` from the sibling checkout (τ_high / τ_low /
+`SYSTEM_PARAMS_v4.0.md` from the sibling checkout (τ_high / τ_low /
 IV_HV_ELEVATED_THRESHOLD / DGPI_STRONG_BAND / DGPI_NEUTRAL_BAND) and
 `KbDriftTests` anchors the same numbers in the viewer docs — a SYSTEM_PARAMS
 recalibration trips viewer `pytest`. Semantic changes (veto tables, force-flag
@@ -183,17 +183,17 @@ options cache (viewer change) or treat frozen screen fields as options-off reads
 | Surface ATM IV / IV-HV / status as grid columns | viewer | **Landed** |
 | Four `Export - …` pipeline-feed presets | viewer | **Landed** |
 | Carry the canonical IV/HV + full dealer/Wyckoff in the §A1 export | viewer (`A1_FIELDS`) | **Landed** |
-| §A1 ingest map consumes `atm_iv` / `iv_hv_ratio` / `iv_hv_status` from the handoff | KB (`PASS1_SCREENING_v3.0.md` 3.0.12) | **Landed** |
+| §A1 ingest map consumes `atm_iv` / `iv_hv_ratio` / `iv_hv_status` from the handoff | KB (`PASS1_SCREENING_v4.0.md` 3.0.12) | **Landed** |
 | Deterministic Pass-1 screen columns + envelope (`screen_version` / `screen_thresholds` / `macro_context`) | viewer (#53, `pass1_screen.py` 1.0) | **Landed** (8f83693..52aa887) |
 | §A1 ingest map consumes `screen_*`; FLAGGED→WAIT pin; phase-C predicate pin; near-flip prose fix | KB (#84; PASS1 3.0.13, SIGNAL 3.0.8) | **Landed** (this change) |
 | SOW-recency window parameter (operator calibration) | KB (#85) | **Decided — not parameterized** (staleness stays a run-level judgment; WYCKOFF 3.0.10) |
 
 ## Related
 
-- `llm_runtime/VOLATILITY_v3.0.md` — IV source-authority; the producer's `atm_iv` /
+- `llm_runtime/VOLATILITY_v4.0.md` — IV source-authority; the producer's `atm_iv` /
   `iv_hv_ratio` and the derived FULL/LIMITED/INVALID volatility-status.
-- `llm_runtime/PASS1_SCREENING_v3.0.md` — the §A1 ingest map this spec reconciles.
-- `engineering_only/VOLATILITY_MCP_REFERENCE_v3.0.md` — producer tool-surface
+- `llm_runtime/PASS1_SCREENING_v4.0.md` — the §A1 ingest map this spec reconciles.
+- `engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md` — producer tool-surface
   mechanics (formulas, windows, thresholds).
 - `kapman-polygon-viewer/docs/pipeline-feed-views.md` — the viewer-side story and
   acceptance criteria.

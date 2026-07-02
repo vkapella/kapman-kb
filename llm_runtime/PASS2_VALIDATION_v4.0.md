@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.6
-file_last_updated: 2026-06-28
+kb_version: 4.0.0
+file_last_updated: 2026-07-02
 status: active
 tier: T2
 ---
@@ -47,11 +47,11 @@ For each eligible candidate, Pass 2 fetches the Schwab option chain constrained 
 
 **When a chain fetch appears truncated, reduce and re-fetch before classifying — never treat a truncated chain as complete.**
 
-A chain fetch result that shows fewer contracts than expected for the zone and DTE band, missing far strikes within the zone, or incomplete expiration coverage within the DTE band is a truncation signal per PIPELINE_012. When truncation is suspected, Pass 2 reduces the strike count parameter and re-fetches, or splits the fetch by targeted expiration, before classifying chain quality or selecting strikes. A chain that has not been confirmed complete cannot be classified Full. If the re-fetch resolves the truncation, classification proceeds on the complete result. If the re-fetch does not resolve it, the chain is classified at its actual quality level with the truncation noted, and the output for the affected candidate is Flagged rather than Validated. The numeric strike-count parameters and the re-fetch mechanics belong in `engineering_only/PASS2_MCP_REFERENCE_v3.0.md`; the behavioral contract — never treat a truncated chain as complete — is this file's to own.
+A chain fetch result that shows fewer contracts than expected for the zone and DTE band, missing far strikes within the zone, or incomplete expiration coverage within the DTE band is a truncation signal per PIPELINE_012. When truncation is suspected, Pass 2 reduces the strike count parameter and re-fetches, or splits the fetch by targeted expiration, before classifying chain quality or selecting strikes. A chain that has not been confirmed complete cannot be classified Full. If the re-fetch resolves the truncation, classification proceeds on the complete result. If the re-fetch does not resolve it, the chain is classified at its actual quality level with the truncation noted, and the output for the affected candidate is Flagged rather than Validated. The numeric strike-count parameters and the re-fetch mechanics belong in `engineering_only/PASS2_MCP_REFERENCE_v4.0.md`; the behavioral contract — never treat a truncated chain as complete — is this file's to own.
 
 **Chain quality classification is Pass 2's data-quality gate, independent of dealer confidence.**
 
-Every chain fetch produces a chain quality classification: Full, Limited, or Weak. This classification is independent of the dealer `confidence` (`high` / `medium` / `low` / `invalid`) that the fresh dealer fetch produces. Both dimensions apply simultaneously. Chain quality thresholds (contract count floors, bid/ask spread limits, OI floors per contract) are MCP-internal parameters that belong in `engineering_only/PASS2_MCP_REFERENCE_v3.0.md`. The runtime classification vocabulary — Full, Limited, Weak — and the behavioral consequence for each combination with dealer confidence are this file's to own. The combination matrix is in the Appendix.
+Every chain fetch produces a chain quality classification: Full, Limited, or Weak. This classification is independent of the dealer `confidence` (`high` / `medium` / `low` / `invalid`) that the fresh dealer fetch produces. Both dimensions apply simultaneously. Chain quality thresholds (contract count floors, bid/ask spread limits, OI floors per contract) are MCP-internal parameters that belong in `engineering_only/PASS2_MCP_REFERENCE_v4.0.md`. The runtime classification vocabulary — Full, Limited, Weak — and the behavioral consequence for each combination with dealer confidence are this file's to own. The combination matrix is in the Appendix.
 
 **The spread-mandate is resolved definitively at Pass 2 — three outcomes, no others.**
 
@@ -99,55 +99,55 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 
 | Source file | What PASS2 consumes | How PASS2 uses it |
 |---|---|---|
-| `PASS1_SCREENING_v3.0.md` (T2) | Per-candidate eligible-set output: structure, direction, candidate zones, DTE band, Pass 1 IV source label, sizing band note, confidence value | Entry contract for every Pass 2 run; PASS2 does not re-derive any of these |
-| `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Anti-hallucination floor; data-quality vocabulary; override discipline | PASS2 enforces the floor on every output; exact strikes and expirations appear only from validated chain; data-quality labels applied throughout |
-| `DEALER_v3.0.md` (T1) | Fresh dealer `confidence` (`high` / `medium` / `low` / `invalid`); call/put wall levels; signed DGPI tier; near-flip flag (`position_vs_flip` `at_flip`) | Re-fetched fresh at Pass 2 start; wall levels inform strike selection; dealer `confidence` combined with chain quality for output-state determination |
-| `VOLATILITY_v3.0.md` (T1) | Pass 2 IV/HV (the Polygon producer's `iv_hv_ratio`, re-fetched fresh); IV/HV band; IV rank tier; volatility-status label; source-authority discipline | Spread-mandate resolution: IV/HV band and IV rank tier determine confirmed / overridden / fire-by-default outcome |
-| `SIGNAL_v3.0.md` (T1) | Spread-mandate contract (heuristic 3); anti-hallucination floor (heuristic 10); alternative-confidence ordering (heuristic 8) | PASS2 enforces the spread-mandate's three-outcome resolution; honors anti-hallucination floor on truncated chains; orders validated-set summary by descending confidence |
-| `WYCKOFF_v3.0.md` (T1) | Operator-confirmed phase and event readings; structural levels from confirmed phase | Structural levels inform strike selection anchoring within the candidate zone |
-| `RISK_v3.0.md` (T1) | Sizing band ladder; chain-quality sizing step-down discipline | PASS2 inherits Pass 1 sizing band note and may step down based on Pass 2 chain quality; step-down direction and magnitude follow RISK's band ladder |
-| `SYSTEM_PARAMS_v3.0.md` (T3) | `SWING_DTE_BAND`, `CSP_DTE_BAND`, `LEAP_DTE_BAND`, `IV_HV_ELEVATED_THRESHOLD`, `IV_RANK_EXTREME_FLOOR` | DTE band values govern expiration selection scope; IV threshold values govern spread-mandate resolution |
+| `PASS1_SCREENING_v4.0.md` (T2) | Per-candidate eligible-set output: structure, direction, candidate zones, DTE band, Pass 1 IV source label, sizing band note, confidence value | Entry contract for every Pass 2 run; PASS2 does not re-derive any of these |
+| `KAPMAN_GUARDRAILS_v4.0.md` (T0) | Anti-hallucination floor; data-quality vocabulary; override discipline | PASS2 enforces the floor on every output; exact strikes and expirations appear only from validated chain; data-quality labels applied throughout |
+| `DEALER_v4.0.md` (T1) | Fresh dealer `confidence` (`high` / `medium` / `low` / `invalid`); call/put wall levels; signed DGPI tier; near-flip flag (`position_vs_flip` `at_flip`) | Re-fetched fresh at Pass 2 start; wall levels inform strike selection; dealer `confidence` combined with chain quality for output-state determination |
+| `VOLATILITY_v4.0.md` (T1) | Pass 2 IV/HV (the Polygon producer's `iv_hv_ratio`, re-fetched fresh); IV/HV band; IV rank tier; volatility-status label; source-authority discipline | Spread-mandate resolution: IV/HV band and IV rank tier determine confirmed / overridden / fire-by-default outcome |
+| `SIGNAL_v4.0.md` (T1) | Spread-mandate contract (heuristic 3); anti-hallucination floor (heuristic 10); alternative-confidence ordering (heuristic 8) | PASS2 enforces the spread-mandate's three-outcome resolution; honors anti-hallucination floor on truncated chains; orders validated-set summary by descending confidence |
+| `WYCKOFF_v4.0.md` (T1) | Operator-confirmed phase and event readings; structural levels from confirmed phase | Structural levels inform strike selection anchoring within the candidate zone |
+| `RISK_v4.0.md` (T1) | Sizing band ladder; chain-quality sizing step-down discipline | PASS2 inherits Pass 1 sizing band note and may step down based on Pass 2 chain quality; step-down direction and magnitude follow RISK's band ladder |
+| `SYSTEM_PARAMS_v4.0.md` (T3) | `SWING_DTE_BAND`, `CSP_DTE_BAND`, `LEAP_DTE_BAND`, `IV_HV_ELEVATED_THRESHOLD`, `IV_RANK_EXTREME_FLOOR` | DTE band values govern expiration selection scope; IV threshold values govern spread-mandate resolution |
 
 **What PASS2 delivers to each downstream file.**
 
 | Destination file | What PASS2 delivers | How that file uses it |
 |---|---|---|
-| `PORTFOLIO_MGMT_v3.0.md` (T2) | Validated trade specifications: exact strike, exact expiration, structure, direction, entry price range, sizing band, chain quality label, dealer `confidence` rating, entry-time regime snapshot | PORTFOLIO_MGMT carries the validated specification and regime snapshot in position context for monitoring and exit-trigger evaluation |
-| `REPORT_FORMAT_v3.0.md` (T3) | Full Pass 2 output: Validated / Flagged / Rejected per candidate with named reasons; chain quality label; dealer `confidence` rating; spread-mandate resolution outcome; entry price range; sizing band | REPORT_FORMAT renders the Pass 2 section of the screening report; PASS2 does not own report rendering |
-| `REPORT_STYLE_v3.0.md` (T3) | (Indirectly) the Pass 2 output surface | REPORT_STYLE governs field length caps and label vocabulary; PASS2 respects these constraints in the rationale text it assembles |
+| `PORTFOLIO_MGMT_v4.0.md` (T2) | Validated trade specifications: exact strike, exact expiration, structure, direction, entry price range, sizing band, chain quality label, dealer `confidence` rating, entry-time regime snapshot | PORTFOLIO_MGMT carries the validated specification and regime snapshot in position context for monitoring and exit-trigger evaluation |
+| `REPORT_FORMAT_v4.0.md` (T3) | Full Pass 2 output: Validated / Flagged / Rejected per candidate with named reasons; chain quality label; dealer `confidence` rating; spread-mandate resolution outcome; entry price range; sizing band | REPORT_FORMAT renders the Pass 2 section of the screening report; PASS2 does not own report rendering |
+| `REPORT_STYLE_v4.0.md` (T3) | (Indirectly) the Pass 2 output surface | REPORT_STYLE governs field length caps and label vocabulary; PASS2 respects these constraints in the rationale text it assembles |
 
 **What PASS2 does not own.**
 
 | Concern | Owner |
 |---|---|
-| Trigger contracts and firing conditions | `SIGNAL_v3.0.md` |
-| Phase and event vocabulary | `WYCKOFF_v3.0.md` |
-| Dealer regime tier vocabulary | `DEALER_v3.0.md` |
-| IV/HV band vocabulary and source-authority rules | `VOLATILITY_v3.0.md` |
-| Sizing band ladder | `RISK_v3.0.md` |
-| Override discipline | `KAPMAN_GUARDRAILS_v3.0.md` |
-| Eligible-set determination | `PASS1_SCREENING_v3.0.md` |
-| Report rendering | `REPORT_FORMAT_v3.0.md` |
-| Position monitoring and portfolio management | `PORTFOLIO_MGMT_v3.0.md` |
-| Operator-configurable parameter values | `SYSTEM_PARAMS_v3.0.md` |
-| MCP endpoint names, parameter shapes, chain-quality numeric thresholds, chain truncation detection heuristics | `engineering_only/PASS2_MCP_REFERENCE_v3.0.md` (forthcoming) |
+| Trigger contracts and firing conditions | `SIGNAL_v4.0.md` |
+| Phase and event vocabulary | `WYCKOFF_v4.0.md` |
+| Dealer regime tier vocabulary | `DEALER_v4.0.md` |
+| IV/HV band vocabulary and source-authority rules | `VOLATILITY_v4.0.md` |
+| Sizing band ladder | `RISK_v4.0.md` |
+| Override discipline | `KAPMAN_GUARDRAILS_v4.0.md` |
+| Eligible-set determination | `PASS1_SCREENING_v4.0.md` |
+| Report rendering | `REPORT_FORMAT_v4.0.md` |
+| Position monitoring and portfolio management | `PORTFOLIO_MGMT_v4.0.md` |
+| Operator-configurable parameter values | `SYSTEM_PARAMS_v4.0.md` |
+| MCP endpoint names, parameter shapes, chain-quality numeric thresholds, chain truncation detection heuristics | `engineering_only/PASS2_MCP_REFERENCE_v4.0.md` (forthcoming) |
 
 **Cross-references this file expects to be honored.**
 
-- `SIGNAL_v3.0.md` owns the spread-mandate contract that PASS2 enforces. When SIGNAL and PASS2 appear to specify different spread-mandate outcomes, SIGNAL governs.
-- `VOLATILITY_v3.0.md` owns the IV source-authority rules. PASS2's re-fetch of the Polygon producer for the Pass 2 re-confirm is an application of VOLATILITY's source-authority discipline, not an independent PASS2 decision.
-- `KAPMAN_GUARDRAILS_v3.0.md` owns the anti-hallucination floor and override discipline. Neither may be relaxed by PASS2 heuristics, even implicitly.
-- `RISK_v3.0.md` owns the sizing band ladder. PASS2 applies chain-quality sizing step-downs per RISK's ladder; it does not define its own step-down magnitudes.
-- `engineering_only/PASS2_MCP_REFERENCE_v3.0.md` (forthcoming) owns the specific MCP tool-surface contracts for Pass 2 data fetching — endpoint names, chain-quality numeric thresholds, truncation detection heuristics, and strike-count reduction parameters. PASS2 is silent on all of these; operators and engineers consult the engineering-only reference for tool-surface details.
+- `SIGNAL_v4.0.md` owns the spread-mandate contract that PASS2 enforces. When SIGNAL and PASS2 appear to specify different spread-mandate outcomes, SIGNAL governs.
+- `VOLATILITY_v4.0.md` owns the IV source-authority rules. PASS2's re-fetch of the Polygon producer for the Pass 2 re-confirm is an application of VOLATILITY's source-authority discipline, not an independent PASS2 decision.
+- `KAPMAN_GUARDRAILS_v4.0.md` owns the anti-hallucination floor and override discipline. Neither may be relaxed by PASS2 heuristics, even implicitly.
+- `RISK_v4.0.md` owns the sizing band ladder. PASS2 applies chain-quality sizing step-downs per RISK's ladder; it does not define its own step-down magnitudes.
+- `engineering_only/PASS2_MCP_REFERENCE_v4.0.md` (forthcoming) owns the specific MCP tool-surface contracts for Pass 2 data fetching — endpoint names, chain-quality numeric thresholds, truncation detection heuristics, and strike-count reduction parameters. PASS2 is silent on all of these; operators and engineers consult the engineering-only reference for tool-surface details.
 - `JOURNAL_MGMT_v4.0.md` owns where and how the entry-time snapshot Pass 2 captures at validation is written to `positions.md` (path, schema, write-once overwrite). PASS2 owns only the trigger (validation of a new entry) and the captured field set; it does not define the journal's write model.
 
 ## Legacy anchors (for legend citations and back-compat)
 
-**PIPELINE_012** → § Operational heuristics, "When a chain fetch appears truncated, reduce and re-fetch before classifying — never treat a truncated chain as complete." The v2.3 anchor identified MCP result-size truncation as a failure mode specific to large option chains: when the Schwab chain fetch returns fewer contracts than expected for the requested zone and DTE band, the workaround is to reduce the `strike_count` parameter and re-fetch, or to split the fetch by targeted expiration rather than fetching the full zone in one call. The runtime behavioral contract — never classify a chain as Full when truncation has not been ruled out — is owned by this file's Operational heuristics. The numeric `strike_count` reduction parameters, the targeted-expiry split mechanics, and the truncation detection heuristics belong in `engineering_only/PASS2_MCP_REFERENCE_v3.0.md` (forthcoming). Body-text references in legacy report legends (e.g., "Rules applied: PIPELINE_012") remain valid; the legend entry resolves to this file's truncation heuristic for the runtime behavioral contract and to the engineering-only reference for the mechanical workaround.
+**PIPELINE_012** → § Operational heuristics, "When a chain fetch appears truncated, reduce and re-fetch before classifying — never treat a truncated chain as complete." The v2.3 anchor identified MCP result-size truncation as a failure mode specific to large option chains: when the Schwab chain fetch returns fewer contracts than expected for the requested zone and DTE band, the workaround is to reduce the `strike_count` parameter and re-fetch, or to split the fetch by targeted expiration rather than fetching the full zone in one call. The runtime behavioral contract — never classify a chain as Full when truncation has not been ruled out — is owned by this file's Operational heuristics. The numeric `strike_count` reduction parameters, the targeted-expiry split mechanics, and the truncation detection heuristics belong in `engineering_only/PASS2_MCP_REFERENCE_v4.0.md` (forthcoming). Body-text references in legacy report legends (e.g., "Rules applied: PIPELINE_012") remain valid; the legend entry resolves to this file's truncation heuristic for the runtime behavioral contract and to the engineering-only reference for the mechanical workaround.
 
-**VALIDATION_001 (PASS2 residue)** → § Principle, "The anti-hallucination floor does not lift at Pass 2; it narrows." The v2.3 anchor was a system-prompt instruction at the model-control layer forbidding model-generated strike and expiration assumptions. The primary v3.0 destination is `KAPMAN_GUARDRAILS_v3.0.md` (owned there as the standing anti-hallucination floor). The PASS2-specific residue is the narrowing rule: the floor lifts only to the extent that the Schwab chain has been validated and is not truncated. A validated Full chain permits exact strike and expiration output; a truncated or Weak chain reverts output to candidate zones with a named data-quality label. The persistence-layer enforcement (VALIDATION_007: hardcoded null assignment for option_strike and option_expiration in C4 recommendation rows) is a tool-surface-internal control with no LLM runtime effect and belongs in `engineering_only/PASS2_MCP_REFERENCE_v3.0.md`.
+**VALIDATION_001 (PASS2 residue)** → § Principle, "The anti-hallucination floor does not lift at Pass 2; it narrows." The v2.3 anchor was a system-prompt instruction at the model-control layer forbidding model-generated strike and expiration assumptions. The primary v3.0 destination is `KAPMAN_GUARDRAILS_v4.0.md` (owned there as the standing anti-hallucination floor). The PASS2-specific residue is the narrowing rule: the floor lifts only to the extent that the Schwab chain has been validated and is not truncated. A validated Full chain permits exact strike and expiration output; a truncated or Weak chain reverts output to candidate zones with a named data-quality label. The persistence-layer enforcement (VALIDATION_007: hardcoded null assignment for option_strike and option_expiration in C4 recommendation rows) is a tool-surface-internal control with no LLM runtime effect and belongs in `engineering_only/PASS2_MCP_REFERENCE_v4.0.md`.
 
-**PIPELINE_011 (mis-filing note)** → This anchor does not belong in PASS2. The PASS2 scaffold contained a PIPELINE_011 placeholder; that placeholder was a mis-filing. PIPELINE_011 (context compaction guard — numeric regime reads do not carry forward as authoritative from Pass 1 into Pass 2) was resolved in session 7 into `PASS1_SCREENING_v3.0.md`'s Operational heuristics and Legacy anchors. PASS2 enforces the re-fetch requirement that PIPELINE_011 motivates, but it does not own the anchor. See `PASS1_SCREENING_v3.0.md` for the authoritative PIPELINE_011 destination.
+**PIPELINE_011 (mis-filing note)** → This anchor does not belong in PASS2. The PASS2 scaffold contained a PIPELINE_011 placeholder; that placeholder was a mis-filing. PIPELINE_011 (context compaction guard — numeric regime reads do not carry forward as authoritative from Pass 1 into Pass 2) was resolved in session 7 into `PASS1_SCREENING_v4.0.md`'s Operational heuristics and Legacy anchors. PASS2 enforces the re-fetch requirement that PIPELINE_011 motivates, but it does not own the anchor. See `PASS1_SCREENING_v4.0.md` for the authoritative PIPELINE_011 destination.
 
 ## Appendix — formulas and reference tables
 

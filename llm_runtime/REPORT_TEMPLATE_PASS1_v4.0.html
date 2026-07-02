@@ -7,11 +7,11 @@
 <style>
 /* ═══════════════════════════════════════════════════════════════════
    KAPMAN PASS 1 REPORT — CANONICAL TEMPLATE
-   Style: REPORT_STYLE_v3.0.3 reference CSS block (verbatim)
-   Format: REPORT_FORMAT_v3.0.8
+   Style: REPORT_STYLE_v4.0.0 reference CSS block (verbatim)
+   Format: REPORT_FORMAT_v4.0.0
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ── Reference CSS (REPORT_STYLE_v3.0.3) — do not modify ─────────── */
+/* ── Reference CSS (REPORT_STYLE_v4.0.0) — do not modify ─────────── */
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:Arial,sans-serif;font-size:7pt;color:#111;background:#fff;padding:10px 12px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 h1{font-size:10.5pt;font-weight:bold;text-align:center;letter-spacing:.5px;margin-bottom:3px;}
@@ -206,7 +206,7 @@ th.action-col, th.col-type, th.rationale-col{text-align:left;}
      SCREENING TABLE
      One table. Exactly 12 columns. Column order is spec-locked.
      NO_TRADE and WAIT are rows inside this table — not separate tables.
-     Column order (REPORT_FORMAT_v3.0.8 Appendix):
+     Column order (REPORT_FORMAT_v4.0.0 Appendix):
        1 Ticker · 2 Type · 3 Action · 4 Wyckoff Phase · 5 DGPI ·
        6 Strike · 7 Exp · 8 Entry · 9 Exit · 10 Scale ·
        11 Confidence · 12 Rationale
@@ -245,7 +245,7 @@ th.action-col, th.col-type, th.rationale-col{text-align:left;}
          ☐ Rationale cells ≤20 words; overflow → numbered footnote
          ☐ NO_TRADE row: Type=NONE, Action=NO_TRADE, cols 4–11 = "—"
          ☐ WAIT row:     Type=NONE, Action=WAIT,     cols 4–11 = "—"
-         Authority: REPORT_FORMAT_v3.0.md § Appendix
+         Authority: REPORT_FORMAT_v4.0.md § Appendix
          ───────────────────────────────────────────────────────────── -->
     <!-- ═════════════════════════════════════════════════════════════
          TEMPLATE BODY — ships empty.
@@ -352,7 +352,7 @@ th.action-col, th.col-type, th.rationale-col{text-align:left;}
      ☐ Subsection 6 (Recheck trigger) always present
      ☐ Aggregate word cap per block: 145w; overflow → footnote
      ☐ Block order matches screening-table candidate order
-     Authority: REPORT_FORMAT_v3.0.md § Alternatives Summary
+     Authority: REPORT_FORMAT_v4.0.md § Alternatives Summary
      ───────────────────────────────────────────────────────────── -->
 
 <!-- ═════════════════════════════════════════════════════════════════
@@ -460,8 +460,8 @@ th.action-col, th.col-type, th.rationale-col{text-align:left;}
        Volatility 25w · Exit 60w · Alternatives 30w · Caveats 20w)
      ☐ Alternatives subsection omitted entirely when absent
      ☐ Caveats subsection omitted entirely when nothing to flag
-     Authority: REPORT_FORMAT_v3.0.md § Alternatives Summary +
-                REPORT_FORMAT_v3.0.md § Appendix per-ticker
+     Authority: REPORT_FORMAT_v4.0.md § Alternatives Summary +
+                REPORT_FORMAT_v4.0.md § Appendix per-ticker
      ───────────────────────────────────────────────────────────── -->
 
 <!-- ═════════════════════════════════════════════════════════════════
@@ -515,7 +515,7 @@ th.action-col, th.col-type, th.rationale-col{text-align:left;}
 
 <!-- ═══════════════════════════════════════════════════════════════════
      LEGEND / FOOTER
-     Five elements in spec order (REPORT_FORMAT_v3.0.8 Appendix).
+     Five elements in spec order (REPORT_FORMAT_v4.0.0 Appendix).
      .footnote subsection sits inside .legend with dashed top border.
      Session metadata is always the final element.
      ═══════════════════════════════════════════════════════════════════ -->

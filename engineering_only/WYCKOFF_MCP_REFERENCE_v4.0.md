@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.0-alpha
-file_last_updated: 2026-05-13
+kb_version: 4.0.0-alpha
+file_last_updated: 2026-07-02
 status: draft
 tier: —
 ---
@@ -11,7 +11,7 @@ tier: —
 
 ## Purpose
 
-This file documents Wyckoff MCP detection and chart-rendering mechanics extracted from `llm_runtime/WYCKOFF_v3.0.md`. The runtime WYCKOFF file owns the propose-confirm protocol, phase vocabulary, and qualitative event-reading behavior; this file owns bar-count thresholds, disabled config defaults, event detection thresholds, sequence formulas, and event-score payload mechanics.
+This file documents Wyckoff MCP detection and chart-rendering mechanics extracted from `llm_runtime/WYCKOFF_v4.0.md`. The runtime WYCKOFF file owns the propose-confirm protocol, phase vocabulary, and qualitative event-reading behavior; this file owns bar-count thresholds, disabled config defaults, event detection thresholds, sequence formulas, and event-score payload mechanics.
 
 ## Contents
 
@@ -55,10 +55,10 @@ This file documents Wyckoff MCP detection and chart-rendering mechanics extracte
 ## Legacy anchors
 
 - `WYCKOFF_PHASE_001` → Contents / Minimum bars in range.
-- `WYCKOFF_PHASE_002` → Runtime phase vocabulary in `llm_runtime/WYCKOFF_v3.0.md`; no engineering-only mechanic extracted.
-- `WYCKOFF_PHASE_003` → Runtime phase vocabulary in `llm_runtime/WYCKOFF_v3.0.md`; no engineering-only mechanic extracted.
-- `WYCKOFF_PHASE_004` → Runtime phase vocabulary in `llm_runtime/WYCKOFF_v3.0.md`; no engineering-only mechanic extracted.
-- `WYCKOFF_PHASE_005` → Runtime phase vocabulary in `llm_runtime/WYCKOFF_v3.0.md`; no engineering-only mechanic extracted.
+- `WYCKOFF_PHASE_002` → Runtime phase vocabulary in `llm_runtime/WYCKOFF_v4.0.md`; no engineering-only mechanic extracted.
+- `WYCKOFF_PHASE_003` → Runtime phase vocabulary in `llm_runtime/WYCKOFF_v4.0.md`; no engineering-only mechanic extracted.
+- `WYCKOFF_PHASE_004` → Runtime phase vocabulary in `llm_runtime/WYCKOFF_v4.0.md`; no engineering-only mechanic extracted.
+- `WYCKOFF_PHASE_005` → Runtime phase vocabulary in `llm_runtime/WYCKOFF_v4.0.md`; no engineering-only mechanic extracted.
 - `WYCKOFF_PHASE_006` → Contents / Soft markdown without SOW.
 - `WYCKOFF_PHASE_007` → Contents / Chart-edge extension.
 - `WYCKOFF_PHASE_008` → Contents / Event priority order.

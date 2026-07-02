@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.0-alpha
-file_last_updated: 2026-05-13
+kb_version: 4.0.0-alpha
+file_last_updated: 2026-07-02
 status: draft
 tier: —
 ---
@@ -11,7 +11,7 @@ tier: —
 
 ## Purpose
 
-This file documents volatility-metrics MCP tool-surface mechanics extracted from `llm_runtime/VOLATILITY_v3.0.md`. The runtime VOLATILITY file owns source-authority behavior and regime interpretation; this file owns formulas, windows, weighting schemes, history lookbacks, status thresholds, endpoint references, and provider-specific mechanical details.
+This file documents volatility-metrics MCP tool-surface mechanics extracted from `llm_runtime/VOLATILITY_v4.0.md`. The runtime VOLATILITY file owns source-authority behavior and regime interpretation; this file owns formulas, windows, weighting schemes, history lookbacks, status thresholds, endpoint references, and provider-specific mechanical details.
 
 ## Contents
 

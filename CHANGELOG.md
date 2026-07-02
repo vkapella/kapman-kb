@@ -1,5 +1,54 @@
 # KapMan KB Changelog
 
+## 2026-07-02 — v4.0 cutover complete — Stage F closeout: pilots pass, `_v3.0 → _v4.0` rename sweep lands (closes #78)
+
+### Stage F pilots (validation, no KB edits required)
+
+- **Structural validate — PASS.** `verify_frontmatter` + `verify_anchors` pass; anchor parity independently re-confirmed
+  via grep (107 legacy rule IDs in `archive/`, all mapped in `INDEX.md`) after finding that `verify_anchors.sh` silently
+  passes on an empty ID set when `rg` is unavailable (hardening tracked separately; not a parity break).
+- **BEARISH fixture pilot — PASS, zero KB must-fixes.** Operator-produced Swing Long Put export
+  (`kapman-journal` handoff `VS-20260702-1225-01`, 75 rows, `screen_version 1.0`). Every fixture value class reconciles
+  with the committed KB: `screen_thresholds` match SYSTEM_PARAMS by name and value (τ 0.70/0.45, IV-HV 1.20, DGPI 30/10);
+  gating `g = min(regime_confidence, phase_confidence)` matches WYCKOFF; all four hard force-flags fire on the re-keyed
+  string values (`"conflict"`), including SOW-gated markdown; FLAGGED→WAIT and ESTIMATION→WAIT match the #84 pin on all
+  47 WAIT rows; dealer `invalid`→veto (4 NO_TRADE rows) and `low`→floor-narrowing match SIGNAL/RISK verbatim; adverse-tier
+  DGPI mirror-narrowing→floor matches DEALER's direction-relative read; `conditional-top` sizing (URA: `distribution`,
+  post-phase-C) matches RISK's band; `iv_hv_status` values (`OK`/`ATM_FALLBACK_BAND`/`INSUFFICIENT_CONTRACTS`) match
+  VOLATILITY's derived-status contract; spread-mandate fires at ≥ 1.2 (BABA/CEG/TRI). Macro card (SPY DGPI −93.83,
+  short-gamma, flip unknown) reads mixed-conservative per PASS1 Step 1 — hostile-macro stays bullish-scoped, long puts
+  aligned. **Divergence noted (producer-side, not KB):** the screen ACCEPTed the stale SATS row (`as_of` 2026-06-23 in an
+  `as_of` 2026-07-01 export) — the KB's stale-snapshot force-flag catches it at ingest; a per-row freshness check is a
+  candidate viewer follow-up. Coverage gaps (fixture, not KB): `msow`/`ice_break` events, `ranging_undefined` regime, and
+  the full bearish-mirror dealer veto (DGPI ≥ +30 **and** well-above-flip on an ACCEPT-tier row) were not exercised.
+- **BULLISH golden regression — PASS at the persisted summary level.** `VS-20260629-1348-05` (73 rows): all persisted
+  tier/disposition/structure rows conform to the reconciled gate and disposition rules (raw per-row JSON was not
+  persisted for the pilot handoffs; the deep read happened live in the #82 pilot, which the #78 slices reconciled to).
+- **Estimation-path regression — PASS.** All `g < τ_low` rows (FSLR 0.27, NNE 0.42, ED 0.20) route ESTIMATION→WAIT,
+  matching the estimation-path + operator-absent pins.
+
+### Changed — end-of-Stage-1 `_v3.0 → _v4.0` rename sweep (mechanical, autonomous per AGENTS.md)
+
+- **All 25 live files renamed** `_v3.0 → _v4.0` (git-mv, history preserved): 15 `llm_runtime/` (14 .md + the Pass-1 HTML
+  template) + 10 `engineering_only/` .md. `JOURNAL_MGMT_v4.0.md` already carried the v4.0 name.
+- **`kb_version` re-based to the 4.0 line:** renamed files reset `3.0.x → 4.0.0` (scaffolding placeholders
+  `3.0.0-alpha → 4.0.0-alpha`); `JOURNAL_MGMT` keeps its running `4.0.3`. `file_last_updated → 2026-07-02` on renamed files.
+- **Cross-references updated** in `llm_runtime/`, `engineering_only/`, and `INDEX.md` (`_v3.0.md/.html → _v4.0.md/.html`);
+  version-pinned citations re-pinned to the live line (`REPORT_STYLE_v3.0.3`/`REPORT_FORMAT_v3.0.x` → `_v4.0.0` in the HTML
+  template and PASS1). Historical/lineage mentions of v3.0 (v2.3→v3.0 migration notes, "net-new v3.0" rows) intentionally
+  preserved. `archive/`, `CHANGELOG.md` history, and `docs/` plan documents untouched.
+- **`INDEX.md`:** Version status rewritten to the completed-cutover state (v4.0 complete, Stage 1 closed 2026-07-02);
+  Stage-1b authoring bullets re-marked historical; file directory re-headed "v4.0 file directory (live)" with all rows at
+  `_v4.0`; `JOURNAL_MGMT_v4.0.md` added to the directory table (T2 runbook — previously tracked only in Version status).
+
+### Still open after Stage 1 (carried forward, do not block the cutover)
+P0-3a (RISK↔PASS2 Weak-chain), P0-3b, P0-4 (positions.md written at validation not fill), P0-5 (CSP "regime-aligned"
+overclaim), P1-10, P1-11; deferred pilot-safe IV-rank dormancy pass + absolute-IV guard (phase-2 IV-history).
+
+### Verification
+`verify_frontmatter` + `verify_anchors` pass post-rename; grep re-check: no `_v3.0` filename references remain in
+`llm_runtime/`/`engineering_only/`/`INDEX.md`; all live frontmatter `kb_version` on the 4.0 line; archive untouched.
+
 ## 2026-07-02 — SOW-staleness decision — resolve the SOW-recency window as a judgment call, not a parameter (closes #85)
 
 ### Changed — WYCKOFF SOW-gated-markdown recency clarification (substantive; HITL, operator-decided)

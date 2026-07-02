@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.0-alpha
-file_last_updated: 2026-05-13
+kb_version: 4.0.0-alpha
+file_last_updated: 2026-07-02
 status: draft
 tier: —
 ---
@@ -11,7 +11,7 @@ tier: —
 
 ## Purpose
 
-This file documents the Pass 1 MCP tool-surface mechanics extracted from `llm_runtime/PASS1_SCREENING_v3.0.md`. The runtime PASS1 file owns eligible-set behavior and screening flow; this file owns endpoint names, batch caps, parameter shapes, deprecated endpoint prohibitions, scoring pass-through bounds, and other mechanical references.
+This file documents the Pass 1 MCP tool-surface mechanics extracted from `llm_runtime/PASS1_SCREENING_v4.0.md`. The runtime PASS1 file owns eligible-set behavior and screening flow; this file owns endpoint names, batch caps, parameter shapes, deprecated endpoint prohibitions, scoring pass-through bounds, and other mechanical references.
 
 ## Contents
 
@@ -58,8 +58,8 @@ This file documents the Pass 1 MCP tool-surface mechanics extracted from `llm_ru
 
 - `PIPELINE_010` → Contents / Polygon MCP endpoint routing.
 - `SCORING_001` → Contents / Scoring pass-through.
-- `SIGNAL_009` reference values → Contents / Fallback confidence reference values. Canonical SIGNAL persistence mechanics are also documented in `engineering_only/SIGNAL_MCP_REFERENCE_v3.0.md`.
-- `PIPELINE_011` platform observation → Contents / Context compaction observation. Runtime behavior remains in `llm_runtime/PASS1_SCREENING_v3.0.md`.
+- `SIGNAL_009` reference values → Contents / Fallback confidence reference values. Canonical SIGNAL persistence mechanics are also documented in `engineering_only/SIGNAL_MCP_REFERENCE_v4.0.md`.
+- `PIPELINE_011` platform observation → Contents / Context compaction observation. Runtime behavior remains in `llm_runtime/PASS1_SCREENING_v4.0.md`.
 
 ## Appendix
 

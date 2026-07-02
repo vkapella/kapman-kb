@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.5
-file_last_updated: 2026-06-28
+kb_version: 4.0.0
+file_last_updated: 2026-07-02
 status: active
 tier: T2
 ---
@@ -83,49 +83,49 @@ When a validated trade specification arrives from Pass 2 and the operator confir
 
 | Source file | What PORTFOLIO_MGMT consumes | How PORTFOLIO_MGMT uses it |
 |---|---|---|
-| `PASS2_VALIDATION_v3.0.md` (T2) | Validated trade specifications: structure, direction, ticker, strikes, expiration, entry price range, sizing band, chain quality label, dealer `confidence`, entry-time regime snapshot | Carried forward as the reference record when the operator confirms execution and supplies actual fill details; forms the foundation of the position context schema |
-| `SIGNAL_v3.0.md` (T1) | Stop alert and Profit target alert four-field output; the **direction-aware** Regime exit advisory firing condition and four decay branches (the Wyckoff branch covers regime succession + phase regression D→B/A); delta-gamma approximation formula | PORTFOLIO_MGMT carries the four exit-trigger fields in position context; evaluates the Regime exit advisory branch by branch per Operational heuristics, reading the Wyckoff branch relative to the position's direction; may refresh the estimated option price at alert using the delta-gamma formula when current Greeks are available |
-| `DEALER_v3.0.md` (T1) | Fresh dealer metrics per session: DGPI tier, flip-zone classification, dealer confidence, call/put wall levels | Fetched fresh at each Portfolio mode session for each open position's ticker; DGPI tier and flip-zone used for Regime exit advisory DGPI and spot-vs-flip branches; dealer confidence used to determine whether the DGPI branch can evaluate (`high`/`medium`/`low`) or must be labeled data-absent (`invalid`) |
-| `VOLATILITY_v3.0.md` (T1) | Fresh volatility metrics per session: IV/HV band, IV rank tier, volatility-status label | Fetched fresh at each Portfolio mode session; IV/HV band used for the Regime exit advisory volatility branch; volatility-status label used to determine branch evaluability |
-| `WYCKOFF_v3.0.md` (T1) | Current session's confirmed Wyckoff **regime + phase (A–E)** per ticker, via propose-confirm protocol; the canonical regime/phase vocabulary and succession **graph** | Consumed for the Regime exit advisory regime-succession & phase-regression branch (read relative to the position's direction); if no confirmed reading exists for a ticker in the current session, the branch is suppressed and labeled rather than fired conservatively |
-| `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Mode discipline (Portfolio / Hybrid); data-quality vocabulary; override discipline; Hybrid output section ordering | PORTFOLIO_MGMT confirms mode at session start per GUARDRAILS; applies data-quality labels to all degraded or missing fields; honors the Hybrid output discipline (Screening first, Portfolio second) |
-| `SYSTEM_PARAMS_v3.0.md` (T3) | `DTE_DECAY_WARNING_THRESHOLD` | Applied at Step 5 of the Portfolio mode workflow to surface DTE decay warnings for positions approaching expiration |
+| `PASS2_VALIDATION_v4.0.md` (T2) | Validated trade specifications: structure, direction, ticker, strikes, expiration, entry price range, sizing band, chain quality label, dealer `confidence`, entry-time regime snapshot | Carried forward as the reference record when the operator confirms execution and supplies actual fill details; forms the foundation of the position context schema |
+| `SIGNAL_v4.0.md` (T1) | Stop alert and Profit target alert four-field output; the **direction-aware** Regime exit advisory firing condition and four decay branches (the Wyckoff branch covers regime succession + phase regression D→B/A); delta-gamma approximation formula | PORTFOLIO_MGMT carries the four exit-trigger fields in position context; evaluates the Regime exit advisory branch by branch per Operational heuristics, reading the Wyckoff branch relative to the position's direction; may refresh the estimated option price at alert using the delta-gamma formula when current Greeks are available |
+| `DEALER_v4.0.md` (T1) | Fresh dealer metrics per session: DGPI tier, flip-zone classification, dealer confidence, call/put wall levels | Fetched fresh at each Portfolio mode session for each open position's ticker; DGPI tier and flip-zone used for Regime exit advisory DGPI and spot-vs-flip branches; dealer confidence used to determine whether the DGPI branch can evaluate (`high`/`medium`/`low`) or must be labeled data-absent (`invalid`) |
+| `VOLATILITY_v4.0.md` (T1) | Fresh volatility metrics per session: IV/HV band, IV rank tier, volatility-status label | Fetched fresh at each Portfolio mode session; IV/HV band used for the Regime exit advisory volatility branch; volatility-status label used to determine branch evaluability |
+| `WYCKOFF_v4.0.md` (T1) | Current session's confirmed Wyckoff **regime + phase (A–E)** per ticker, via propose-confirm protocol; the canonical regime/phase vocabulary and succession **graph** | Consumed for the Regime exit advisory regime-succession & phase-regression branch (read relative to the position's direction); if no confirmed reading exists for a ticker in the current session, the branch is suppressed and labeled rather than fired conservatively |
+| `KAPMAN_GUARDRAILS_v4.0.md` (T0) | Mode discipline (Portfolio / Hybrid); data-quality vocabulary; override discipline; Hybrid output section ordering | PORTFOLIO_MGMT confirms mode at session start per GUARDRAILS; applies data-quality labels to all degraded or missing fields; honors the Hybrid output discipline (Screening first, Portfolio second) |
+| `SYSTEM_PARAMS_v4.0.md` (T3) | `DTE_DECAY_WARNING_THRESHOLD` | Applied at Step 5 of the Portfolio mode workflow to surface DTE decay warnings for positions approaching expiration |
 | `JOURNAL_MGMT_v4.0.md` (T2) | The `positions.md` entry-time record per open position: the immutable entry-time regime snapshot and the eight SIGNAL Stop/Profit alert levels, written once at Pass 2 | Read at Step 1b, matched by `(instrument_key, account_id)`, as the baseline the Regime exit advisory measures decay against and the entry-time anchor for exit-trigger proximity; orientation only, never re-read to seed a new decision |
 
 **What PORTFOLIO_MGMT delivers to each downstream file.**
 
 | Destination file | What PORTFOLIO_MGMT delivers | How that file uses it |
 |---|---|---|
-| `REPORT_FORMAT_v3.0.md` (T3) | Full portfolio view: Open positions with current regime status, Advisory positions with named decay reasons, exit-trigger proximity flags, DTE decay warnings, Exited positions summary, Expired positions requiring acknowledgment | REPORT_FORMAT renders the Portfolio section of the output; PORTFOLIO_MGMT does not own report rendering |
-| `REPORT_STYLE_v3.0.md` (T3) | (Indirectly) the portfolio view output surface | REPORT_STYLE governs field length caps and label vocabulary; PORTFOLIO_MGMT respects these constraints in the rationale text it assembles |
+| `REPORT_FORMAT_v4.0.md` (T3) | Full portfolio view: Open positions with current regime status, Advisory positions with named decay reasons, exit-trigger proximity flags, DTE decay warnings, Exited positions summary, Expired positions requiring acknowledgment | REPORT_FORMAT renders the Portfolio section of the output; PORTFOLIO_MGMT does not own report rendering |
+| `REPORT_STYLE_v4.0.md` (T3) | (Indirectly) the portfolio view output surface | REPORT_STYLE governs field length caps and label vocabulary; PORTFOLIO_MGMT respects these constraints in the rationale text it assembles |
 
 **What PORTFOLIO_MGMT does not own.**
 
 | Concern | Owner |
 |---|---|
-| Stop alert and Profit target alert computation | `SIGNAL_v3.0.md` — PORTFOLIO_MGMT carries the four-field output; it does not recompute alert levels |
-| Regime exit advisory firing condition | `SIGNAL_v3.0.md` — PORTFOLIO_MGMT operationalizes the evaluation procedure; SIGNAL owns the contract |
-| Delta-gamma approximation formula | `SIGNAL_v3.0.md` — PORTFOLIO_MGMT may reference the formula when refreshing the option-price-at-alert estimate from a current chain snapshot |
-| Sizing band ladder | `RISK_v3.0.md` — PORTFOLIO_MGMT records the Pass 2 sizing band note; it does not define or re-run the ladder |
-| Override discipline | `KAPMAN_GUARDRAILS_v3.0.md` |
-| Wyckoff propose-confirm protocol | `WYCKOFF_v3.0.md` — PORTFOLIO_MGMT consumes the confirmed regime + phase (A–E) output; it does not run propose-confirm itself |
-| Report rendering | `REPORT_FORMAT_v3.0.md`, `REPORT_STYLE_v3.0.md` |
-| MCP endpoint names, parameter shapes, position-persistence implementation details | `engineering_only/PORTFOLIO_MGMT_MCP_REFERENCE_v3.0.md` (forthcoming) |
+| Stop alert and Profit target alert computation | `SIGNAL_v4.0.md` — PORTFOLIO_MGMT carries the four-field output; it does not recompute alert levels |
+| Regime exit advisory firing condition | `SIGNAL_v4.0.md` — PORTFOLIO_MGMT operationalizes the evaluation procedure; SIGNAL owns the contract |
+| Delta-gamma approximation formula | `SIGNAL_v4.0.md` — PORTFOLIO_MGMT may reference the formula when refreshing the option-price-at-alert estimate from a current chain snapshot |
+| Sizing band ladder | `RISK_v4.0.md` — PORTFOLIO_MGMT records the Pass 2 sizing band note; it does not define or re-run the ladder |
+| Override discipline | `KAPMAN_GUARDRAILS_v4.0.md` |
+| Wyckoff propose-confirm protocol | `WYCKOFF_v4.0.md` — PORTFOLIO_MGMT consumes the confirmed regime + phase (A–E) output; it does not run propose-confirm itself |
+| Report rendering | `REPORT_FORMAT_v4.0.md`, `REPORT_STYLE_v4.0.md` |
+| MCP endpoint names, parameter shapes, position-persistence implementation details | `engineering_only/PORTFOLIO_MGMT_MCP_REFERENCE_v4.0.md` (forthcoming) |
 
 **Cross-references this file expects to be honored.**
 
-- `SIGNAL_v3.0.md` owns the Regime exit advisory firing condition and the four decay branch definitions. When SIGNAL and PORTFOLIO_MGMT appear to specify different branch behavior, SIGNAL governs.
-- `DEALER_v3.0.md` owns the DGPI tier vocabulary and the flip-zone vocabulary. PORTFOLIO_MGMT consumes these labels as delivered; it does not re-interpret raw DGPI scores.
-- `WYCKOFF_v3.0.md` owns the regime succession **graph** (and the canonical regime/phase vocabulary). PORTFOLIO_MGMT reads regime succession against that graph — relative to the position's direction — and reads phase regression (D→B/A) when evaluating the Wyckoff branch of the Regime exit advisory; it does not define its own succession logic.
-- `KAPMAN_GUARDRAILS_v3.0.md` owns mode discipline and the Hybrid output section ordering. PORTFOLIO_MGMT's Hybrid mode behavior is constrained by GUARDRAILS' Hybrid output discipline; PORTFOLIO_MGMT does not define its own Hybrid section ordering.
-- `SYSTEM_PARAMS_v3.0.md` is the single update point for `DTE_DECAY_WARNING_THRESHOLD`. PORTFOLIO_MGMT references the parameter by name; it does not hardcode the value.
+- `SIGNAL_v4.0.md` owns the Regime exit advisory firing condition and the four decay branch definitions. When SIGNAL and PORTFOLIO_MGMT appear to specify different branch behavior, SIGNAL governs.
+- `DEALER_v4.0.md` owns the DGPI tier vocabulary and the flip-zone vocabulary. PORTFOLIO_MGMT consumes these labels as delivered; it does not re-interpret raw DGPI scores.
+- `WYCKOFF_v4.0.md` owns the regime succession **graph** (and the canonical regime/phase vocabulary). PORTFOLIO_MGMT reads regime succession against that graph — relative to the position's direction — and reads phase regression (D→B/A) when evaluating the Wyckoff branch of the Regime exit advisory; it does not define its own succession logic.
+- `KAPMAN_GUARDRAILS_v4.0.md` owns mode discipline and the Hybrid output section ordering. PORTFOLIO_MGMT's Hybrid mode behavior is constrained by GUARDRAILS' Hybrid output discipline; PORTFOLIO_MGMT does not define its own Hybrid section ordering.
+- `SYSTEM_PARAMS_v4.0.md` is the single update point for `DTE_DECAY_WARNING_THRESHOLD`. PORTFOLIO_MGMT references the parameter by name; it does not hardcode the value.
 - `JOURNAL_MGMT_v4.0.md` owns where the `positions.md` entry-time snapshot is written and read, and the memory-load precedence. PORTFOLIO_MGMT reads that snapshot at Step 1b; it does not define the journal's write model or path.
-- `KAPMAN_GUARDRAILS_v3.0.md` owns the numeric-no-persist floor and its sole exemption — the Pass-2 entry-time snapshot in `positions.md`. PORTFOLIO_MGMT relies on exactly that exemption to read the entry-time baseline, and on no other persisted regime value.
+- `KAPMAN_GUARDRAILS_v4.0.md` owns the numeric-no-persist floor and its sole exemption — the Pass-2 entry-time snapshot in `positions.md`. PORTFOLIO_MGMT relies on exactly that exemption to read the entry-time baseline, and on no other persisted regime value.
 - The §A2 trade log → Portfolio position-context contract defines which `portfolio_snapshot` export fields populate each position-context field. PORTFOLIO_MGMT's Appendix §A2 source map implements that contract; the contract governs the field list, this runbook governs how the fields are used.
 
 ## Legacy anchors (for legend citations and back-compat)
 
-PORTFOLIO_MGMT is a net-new v3.0 construct with no v2.3 antecedent. No v2.3 source file contains rules governing position tracking, exit discipline, portfolio-mode workflow sequencing, or position lifecycle state management. The v2.3 source set reviewed for this session — `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v2.3.md` and `DEALER_POSITIONING_RULES_v2.3.md` — contains no PORTFOLIO_MGMT-scoped content. The PIPELINE_ORCHESTRATION_v2.3.md rules absorbed in prior sessions likewise contained no portfolio-management-specific anchors; PIPELINE_011 (context compaction guard) resolved into PASS1_SCREENING_v3.0.md and PASS2_VALIDATION_v3.0.md, not here.
+PORTFOLIO_MGMT is a net-new v3.0 construct with no v2.3 antecedent. No v2.3 source file contains rules governing position tracking, exit discipline, portfolio-mode workflow sequencing, or position lifecycle state management. The v2.3 source set reviewed for this session — `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v2.3.md` and `DEALER_POSITIONING_RULES_v2.3.md` — contains no PORTFOLIO_MGMT-scoped content. The PIPELINE_ORCHESTRATION_v2.3.md rules absorbed in prior sessions likewise contained no portfolio-management-specific anchors; PIPELINE_011 (context compaction guard) resolved into PASS1_SCREENING_v4.0.md and PASS2_VALIDATION_v4.0.md, not here.
 
 No legacy rule IDs map to this file. Body-text references in legacy report legends that cite portfolio or position management behavior have no v2.3 rule ID to resolve against; they resolve to this file's Operational heuristics by domain, not by anchor ID.
 

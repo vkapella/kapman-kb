@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 3.0.13
-file_last_updated: 2026-07-01
+kb_version: 4.0.0
+file_last_updated: 2026-07-02
 status: active
 tier: T2
 ---
@@ -50,7 +50,7 @@ The viewer handoff is Pass-1 triage context, not Pass-2 truth: dealer fields are
 
 Two viewer dealer fields use vocabularies that must not be conflated with their Pass-2 counterparts:
 - **`dealer_confidence`** (`high`/`medium`/`low`/`invalid`; `high`/`medium` are trusted) is the viewer's **Pass-1 data-quality self-rating on its own dealer read**. It is the **same four-value `confidence` field** the Schwab Pass-2 producer also emits — not a different vocabulary. The Pass-1↔Pass-2 distinction is **provenance and timing, not naming**: the viewer's `dealer_confidence` rates a Pass-1 triage read computed over the kapman-polygon-mcp-v2 option universe, while the Schwab `confidence` rates the live re-fetched read over the Schwab option universe, spot-anchored to the live flip. Because the two are computed over different universes, a trusted Pass-1 `dealer_confidence` never substitutes for the Pass-2 read and a degraded one never forces it — the dealer regime is re-fetched and re-rated at Pass 2 regardless, and the two are expected to **agree by confidence value and DGPI direction, not by exact value**.
-- **`position_vs_flip`** (`above_flip`/`below_flip`/`at_flip`/`unknown`) is a **coarse Pass-1 triage** that maps onto `DEALER_v3.0.md`'s flip-zone vocabulary: `at_flip` ≈ **Near-flip**, `above_flip` / `below_flip` ≈ above / below the flip. The precise **Well above / Near-flip / Well below** resolution — keyed on the `NEAR_FLIP_BAND_PCT` band around the flip per SYSTEM_PARAMS — is a **Pass-2 determination** from the live Schwab flip distance; the viewer's three-way read is a starting hint, not that resolution. `unknown` is no Pass-1 flip hint — the dealer-timing triage proceeds without one, and Pass 2 re-fetches the live flip regardless.
+- **`position_vs_flip`** (`above_flip`/`below_flip`/`at_flip`/`unknown`) is a **coarse Pass-1 triage** that maps onto `DEALER_v4.0.md`'s flip-zone vocabulary: `at_flip` ≈ **Near-flip**, `above_flip` / `below_flip` ≈ above / below the flip. The precise **Well above / Near-flip / Well below** resolution — keyed on the `NEAR_FLIP_BAND_PCT` band around the flip per SYSTEM_PARAMS — is a **Pass-2 determination** from the live Schwab flip distance; the viewer's three-way read is a starting hint, not that resolution. `unknown` is no Pass-1 flip hint — the dealer-timing triage proceeds without one, and Pass 2 re-fetches the live flip regardless.
 
 **The handoff envelope may carry screen provenance and a macro-context block; both are triage context, never authority.**
 
@@ -63,9 +63,9 @@ A pasted viewer handoff must carry the fields below for the §A1 ingest to be va
 | Field | Role in the ingest | If absent |
 |---|---|---|
 | `exported_at` (envelope) | Lineage clock — the `lineage_id` derives from it per `JOURNAL_MGMT_v4.0.md`, never the session clock | Lineage cannot be derived; surface "lineage unavailable — export carries no `exported_at`" and flag the run lineage-degraded; do not substitute the session clock |
-| `as_of` / `data_through` | Snapshot freshness + decision-anchor freshness | Freshness cannot be established; per `WYCKOFF_v3.0.md` this trips the stale-snapshot check, so the row cannot auto-accept — it drops to the estimation / flagged-reading path |
+| `as_of` / `data_through` | Snapshot freshness + decision-anchor freshness | Freshness cannot be established; per `WYCKOFF_v4.0.md` this trips the stale-snapshot check, so the row cannot auto-accept — it drops to the estimation / flagged-reading path |
 | `row_count` (envelope) | Paste-integrity echo / manifest | Surface "row_count not provided — paste integrity unverified" and proceed without the operator-eyeball check |
-| `weekly_agrees`, `structure_conflict` | WYCKOFF hard force-flags | A missing field is read as *unknown*, not "clear" — it cannot confirm a high-confidence reading, so the reading routes to the flagged-reading exchange per `WYCKOFF_v3.0.md` rather than auto-accepting |
+| `weekly_agrees`, `structure_conflict` | WYCKOFF hard force-flags | A missing field is read as *unknown*, not "clear" — it cannot confirm a high-confidence reading, so the reading routes to the flagged-reading exchange per `WYCKOFF_v4.0.md` rather than auto-accepting |
 | `regime`, `regime_confidence` | WYCKOFF tier-gate input | The validity gate fails; the row runs the estimation path |
 | earnings / next-earnings date | Step-0 near-event screen | Not a §A1 field — the earnings screen stays in the KB (a KB-side lookup); Step 0 runs that lookup regardless of the handoff |
 
@@ -127,37 +127,37 @@ PASS1 SCREENING is tier T2 — a runbook. It is the primary consumer of every T1
 
 | Source file | What PASS1 consumes | How PASS1 uses it |
 |---|---|---|
-| `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Data-quality vocabulary; override discipline; hostile-macro eligible-set redirect; anti-hallucination floor | PASS1 applies the data-quality labels to every degraded output; applies override discipline at the screening-request entry point; applies the hostile-macro redirect run-wide when macro gate fires; enforces the anti-hallucination floor on every candidate zone |
-| `DEALER_v3.0.md` (T1) | SPY hostile-macro composite (both conditions); per-ticker DGPI tier (signed), flip-zone, near-flip flag, dealer `confidence`; macro-layer dealer `confidence` | PASS1 evaluates the hostile-macro composite once at run start; reads per-ticker dealer regime for the dealer-timing veto; reads near-flip flag for the one-tier sizing step-down note in the candidate output |
-| `VOLATILITY_v3.0.md` (T1) | IV/HV band (Pass 1 read: the Polygon producer's `iv_hv_ratio`); IV rank tier; volatility-status label; source-authority discipline | PASS1 reads the producer's IV/HV for the spread-mandate firing condition; applies *Needs chain validation* label when the mandate fires at Pass 1 (binding mandate is the Pass 2 re-confirm); degrades to fire-by-default when the Pass 1 read is unavailable |
-| `WYCKOFF_v3.0.md` (T1) | Propose-confirm protocol; confirmed regime + phase (A–E) and event readings; UNKNOWN state; conservative-default behavior; operator-declared regime/phase handling | PASS1 invokes propose-confirm inline per candidate for unconfirmed tickers; consumes the confirmed regime/phase for Wyckoff veto evaluation; consumes confirmed `sos`/`sow` for directional fallback; assigns UNKNOWN and conservative defaults when propose-confirm is declined |
-| `SIGNAL_v3.0.md` (T1) | Wyckoff veto contract (heuristic 1); dealer-timing veto contract (heuristic 2); spread-mandate contract (heuristic 3); directional fallback (heuristic 11); NO_TRADE consistency (heuristic 7); alternative-confidence ordering (heuristic 8); degraded-input fallback (heuristic 9); anti-hallucination floor (heuristic 10) | PASS1 applies the trigger contracts in fixed sequence per candidate; assembles NO_TRADE outputs with NONE structure; assigns confidence values that honor the ordering rule; applies structured fallback on degraded inputs |
-| `RISK_v3.0.md` (T1) | Sizing band ladder (regime-ceiling → dealer-tier → volatility-tier), direction-relative; near-flip one-tier step-down | PASS1 notes the applicable sizing band in the candidate output so Pass 2 and the operator have the sizing context; PASS1 does not compute exact position size — that is RISK and operator work |
+| `KAPMAN_GUARDRAILS_v4.0.md` (T0) | Data-quality vocabulary; override discipline; hostile-macro eligible-set redirect; anti-hallucination floor | PASS1 applies the data-quality labels to every degraded output; applies override discipline at the screening-request entry point; applies the hostile-macro redirect run-wide when macro gate fires; enforces the anti-hallucination floor on every candidate zone |
+| `DEALER_v4.0.md` (T1) | SPY hostile-macro composite (both conditions); per-ticker DGPI tier (signed), flip-zone, near-flip flag, dealer `confidence`; macro-layer dealer `confidence` | PASS1 evaluates the hostile-macro composite once at run start; reads per-ticker dealer regime for the dealer-timing veto; reads near-flip flag for the one-tier sizing step-down note in the candidate output |
+| `VOLATILITY_v4.0.md` (T1) | IV/HV band (Pass 1 read: the Polygon producer's `iv_hv_ratio`); IV rank tier; volatility-status label; source-authority discipline | PASS1 reads the producer's IV/HV for the spread-mandate firing condition; applies *Needs chain validation* label when the mandate fires at Pass 1 (binding mandate is the Pass 2 re-confirm); degrades to fire-by-default when the Pass 1 read is unavailable |
+| `WYCKOFF_v4.0.md` (T1) | Propose-confirm protocol; confirmed regime + phase (A–E) and event readings; UNKNOWN state; conservative-default behavior; operator-declared regime/phase handling | PASS1 invokes propose-confirm inline per candidate for unconfirmed tickers; consumes the confirmed regime/phase for Wyckoff veto evaluation; consumes confirmed `sos`/`sow` for directional fallback; assigns UNKNOWN and conservative defaults when propose-confirm is declined |
+| `SIGNAL_v4.0.md` (T1) | Wyckoff veto contract (heuristic 1); dealer-timing veto contract (heuristic 2); spread-mandate contract (heuristic 3); directional fallback (heuristic 11); NO_TRADE consistency (heuristic 7); alternative-confidence ordering (heuristic 8); degraded-input fallback (heuristic 9); anti-hallucination floor (heuristic 10) | PASS1 applies the trigger contracts in fixed sequence per candidate; assembles NO_TRADE outputs with NONE structure; assigns confidence values that honor the ordering rule; applies structured fallback on degraded inputs |
+| `RISK_v4.0.md` (T1) | Sizing band ladder (regime-ceiling → dealer-tier → volatility-tier), direction-relative; near-flip one-tier step-down | PASS1 notes the applicable sizing band in the candidate output so Pass 2 and the operator have the sizing context; PASS1 does not compute exact position size — that is RISK and operator work |
 
 **What PASS1 hands to each downstream file.**
 
 | Destination file | What PASS1 delivers | How that file uses it |
 |---|---|---|
-| `PASS2_VALIDATION_v3.0.md` (T2) | Eligible-set: per-candidate structure, direction, candidate zones, DTE band, Pass 1 IV source label, sizing band note, confidence value | PASS2 takes each eligible candidate and validates the structure and direction against the live Schwab chain; selects specific strikes and expirations within the candidate zones; re-confirms the spread-mandate by re-fetching the Polygon producer |
-| `REPORT_FORMAT_v3.0.md` (T3) | Full Pass 1 output: Eligible/NO_TRADE/WAIT determinations with rationale, candidate zones, alternatives with confidence, data-quality labels, macro gate result, override acknowledgments | REPORT_FORMAT renders the Pass 1 section of the screening report; PASS1 does not own report rendering |
-| `REPORT_STYLE_v3.0.md` (T3) | (Indirectly) the Pass 1 output surface | REPORT_STYLE governs field length caps, label vocabulary, and rationale density; PASS1 respects these constraints in the rationale text it assembles |
-| `PORTFOLIO_MGMT_v3.0.md` (T2) | (Indirectly, after Pass 2) The entry-time regime snapshots that Pass 2 completes | PORTFOLIO_MGMT carries regime snapshots in position context; PASS1 is the regime-read origin for the Wyckoff regime (and phase) and direction that eventually become the entry-time snapshot |
+| `PASS2_VALIDATION_v4.0.md` (T2) | Eligible-set: per-candidate structure, direction, candidate zones, DTE band, Pass 1 IV source label, sizing band note, confidence value | PASS2 takes each eligible candidate and validates the structure and direction against the live Schwab chain; selects specific strikes and expirations within the candidate zones; re-confirms the spread-mandate by re-fetching the Polygon producer |
+| `REPORT_FORMAT_v4.0.md` (T3) | Full Pass 1 output: Eligible/NO_TRADE/WAIT determinations with rationale, candidate zones, alternatives with confidence, data-quality labels, macro gate result, override acknowledgments | REPORT_FORMAT renders the Pass 1 section of the screening report; PASS1 does not own report rendering |
+| `REPORT_STYLE_v4.0.md` (T3) | (Indirectly) the Pass 1 output surface | REPORT_STYLE governs field length caps, label vocabulary, and rationale density; PASS1 respects these constraints in the rationale text it assembles |
+| `PORTFOLIO_MGMT_v4.0.md` (T2) | (Indirectly, after Pass 2) The entry-time regime snapshots that Pass 2 completes | PORTFOLIO_MGMT carries regime snapshots in position context; PASS1 is the regime-read origin for the Wyckoff regime (and phase) and direction that eventually become the entry-time snapshot |
 
 **What PASS1 does not own.**
 
 | Concern | Owner |
 |---|---|
-| Trigger contracts and firing conditions | `SIGNAL_v3.0.md` |
-| Regime, phase, and event vocabulary | `WYCKOFF_v3.0.md` |
-| Propose-confirm mechanics | `WYCKOFF_v3.0.md` |
-| Dealer regime tier vocabulary | `DEALER_v3.0.md` |
-| IV/HV band vocabulary and source-authority rules | `VOLATILITY_v3.0.md` |
-| Sizing band ladder and near-flip step-down math | `RISK_v3.0.md` |
-| Override discipline | `KAPMAN_GUARDRAILS_v3.0.md` |
-| MCP tool-surface endpoint names, batch caps, parameter shapes | `engineering_only/PASS1_MCP_REFERENCE_v3.0.md` (forthcoming) |
-| Chain validation, exact strikes, expiration selection | `PASS2_VALIDATION_v3.0.md` |
-| Report rendering and field length caps | `REPORT_FORMAT_v3.0.md`, `REPORT_STYLE_v3.0.md` |
-| Position monitoring and portfolio management | `PORTFOLIO_MGMT_v3.0.md` |
+| Trigger contracts and firing conditions | `SIGNAL_v4.0.md` |
+| Regime, phase, and event vocabulary | `WYCKOFF_v4.0.md` |
+| Propose-confirm mechanics | `WYCKOFF_v4.0.md` |
+| Dealer regime tier vocabulary | `DEALER_v4.0.md` |
+| IV/HV band vocabulary and source-authority rules | `VOLATILITY_v4.0.md` |
+| Sizing band ladder and near-flip step-down math | `RISK_v4.0.md` |
+| Override discipline | `KAPMAN_GUARDRAILS_v4.0.md` |
+| MCP tool-surface endpoint names, batch caps, parameter shapes | `engineering_only/PASS1_MCP_REFERENCE_v4.0.md` (forthcoming) |
+| Chain validation, exact strikes, expiration selection | `PASS2_VALIDATION_v4.0.md` |
+| Report rendering and field length caps | `REPORT_FORMAT_v4.0.md`, `REPORT_STYLE_v4.0.md` |
+| Position monitoring and portfolio management | `PORTFOLIO_MGMT_v4.0.md` |
 
 **Entry point for every Pass 1 run.**
 
@@ -169,20 +169,20 @@ Before per-candidate evaluation begins, three conditions must hold:
 
 **Cross-references this file expects to be honored.**
 
-- `SIGNAL_v3.0.md` owns the trigger contracts PASS1 enforces. When SIGNAL and PASS1 appear to specify different firing conditions for the same trigger, SIGNAL governs.
-- `WYCKOFF_v3.0.md` owns the propose-confirm protocol PASS1 invokes. PASS1 specifies *when* propose-confirm runs in the screening workflow; WYCKOFF specifies *how* it runs.
-- `KAPMAN_GUARDRAILS_v3.0.md` owns the override discipline and the anti-hallucination floor. Neither may be relaxed by PASS1 heuristics, even implicitly.
-- `VOLATILITY_v3.0.md` owns the IV source-authority rules. PASS1's use of the Polygon producer's `iv_hv_ratio` as the Pass 1 read is an application of VOLATILITY's source-authority discipline, not an independent PASS1 decision.
-- `engineering_only/PASS1_MCP_REFERENCE_v3.0.md` (forthcoming) owns the specific MCP tool-surface contracts for Pass 1 data fetching — endpoint names, batch caps, parameter shapes, and the Polygon deprecated-endpoint inventory. PASS1 is silent on these; operators and engineers consult the engineering-only reference for tool-surface details.
+- `SIGNAL_v4.0.md` owns the trigger contracts PASS1 enforces. When SIGNAL and PASS1 appear to specify different firing conditions for the same trigger, SIGNAL governs.
+- `WYCKOFF_v4.0.md` owns the propose-confirm protocol PASS1 invokes. PASS1 specifies *when* propose-confirm runs in the screening workflow; WYCKOFF specifies *how* it runs.
+- `KAPMAN_GUARDRAILS_v4.0.md` owns the override discipline and the anti-hallucination floor. Neither may be relaxed by PASS1 heuristics, even implicitly.
+- `VOLATILITY_v4.0.md` owns the IV source-authority rules. PASS1's use of the Polygon producer's `iv_hv_ratio` as the Pass 1 read is an application of VOLATILITY's source-authority discipline, not an independent PASS1 decision.
+- `engineering_only/PASS1_MCP_REFERENCE_v4.0.md` (forthcoming) owns the specific MCP tool-surface contracts for Pass 1 data fetching — endpoint names, batch caps, parameter shapes, and the Polygon deprecated-endpoint inventory. PASS1 is silent on these; operators and engineers consult the engineering-only reference for tool-surface details.
 
 
 ## Legacy anchors (for legend citations and back-compat)
 
-**PIPELINE_010** → `engineering_only/PASS1_MCP_REFERENCE_v3.0.md` (forthcoming). The v2.3 rule consolidated all Polygon MCP tool-surface routing decisions for Pass 1 data fetching: canonical endpoint names (`get_options_metrics`, `get_batch_options_metrics` with `include=['volatility']`), batch cap of 30 symbols per call, and the full inventory of deprecated endpoints that must never be called. These are MCP tool-surface contracts with no LLM runtime effect — the runtime reads delivered outputs; it does not select endpoints or enforce batch caps. The one behavioral residue that surfaces at the runtime layer is the data-quality consequence of the source-authority discipline (Polygon `avg_iv` as Pass 1 source, labeled *Needs chain validation* for spread-mandate outputs), which is owned by `VOLATILITY_v3.0.md` and applied by this file's heuristic "The Pass 1 IV source is Polygon `avg_iv`; its outputs are labeled accordingly." The full endpoint inventory, batch-cap enforcement, and deprecated-endpoint prohibition live in engineering-only. Body-text references in legacy report legends (e.g., "Rules applied: PIPELINE_010") remain valid; the legend entry resolves to the engineering-only destination. In the v4.0 runtime the full metrics payload (regime, dealer, volatility, IV/HV) arrives in the viewer/v2 handoff as Pass-1 triage context per the §A1 ingest map; the Polygon batch endpoint reference is unchanged — it remains the source for Polygon `avg_iv` specifically when a ticker is fetched directly rather than ingested from a handoff.
+**PIPELINE_010** → `engineering_only/PASS1_MCP_REFERENCE_v4.0.md` (forthcoming). The v2.3 rule consolidated all Polygon MCP tool-surface routing decisions for Pass 1 data fetching: canonical endpoint names (`get_options_metrics`, `get_batch_options_metrics` with `include=['volatility']`), batch cap of 30 symbols per call, and the full inventory of deprecated endpoints that must never be called. These are MCP tool-surface contracts with no LLM runtime effect — the runtime reads delivered outputs; it does not select endpoints or enforce batch caps. The one behavioral residue that surfaces at the runtime layer is the data-quality consequence of the source-authority discipline (Polygon `avg_iv` as Pass 1 source, labeled *Needs chain validation* for spread-mandate outputs), which is owned by `VOLATILITY_v4.0.md` and applied by this file's heuristic "The Pass 1 IV source is Polygon `avg_iv`; its outputs are labeled accordingly." The full endpoint inventory, batch-cap enforcement, and deprecated-endpoint prohibition live in engineering-only. Body-text references in legacy report legends (e.g., "Rules applied: PIPELINE_010") remain valid; the legend entry resolves to the engineering-only destination. In the v4.0 runtime the full metrics payload (regime, dealer, volatility, IV/HV) arrives in the viewer/v2 handoff as Pass-1 triage context per the §A1 ingest map; the Polygon batch endpoint reference is unchanged — it remains the source for Polygon `avg_iv` specifically when a ticker is fetched directly rather than ingested from a handoff.
 
 **PIPELINE_011** → § Operational heuristics, "Pass 1 data does not carry forward as authoritative into Pass 2." The v2.3 rule was a hard operational guard against context compaction in long screening sessions: Pass 2 must always re-fetch Schwab dealer metrics live, never reusing Pass 1 values even if they appear present in conversation history, because compaction can silently approximate numeric values that Pass 2 decisions require to be exact. The behavioral intent — that Pass 1 numeric regime reads are starting context, not validated inputs — is load-bearing for the runtime and is preserved in the heuristic as the standing Pass 1 / Pass 2 data-boundary rule. The specific compaction behavior that motivated the rule (Claude Sonnet 4.6 / Opus 4.6 context compaction active in beta as of 2026-03) is a platform-behavior observation documented in the v2.3 source; the runtime rule it produced is durable regardless of whether compaction behavior changes. Body-text references in legacy report legends (e.g., "Rules applied: PIPELINE_011") remain valid.
 
-**SCORING_001** → `engineering_only/PASS1_MCP_REFERENCE_v3.0.md` (forthcoming). The v2.3 rule established that BC Score, Spring Score, and Composite Score are pass-through context values only — no formula computation occurs anywhere in the active pipeline, and no entry should be blocked or approved based solely on Composite Score until a formula and threshold are formally implemented. In v3.0 this situation is unchanged: the scoring modules remain unimplemented, and PASS1 does not gate entries on these scores. The pass-through constraint and the storage bounds (BC Score 0–28, Spring Score 0–12) are preserved in engineering-only as reference against the schema and the `c4_batch_ai_screening_job.py` payload. The v3.0 runtime does not reference these scores in any trigger evaluation or eligible-set determination. Body-text references in legacy report legends (e.g., "Rules applied: SCORING_001") remain valid; the legend entry resolves to the engineering-only destination.
+**SCORING_001** → `engineering_only/PASS1_MCP_REFERENCE_v4.0.md` (forthcoming). The v2.3 rule established that BC Score, Spring Score, and Composite Score are pass-through context values only — no formula computation occurs anywhere in the active pipeline, and no entry should be blocked or approved based solely on Composite Score until a formula and threshold are formally implemented. In v3.0 this situation is unchanged: the scoring modules remain unimplemented, and PASS1 does not gate entries on these scores. The pass-through constraint and the storage bounds (BC Score 0–28, Spring Score 0–12) are preserved in engineering-only as reference against the schema and the `c4_batch_ai_screening_job.py` payload. The v3.0 runtime does not reference these scores in any trigger evaluation or eligible-set determination. Body-text references in legacy report legends (e.g., "Rules applied: SCORING_001") remain valid; the legend entry resolves to the engineering-only destination.
 
 
 ## Appendix — formulas and reference tables
@@ -204,8 +204,8 @@ Before per-candidate evaluation begins, three conditions must hold:
 | Output state | Meaning | What it carries | Pass 2 disposition |
 |---|---|---|---|
 | Eligible | Candidate passed all applicable trigger gates; a structure and direction are determined | Structure, direction, candidate zone (strike range + DTE band), sizing band note, confidence, data-quality labels | Enters Pass 2 queue |
-| NO_TRADE | Candidate refused for this screening run on a named basis | Named refusal reason, eligible alternatives with lower confidence, structure = NONE for primary. Full detail (Wyckoff read, dealer read, volatility read, alternatives, recheck trigger) renders in the Alternatives Summary section per REPORT_FORMAT_v3.0.5. | Does not enter Pass 2; alternatives may re-enter as separate candidates if operator directs |
-| WAIT | Candidate is structurally screenable but a required input is degraded or absent | Named degraded input, recheck instruction, WAIT confidence below primary NO_TRADE. Full detail (Wyckoff read, dealer read, volatility read, recheck trigger) renders in the Alternatives Summary section per REPORT_FORMAT_v3.0.5. | Does not enter Pass 2 until input is refreshed and candidate is re-screened |
+| NO_TRADE | Candidate refused for this screening run on a named basis | Named refusal reason, eligible alternatives with lower confidence, structure = NONE for primary. Full detail (Wyckoff read, dealer read, volatility read, alternatives, recheck trigger) renders in the Alternatives Summary section per REPORT_FORMAT_v4.0.0. | Does not enter Pass 2; alternatives may re-enter as separate candidates if operator directs |
+| WAIT | Candidate is structurally screenable but a required input is degraded or absent | Named degraded input, recheck instruction, WAIT confidence below primary NO_TRADE. Full detail (Wyckoff read, dealer read, volatility read, recheck trigger) renders in the Alternatives Summary section per REPORT_FORMAT_v4.0.0. | Does not enter Pass 2 until input is refreshed and candidate is re-screened |
 | WAIT — near event risk (block) | Earnings within EARNINGS_BLOCK_DAYS | Named earnings date and days remaining | Does not enter Pass 2; re-screens fresh in next session after earnings pass |
 | WAIT — near event risk (caution) | Earnings within EARNINGS_CAUTION_DAYS, outside block window | Named earnings date, days remaining, operator-approval gate | Does not enter Pass 2 unless operator explicitly redirects in current session |
 
@@ -221,7 +221,7 @@ Before per-candidate evaluation begins, three conditions must hold:
 
 **Confidence band discipline.**
 
-Specific base-confidence values and confidence deltas are MCP-internal output-formatting parameters documented in `engineering_only/PASS1_MCP_REFERENCE_v3.0.md` (forthcoming), preserving the v2.3 SIGNAL_009 reference values (base 75/60, deltas −20/−30) as engineering-only reference. The runtime band discipline is:
+Specific base-confidence values and confidence deltas are MCP-internal output-formatting parameters documented in `engineering_only/PASS1_MCP_REFERENCE_v4.0.md` (forthcoming), preserving the v2.3 SIGNAL_009 reference values (base 75/60, deltas −20/−30) as engineering-only reference. The runtime band discipline is:
 
 | Recommendation type | Confidence band | Ordering rule |
 |---|---|---|
@@ -262,7 +262,7 @@ Per GUARDRAILS and DEALER. Reproduced here as Pass 1 quick reference.
 
 **Engineering-only cross-reference.**
 
-Content owned by `engineering_only/PASS1_MCP_REFERENCE_v3.0.md` (forthcoming) and not reproduced in this file:
+Content owned by `engineering_only/PASS1_MCP_REFERENCE_v4.0.md` (forthcoming) and not reproduced in this file:
 
 | Content | v2.3 source anchor |
 |---|---|

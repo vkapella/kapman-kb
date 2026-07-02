@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.0-alpha
-file_last_updated: 2026-05-10
+kb_version: 4.0.0-alpha
+file_last_updated: 2026-07-02
 status: scaffolding
 tier: T4
 ---

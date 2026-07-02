@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.0
-file_last_updated: 2026-05-13
+kb_version: 4.0.0
+file_last_updated: 2026-07-02
 status: active
 tier: T3
 ---

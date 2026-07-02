@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 3.0.0-alpha
-file_last_updated: 2026-05-13
+kb_version: 4.0.0-alpha
+file_last_updated: 2026-07-02
 status: draft
 tier: —
 ---
@@ -11,7 +11,7 @@ tier: —
 
 ## Purpose
 
-This file documents the dealer-metrics pipeline mechanics extracted from `llm_runtime/DEALER_v3.0.md` legacy anchors. The runtime DEALER file owns the behavioral contract for interpreting delivered dealer outputs; this file owns the formulas, thresholds, filters, defaults, and data-depth mechanics that produce those outputs.
+This file documents the dealer-metrics pipeline mechanics extracted from `llm_runtime/DEALER_v4.0.md` legacy anchors. The runtime DEALER file owns the behavioral contract for interpreting delivered dealer outputs; this file owns the formulas, thresholds, filters, defaults, and data-depth mechanics that produce those outputs.
 
 ## Contents
 
@@ -86,15 +86,15 @@ This file documents the dealer-metrics pipeline mechanics extracted from `llm_ru
 - `DEALER_001` → Contents / Contract filtering.
 - `DEALER_002` → Appendix / Per-contract GEX formula.
 - `DEALER_003` → Contents / Strike-level GEX aggregation.
-- `DEALER_004` → Contents / Gamma flip computation; runtime interpretation remains in `llm_runtime/DEALER_v3.0.md`.
+- `DEALER_004` → Contents / Gamma flip computation; runtime interpretation remains in `llm_runtime/DEALER_v4.0.md`.
 - `DEALER_005` → Contents / Wall computation filters.
 - `DEALER_006` → Contents / Wall ranking weights.
 - `DEALER_007` → Contents / Wall ranking sort and top-N truncation.
 - `DEALER_008` → Appendix / GEX slope formula.
-- `DEALER_009` → Contents / DGPI components; runtime tier semantics remain in `llm_runtime/DEALER_v3.0.md`.
+- `DEALER_009` → Contents / DGPI components; runtime tier semantics remain in `llm_runtime/DEALER_v4.0.md`.
 - `DEALER_010` → Contents / Position class.
 - `DEALER_011` → Contents / Confidence classifier.
-- `DEALER_012` → Contents / Dealer-status resolution; runtime label semantics remain in `llm_runtime/DEALER_v3.0.md`.
+- `DEALER_012` → Contents / Dealer-status resolution; runtime label semantics remain in `llm_runtime/DEALER_v4.0.md`.
 - `DEALER_013` → Contents / Secondary metadata-status classifier.
 - `DEALER_014` → Contents / Runtime defaults.
 

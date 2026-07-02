@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 3.0.4
-file_last_updated: 2026-06-27
+kb_version: 4.0.0
+file_last_updated: 2026-07-02
 status: active
 tier: T0
 ---
@@ -11,7 +11,7 @@ tier: T0
 
 ## Principle
 
-KapMan is a systematic options-trading framework that combines Wyckoff phase analysis, dealer gamma positioning, and volatility regime assessment to identify high-probability directional setups and translate them into precisely-sized options structures for live capital. This file is the orientation layer — the first file Claude reads when project knowledge loads, and the file that maps the KB for every session that follows. Two files share the T0 tier and divide its authority cleanly: this file owns the KB's organization and structure — the file inventory, the tier authority model, and the mode-detection logic that determines what kind of output a session produces; `KAPMAN_GUARDRAILS_v3.0.md` owns the runtime's behavioral rules — what Claude refuses, what requires explicit override, and what constitutes a guardrail violation. Neither file subordinates the other; they govern different surfaces. When this file and GUARDRAILS appear to conflict, the question to ask is not which T0 file wins but which domain the contested point belongs to: if it is about how the KB is organized or how a session begins, this file is authoritative; if it is about what Claude does or refuses during a session, GUARDRAILS is authoritative. No other file in the KB may relax a GUARDRAILS rule, expand a GUARDRAILS override, or redefine a GUARDRAILS refusal — including this one.
+KapMan is a systematic options-trading framework that combines Wyckoff phase analysis, dealer gamma positioning, and volatility regime assessment to identify high-probability directional setups and translate them into precisely-sized options structures for live capital. This file is the orientation layer — the first file Claude reads when project knowledge loads, and the file that maps the KB for every session that follows. Two files share the T0 tier and divide its authority cleanly: this file owns the KB's organization and structure — the file inventory, the tier authority model, and the mode-detection logic that determines what kind of output a session produces; `KAPMAN_GUARDRAILS_v4.0.md` owns the runtime's behavioral rules — what Claude refuses, what requires explicit override, and what constitutes a guardrail violation. Neither file subordinates the other; they govern different surfaces. When this file and GUARDRAILS appear to conflict, the question to ask is not which T0 file wins but which domain the contested point belongs to: if it is about how the KB is organized or how a session begins, this file is authoritative; if it is about what Claude does or refuses during a session, GUARDRAILS is authoritative. No other file in the KB may relax a GUARDRAILS rule, expand a GUARDRAILS override, or redefine a GUARDRAILS refusal — including this one.
 
 ---
 
@@ -21,22 +21,22 @@ The table below is the authoritative map of all files in `llm_runtime/`. Read it
 
 | File | Tier | Doc type | Status | Owns |
 |---|---|---|---|---|
-| `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` | T0 | orientation | active | KB organization, tier model, mode detection, session entry sequence |
-| `KAPMAN_GUARDRAILS_v3.0.md` | T0 | principle | active | Runtime behavioral rules, refusals, override discipline, data-honesty floor |
-| `DEALER_v3.0.md` | T1 | principle | active | Dealer regime interpretation, gamma flip bands, DGPI tiers, macro and ticker-layer regime reads |
-| `RISK_v3.0.md` | T1 | principle | active | Position sizing bands, regime-conditional size caps, absolute ceiling, CSP sizing denominator |
-| `SIGNAL_v3.0.md` | T1 | principle | active | Entry and exit trigger contracts, Wyckoff veto, dealer-timing veto, spread mandate |
-| `VOLATILITY_v3.0.md` | T1 | principle | active | IV source authority by pass, IV/HV regime tiers, spread-mandate reinforcement, FULL/LIMITED/INVALID volatility label |
-| `WYCKOFF_v3.0.md` | T1 | principle | active | Phase classification, event detection, propose-confirm protocol, Wyckoff veto inputs |
-| `PASS1_SCREENING_v3.0.md` | T2 | runbook | active | Macro gate sequencing, per-candidate eligibility determination, candidate zone assembly |
-| `PASS2_VALIDATION_v3.0.md` | T2 | runbook | active | Live chain validation, exact strike and expiration selection, spread-mandate enforcement |
-| `PORTFOLIO_MGMT_v3.0.md` | T2 | runbook | active | Open position monitoring, exit trigger evaluation, DTE decay warnings, P/L reporting |
+| `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md` | T0 | orientation | active | KB organization, tier model, mode detection, session entry sequence |
+| `KAPMAN_GUARDRAILS_v4.0.md` | T0 | principle | active | Runtime behavioral rules, refusals, override discipline, data-honesty floor |
+| `DEALER_v4.0.md` | T1 | principle | active | Dealer regime interpretation, gamma flip bands, DGPI tiers, macro and ticker-layer regime reads |
+| `RISK_v4.0.md` | T1 | principle | active | Position sizing bands, regime-conditional size caps, absolute ceiling, CSP sizing denominator |
+| `SIGNAL_v4.0.md` | T1 | principle | active | Entry and exit trigger contracts, Wyckoff veto, dealer-timing veto, spread mandate |
+| `VOLATILITY_v4.0.md` | T1 | principle | active | IV source authority by pass, IV/HV regime tiers, spread-mandate reinforcement, FULL/LIMITED/INVALID volatility label |
+| `WYCKOFF_v4.0.md` | T1 | principle | active | Phase classification, event detection, propose-confirm protocol, Wyckoff veto inputs |
+| `PASS1_SCREENING_v4.0.md` | T2 | runbook | active | Macro gate sequencing, per-candidate eligibility determination, candidate zone assembly |
+| `PASS2_VALIDATION_v4.0.md` | T2 | runbook | active | Live chain validation, exact strike and expiration selection, spread-mandate enforcement |
+| `PORTFOLIO_MGMT_v4.0.md` | T2 | runbook | active | Open position monitoring, exit trigger evaluation, DTE decay warnings, P/L reporting |
 | `JOURNAL_MGMT_v4.0.md` | T2 | runbook | active | Journal persistence: session-start memory load, lineage-ID derivation, three-log write, precedence/reconcile |
-| `REPORT_FORMAT_v3.0.md` | T3 | format | active | Report section order, field caps, footnote overflow mechanics, mode-specific layout |
-| `REPORT_STYLE_v3.0.md` | T3 | style | active | Visual presentation, HTML/CSS spec, typography, color |
-| `REPORT_TEMPLATE_PASS1_v3.0.html` | T3 | template | active | Canonical HTML skeleton for Pass 1 screening report; column structure, section order, legend/footer pre-built per REPORT_FORMAT and REPORT_STYLE; consumed by Runtime Rule 6 at render time |
-| `SYSTEM_PARAMS_v3.0.md` | T3 | reference | active | Operator-configurable numeric parameters consumed by name across runtime files |
-| `SIC_SECTOR_MAP_v3.0.md` | T3 | reference | active | SIC code to sector ETF benchmark mapping |
+| `REPORT_FORMAT_v4.0.md` | T3 | format | active | Report section order, field caps, footnote overflow mechanics, mode-specific layout |
+| `REPORT_STYLE_v4.0.md` | T3 | style | active | Visual presentation, HTML/CSS spec, typography, color |
+| `REPORT_TEMPLATE_PASS1_v4.0.html` | T3 | template | active | Canonical HTML skeleton for Pass 1 screening report; column structure, section order, legend/footer pre-built per REPORT_FORMAT and REPORT_STYLE; consumed by Runtime Rule 6 at render time |
+| `SYSTEM_PARAMS_v4.0.md` | T3 | reference | active | Operator-configurable numeric parameters consumed by name across runtime files |
+| `SIC_SECTOR_MAP_v4.0.md` | T3 | reference | active | SIC code to sector ETF benchmark mapping |
 
 ---
 
@@ -46,10 +46,10 @@ The KB is organized into four tiers. Tier number is an authority ranking within 
 
 | Tier | Label | Files | Authority scope |
 |---|---|---|---|
-| T0 | Orientation and guardrails | `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md`, `KAPMAN_GUARDRAILS_v3.0.md` | KB structure and organization (this file); runtime behavioral rules, refusals, and override discipline (GUARDRAILS). T0 files are not superseded by any lower tier. |
-| T1 | Domain principles | `DEALER_v3.0.md`, `RISK_v3.0.md`, `SIGNAL_v3.0.md`, `VOLATILITY_v3.0.md`, `WYCKOFF_v3.0.md` | Interpretive rules for their named domain. T1 files govern how data is read and how regime is assessed. They may not relax a T0 rule. |
-| T2 | Runbooks | `PASS1_SCREENING_v3.0.md`, `PASS2_VALIDATION_v3.0.md`, `PORTFOLIO_MGMT_v3.0.md`, `JOURNAL_MGMT_v4.0.md` | Operational sequencing — what Claude does, in what order, with what inputs, at each stage of a session. T2 files apply T1 principles; they do not override them. |
-| T3 | Reference and format | `REPORT_FORMAT_v3.0.md`, `REPORT_STYLE_v3.0.md`, `SYSTEM_PARAMS_v3.0.md`, `SIC_SECTOR_MAP_v3.0.md` | Output presentation, operator-configurable parameters, and lookup tables. T3 files shape how output looks and what parameter values are in effect; they do not govern interpretation or behavior. |
+| T0 | Orientation and guardrails | `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md`, `KAPMAN_GUARDRAILS_v4.0.md` | KB structure and organization (this file); runtime behavioral rules, refusals, and override discipline (GUARDRAILS). T0 files are not superseded by any lower tier. |
+| T1 | Domain principles | `DEALER_v4.0.md`, `RISK_v4.0.md`, `SIGNAL_v4.0.md`, `VOLATILITY_v4.0.md`, `WYCKOFF_v4.0.md` | Interpretive rules for their named domain. T1 files govern how data is read and how regime is assessed. They may not relax a T0 rule. |
+| T2 | Runbooks | `PASS1_SCREENING_v4.0.md`, `PASS2_VALIDATION_v4.0.md`, `PORTFOLIO_MGMT_v4.0.md`, `JOURNAL_MGMT_v4.0.md` | Operational sequencing — what Claude does, in what order, with what inputs, at each stage of a session. T2 files apply T1 principles; they do not override them. |
+| T3 | Reference and format | `REPORT_FORMAT_v4.0.md`, `REPORT_STYLE_v4.0.md`, `SYSTEM_PARAMS_v4.0.md`, `SIC_SECTOR_MAP_v4.0.md` | Output presentation, operator-configurable parameters, and lookup tables. T3 files shape how output looks and what parameter values are in effect; they do not govern interpretation or behavior. |
 
 **Conflict resolution protocol.** When two files appear to conflict:
 
@@ -64,7 +64,7 @@ The KB is organized into four tiers. Tier number is an authority ranking within 
 
 ## Mode detection
 
-Mode determines the structure of Claude's output for the entire session. Mode is read from operator intent at session start, before any data is fetched or any output is produced. Three modes are active; a fourth (Calibration/Review) is reserved for Stage 3 and is not yet an active detection target — see the reserved-mode note below. `REPORT_FORMAT_v3.0.md` owns the section order and layout rules for each mode; this file owns the logic that selects the mode.
+Mode determines the structure of Claude's output for the entire session. Mode is read from operator intent at session start, before any data is fetched or any output is produced. Three modes are active; a fourth (Calibration/Review) is reserved for Stage 3 and is not yet an active detection target — see the reserved-mode note below. `REPORT_FORMAT_v4.0.md` owns the section order and layout rules for each mode; this file owns the logic that selects the mode.
 
 **The three modes.**
 
@@ -101,19 +101,19 @@ Call `Schwab get_datetime()` to establish the current market date. Confirm wheth
 Apply the mode detection sequence in § Mode detection above. If mode cannot be determined from operator input, ask before proceeding. Do not fetch data speculatively while waiting for mode confirmation.
 
 **3. Load journal memory and announce.**
-Load the `kapman-journal` `memory/` files — `positions.md`, `overrides.md`, `watchlist.md` — as session-start context, and announce what was loaded, distinguishing "loaded, N records" from "file not loaded" from "loaded but empty." Memory is a convenience cache, not authority: when live operator or broker input, or a pasted export, disagrees with memory, the live value wins and the mismatch is surfaced — never silently resolved. Numeric regime reads are never persisted as authoritative; the sole exemption is the entry-time snapshot in `positions.md`. `JOURNAL_MGMT_v4.0.md` owns the load mechanics, paths, and precedence; `KAPMAN_GUARDRAILS_v3.0.md` owns the memory-not-authority floor and the no-persist exemption. In the connected-repo context (Claude Code on the web with `kapman-journal` attached) the files are read directly; in a plain project session they arrive by operator paste or attachment, and if not provided the "not loaded" condition is announced and the session proceeds.
+Load the `kapman-journal` `memory/` files — `positions.md`, `overrides.md`, `watchlist.md` — as session-start context, and announce what was loaded, distinguishing "loaded, N records" from "file not loaded" from "loaded but empty." Memory is a convenience cache, not authority: when live operator or broker input, or a pasted export, disagrees with memory, the live value wins and the mismatch is surfaced — never silently resolved. Numeric regime reads are never persisted as authoritative; the sole exemption is the entry-time snapshot in `positions.md`. `JOURNAL_MGMT_v4.0.md` owns the load mechanics, paths, and precedence; `KAPMAN_GUARDRAILS_v4.0.md` owns the memory-not-authority floor and the no-persist exemption. In the connected-repo context (Claude Code on the web with `kapman-journal` attached) the files are read directly; in a plain project session they arrive by operator paste or attachment, and if not provided the "not loaded" condition is announced and the session proceeds.
 
 **4. Derive lineage and stage the input handoff (when an export is pasted).**
 When the operator supplies a viewer/v2 or tradelog export this session, derive the `lineage_id` from the payload's `exported_at` — never the session clock — per `JOURNAL_MGMT_v4.0.md` (`VS-` viewer, `TL-` tradelog), write the export to the source-partitioned handoff path, and echo `lineage_id` + `row_count` + `as_of` back in-session so the lineage is visible. `JOURNAL_MGMT_v4.0.md` owns the derivation format and the write paths. Skip when no export is pasted this session.
 
 **5. Run the macro gate (Screening and Hybrid modes only).**
-Fetch SPY dealer metrics via `Schwab get_dealer_metrics(["SPY"])`. Evaluate SPY spot vs. gamma flip and DGPI tier per `DEALER_v3.0.md`. If hostile macro is active, output the Macro Regime card per `REPORT_FORMAT_v3.0.md` and restrict the eligible set per `KAPMAN_GUARDRAILS_v3.0.md`. Skip this step in Portfolio mode — the macro gate governs new entries only.
+Fetch SPY dealer metrics via `Schwab get_dealer_metrics(["SPY"])`. Evaluate SPY spot vs. gamma flip and DGPI tier per `DEALER_v4.0.md`. If hostile macro is active, output the Macro Regime card per `REPORT_FORMAT_v4.0.md` and restrict the eligible set per `KAPMAN_GUARDRAILS_v4.0.md`. Skip this step in Portfolio mode — the macro gate governs new entries only.
 
 **6. Load position context (Portfolio and Hybrid modes only).**
-Map the open positions from the tradelog `portfolio_snapshot` export (the §A2 contract; a broker screenshot, CSV, or manual record is the fallback) to the position context schema, and read entry-time context from `positions.md` matched by `(instrument_key, account_id)`, per `PORTFOLIO_MGMT_v3.0.md` Step 1a/1b. Confirm DTE on all open positions against the `DTE_DECAY_WARNING_THRESHOLD` per `SYSTEM_PARAMS_v3.0.md`. Flag any position at or below threshold before mode output.
+Map the open positions from the tradelog `portfolio_snapshot` export (the §A2 contract; a broker screenshot, CSV, or manual record is the fallback) to the position context schema, and read entry-time context from `positions.md` matched by `(instrument_key, account_id)`, per `PORTFOLIO_MGMT_v4.0.md` Step 1a/1b. Confirm DTE on all open positions against the `DTE_DECAY_WARNING_THRESHOLD` per `SYSTEM_PARAMS_v4.0.md`. Flag any position at or below threshold before mode output.
 
 **7. Proceed to mode output.**
-Enter the output sequence for the confirmed mode per `REPORT_FORMAT_v3.0.md`. Do not produce partial output before completing steps 1–6.
+Enter the output sequence for the confirmed mode per `REPORT_FORMAT_v4.0.md`. Do not produce partial output before completing steps 1–6.
 
 **Sequence summary.**
 
@@ -142,7 +142,7 @@ complete. A suppressed field without a named reason is a Rule 5 violation. In Po
 mode this rule applies to every open position individually — the manifest covers all
 positions before the first position block is generated. The mandatory field list for
 Portfolio mode is defined in the mandatory pre-output self-audit table in
-`REPORT_FORMAT_v3.0.md`.
+`REPORT_FORMAT_v4.0.md`.
 
 The self-audit has a second half — the log manifest. Before surfacing any Pass 1 or Pass 2
 output, also confirm that a staged journal entry exists for every logged determination this
@@ -156,7 +156,7 @@ reliably enforced.
 
 ## Legacy anchors (for legend citations and back-compat)
 
-No v2.3 rule IDs map to this file. `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v3.0.md` is a
+No v2.3 rule IDs map to this file. `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md` is a
 net-new v3.0 construct; the v2.3 antecedent (`KAPMAN_PROJECT_INSTRUCTIONS_v2.3.md`)
 carried no discrete rule IDs — its content was distributed across behavioral rules now
-in `KAPMAN_GUARDRAILS_v3.0.md` and format rules now in `REPORT_FORMAT_v3.0.md`.
+in `KAPMAN_GUARDRAILS_v4.0.md` and format rules now in `REPORT_FORMAT_v4.0.md`.

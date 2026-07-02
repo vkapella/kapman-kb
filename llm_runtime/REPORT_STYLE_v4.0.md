@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: style
-kb_version: 3.0.5
-file_last_updated: 2026-06-28
+kb_version: 4.0.0
+file_last_updated: 2026-07-02
 status: active
 tier: T3
 ---
@@ -65,23 +65,23 @@ REPORT_STYLE is tier T3 — the visual implementation layer. It sits alongside R
 
 | Source file | What REPORT_STYLE consumes | How REPORT_STYLE uses it |
 |---|---|---|
-| `REPORT_FORMAT_v3.0.md` (T3) | Field cap numeric values; footnote numbering convention; source bar placement rule; legend/footer internal order | Implements column-width CSS from field caps; implements superscript CSS for footnote references; implements source bar visual block; implements legend/footer visual block |
-| `PORTFOLIO_MGMT_v3.0.md` (T2) | Lifecycle state labels (Open/Advisory/Exited/Expired); DTE decay warning flag format; Advisory flag format | Assigns semantic row class and badge treatment per state label |
-| `KAPMAN_GUARDRAILS_v3.0.md` (T0) | Urgency mandate for Expired positions; override acknowledgment placement | Implements critical visual tier (`.expired`) for Expired rows; ensures override acknowledgment text is visually distinct in subtitle or footnote position |
-| `DEALER_v3.0.md` (T1) | Dealer-confidence labels (high/medium/low/invalid); chain quality badge vocabulary | Maps dealer-confidence labels and chain quality labels to tag color classes |
-| `SIGNAL_v3.0.md` (T1) | Confidence band labels (High/Med/Low); action labels (ACT TODAY/MONITOR/NO_TRADE/WAIT) | Maps action labels to row class and badge class |
+| `REPORT_FORMAT_v4.0.md` (T3) | Field cap numeric values; footnote numbering convention; source bar placement rule; legend/footer internal order | Implements column-width CSS from field caps; implements superscript CSS for footnote references; implements source bar visual block; implements legend/footer visual block |
+| `PORTFOLIO_MGMT_v4.0.md` (T2) | Lifecycle state labels (Open/Advisory/Exited/Expired); DTE decay warning flag format; Advisory flag format | Assigns semantic row class and badge treatment per state label |
+| `KAPMAN_GUARDRAILS_v4.0.md` (T0) | Urgency mandate for Expired positions; override acknowledgment placement | Implements critical visual tier (`.expired`) for Expired rows; ensures override acknowledgment text is visually distinct in subtitle or footnote position |
+| `DEALER_v4.0.md` (T1) | Dealer-confidence labels (high/medium/low/invalid); chain quality badge vocabulary | Maps dealer-confidence labels and chain quality labels to tag color classes |
+| `SIGNAL_v4.0.md` (T1) | Confidence band labels (High/Med/Low); action labels (ACT TODAY/MONITOR/NO_TRADE/WAIT) | Maps action labels to row class and badge class |
 
 **What REPORT_STYLE does not own.**
 
 | Concern | Owner |
 |---|---|
-| Which sections appear in which modes | `REPORT_FORMAT_v3.0.md` |
-| Field cap word/line counts | `REPORT_FORMAT_v3.0.md` |
-| When a lifecycle state is assigned | `PORTFOLIO_MGMT_v3.0.md` |
-| When the DTE decay warning fires | `PORTFOLIO_MGMT_v3.0.md`, `SYSTEM_PARAMS_v3.0.md` |
-| When the Expired state requires acknowledgment | `PORTFOLIO_MGMT_v3.0.md` |
+| Which sections appear in which modes | `REPORT_FORMAT_v4.0.md` |
+| Field cap word/line counts | `REPORT_FORMAT_v4.0.md` |
+| When a lifecycle state is assigned | `PORTFOLIO_MGMT_v4.0.md` |
+| When the DTE decay warning fires | `PORTFOLIO_MGMT_v4.0.md`, `SYSTEM_PARAMS_v4.0.md` |
+| When the Expired state requires acknowledgment | `PORTFOLIO_MGMT_v4.0.md` |
 | Label vocabulary for any badge | The T1 file that owns the domain |
-| Override discipline | `KAPMAN_GUARDRAILS_v3.0.md` |
+| Override discipline | `KAPMAN_GUARDRAILS_v4.0.md` |
 
 ---
 
@@ -89,7 +89,7 @@ REPORT_STYLE is tier T3 — the visual implementation layer. It sits alongside R
 
 **`KAPMAN_REPORT_STYLE_GLOSSARY_v2.3.md` — full migration.**
 
-REPORT_STYLE_v3.0.md is the direct successor to `KAPMAN_REPORT_STYLE_GLOSSARY_v2.3.md`. All v2.3 content migrates; nothing is dropped. The following v2.3 sections map to v3.0 Appendix locations:
+REPORT_STYLE_v4.0.md is the direct successor to `KAPMAN_REPORT_STYLE_GLOSSARY_v2.3.md`. All v2.3 content migrates; nothing is dropped. The following v2.3 sections map to v3.0 Appendix locations:
 
 | v2.3 section | v3.0 Appendix section | Changes in v3.0 |
 |---|---|---|
@@ -274,7 +274,7 @@ All badges: `display: inline-block`, `padding: 0 4px`, `border-radius: 2px`, `fo
 | `.col-confidence` | 88px min  | center | Screening table col 11 — band label |
 
 Note: These classes are defined in the template extension block in
-`REPORT_TEMPLATE_PASS1_v3.0.html`, not in the reference CSS block below.
+`REPORT_TEMPLATE_PASS1_v4.0.html`, not in the reference CSS block below.
 They are listed here as the authoritative column-width and alignment spec.
 
 ---
