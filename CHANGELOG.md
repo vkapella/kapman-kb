@@ -1,5 +1,16 @@
 # KapMan KB Changelog
 
+## 2026-07-02 — Tooling: harden `verify_anchors.sh` against a vacuous pass when `rg` is unavailable (closes #86)
+
+### Changed — validation script only (no KB content)
+
+`scripts/verify_anchors.sh`: the ID-extraction pipeline (`xargs rg … || true`) silently produced an **empty ID set and a
+"passed" verdict** when no `rg` binary was on PATH (xargs can't invoke shell-function shims; exit 127 was swallowed).
+Now: prefers `rg`, falls back to `grep -hoE` (same 107 IDs verified); guards the xargs exit status (0/1-BSD/123-GNU
+no-match OK, 126/127/signals hard-fail); refuses to pass when archive markdown exists but zero IDs extract; per-ID INDEX
+lookup switched to plain `grep -Fq`. Output now names the extractor. Tested: real pass (107 mapped), mixed
+files-without-IDs pass, missing-ID failure, zero-extraction refusal.
+
 ## 2026-07-02 — v4.0 cutover complete — Stage F closeout: pilots pass, `_v3.0 → _v4.0` rename sweep lands (closes #78)
 
 ### Stage F pilots (validation, no KB edits required)
