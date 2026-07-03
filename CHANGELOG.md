@@ -1,5 +1,22 @@
 # KapMan KB Changelog
 
+## 2026-07-03 — Pass-1 spring-first priority ordering: eligible set, flagged queue, report rows (closes #90)
+
+### Changed — `llm_runtime/` (runtime rule addition; operator must re-upload to project knowledge)
+
+**`llm_runtime/PASS1_SCREENING_v4.0.md`** (`4.0.0 → 4.0.1`): new principle block "The eligible set and the
+flagged-review queue are ordered by entry cohort — spring-cohort first." Spring cohort = accumulation-family regime +
+confirmed phase-C `spring`/`shakeout` (bearish mirror: distribution-family + confirmed `utad`). Attention-ordering
+only — no change to tier-gate thresholds, vetoes, dispositions, sizing bands, or structures. Provenance: pinned
+2026-07-02 economics study (docs/ECONOMICS_STUDY_2026-07-02.md; v2 docs/economics_2026-07-02.md) — spring-entry long
+calls are the only CI-positive entry cohort on the broad backtest universe. KB-side pilot; viewer promotion of the
+deterministic cohort tag is a September 2026 re-evaluation decision (drafted turn-by-turn with operator, approved
+as-is 2026-07-03).
+
+**`llm_runtime/REPORT_FORMAT_v4.0.md`** (`4.0.0 → 4.0.1`): new block "Screening-table rows render in entry-cohort
+order" — Eligible spring-cohort first then descending confidence, WAIT rows next (cohort-first within the group),
+NO_TRADE last; presentation only.
+
 ## 2026-07-02 — Pipeline-feed spec: record viewer screen v1.1 — stale-snapshot force-flag + ISO macro as_of (closes #87)
 
 ### Changed — engineering-only contract tracking (no runtime change; `llm_runtime/` untouched)

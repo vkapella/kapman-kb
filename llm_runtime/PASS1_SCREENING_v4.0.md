@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.0
-file_last_updated: 2026-07-02
+kb_version: 4.0.1
+file_last_updated: 2026-07-03
 status: active
 tier: T2
 ---
@@ -115,6 +115,12 @@ Regime reads established at Pass 1 — dealer metrics, volatility metrics, Polyg
 **The eligible-set summary surfaces before Pass 2 begins.**
 
 After all candidates have been evaluated, Pass 1 assembles and surfaces the eligible set — every candidate that received an Eligible output, with its structure, direction, and candidate zones — for operator review before Pass 2 begins. Candidates that received NO_TRADE or WAIT outputs are listed with their reasons. The operator may add, remove, or redirect candidates at this point before Pass 2 begins; any addition at this stage must go through the Pass 1 trigger sequence before it enters the eligible set. Pass 2 does not begin until the operator has reviewed the eligible-set summary.
+
+**The eligible set and the flagged-review queue are ordered by entry cohort — spring-cohort first.**
+
+The spring cohort is every candidate whose current reading is an accumulation-family regime (`accumulation` or `reaccumulation`) with a confirmed bullish phase-C decisive test (`spring` or `shakeout`); the direction mirror is a distribution-family regime with a confirmed `utad` for bearish candidates. When Pass 1 surfaces the eligible-set summary, spring-cohort candidates render first, ahead of trend-continuation candidates; within each cohort the existing confidence ordering applies. The same ordering governs the flagged-reading review queue: when multiple readings await the flagged-reading exchange, spring-cohort candidates are presented for resolution first. Under current tier-gate calibration fresh springs commonly arrive `pipeline-flagged` (the reaccumulation confidence plateau), so without this ordering the highest-value cohort tends to sit unresolved behind auto-accepted continuation names — the ordering puts operator attention there first.
+
+This is an attention-ordering rule, not a gate or sizing change. It does not alter tier-gate thresholds, veto outcomes, dispositions, sizing bands, or structure constraints; a flagged spring is still flagged and a vetoed spring is still refused. Provenance: the pinned 2026-07-02 economics study — spring-entry long calls were the only entry cohort whose mean-return confidence interval excluded zero on the broad backtest universe, while fresh-trend chase entries were breakeven at best; the bearish mirror rests on the battery's event-edge finding (the UTAD is the only bear-side entry edge), not yet on option-space economics. This rule is a KB-side pilot: whether deterministic cohort tagging moves into the viewer screen as a computed priority column is a September 2026 re-evaluation decision.
 
 
 ## Workflow integration

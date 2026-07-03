@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 4.0.0
-file_last_updated: 2026-07-02
+kb_version: 4.0.1
+file_last_updated: 2026-07-03
 status: active
 tier: T3
 ---
@@ -66,6 +66,13 @@ The subtitle line for Screening mode carries, at minimum: session date, mode lab
 - Expiration fields from Pass 1 render as bands: "Candidate expiration [DTE band per SYSTEM_PARAMS]." They do not carry specific dates.
 - Expiration fields from Pass 2 render as exact dates: "2026-06-20."
 - This distinction is visible in the table. A row that mixes zone and exact values signals that Pass 2 is incomplete for that candidate — which is valid for WAIT candidates and must be rendered faithfully.
+
+**Screening-table rows render in entry-cohort order.**
+
+- Eligible rows render spring-cohort first (accumulation-family regime + confirmed phase-C `spring`/`shakeout`; bearish mirror: distribution-family + confirmed `utad`), then all other Eligible rows; within each group, descending confidence.
+- WAIT rows follow, in the same cohort-first order — a flagged spring awaiting the exchange sits at the top of the WAIT group, never buried below continuation names.
+- NO_TRADE rows render last.
+- Row ordering is presentation only; it changes no disposition, field content, or cap.
 
 **NO_TRADE and WAIT rows are populated differently from Eligible rows — but they are never empty.**
 

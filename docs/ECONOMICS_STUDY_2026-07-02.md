@@ -195,6 +195,13 @@ COMPLETE 60-bar windows (first onsets are 2026-06-15; 60 trading bars ≈
    up-onsets (0/6 at archive time) and the markdown side (weaker everywhere).
 5. Apply the N≥20 readability discipline per cell throughout — the same gates
    the viewer UI uses.
+6. Assess the KB-side spring-first priority ordering rule (added 2026-07-03,
+   #90: PASS1_SCREENING + REPORT_FORMAT 4.0.1): did the model apply the
+   ordering consistently across live Pass-1 runs, and did flagged springs get
+   operator attention first? If live data confirms the spring cohort's edge
+   and the rule proved useful, decide on promoting deterministic cohort
+   tagging into viewer code (computed setup_class/priority column in
+   pass1_screen.py, with tests).
 
 ## Caveats
 
