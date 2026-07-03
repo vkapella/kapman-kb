@@ -1,0 +1,33 @@
+/Volumes/OWC Envoy Pro SX/App Development/kapman-polygon-mcp-v2/backtest/calibrate_targets.py:68: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  return {p.stem: pd.read_csv(p, index_col=0, parse_dates=True) for p in files}
+measuring 144 tickers  [cohort] ...
+
+=== ATM LONG CALL, DTE=90  [cohort] ===
+entry   exit         iv path         n  win%    mean     med     PF          CI(mean)
+markup  flip         crush15      2043   28%     -7%    -35%   0.84   [-11%, -2%]
+markup  flip         flat         2043   34%     +1%    -22%   1.04   [-3%, +6%]
+markup  flip         pop15        2043   42%     +9%    -11%   1.32   [+5%, +14%]
+markup  flip         rich_entry   2043   25%    -14%    -35%   0.64   [-18%, -10%]
+markup  target/stop  crush15      2008   45%     -5%    -15%   0.85   [-8%, -1%]
+markup  target/stop  flat         2008   45%     -4%    -15%   0.90   [-7%, +0%]
+markup  target/stop  pop15        2008   46%     -2%    -14%   0.94   [-5%, +2%]
+markup  target/stop  rich_entry   2008   44%    -10%    -15%   0.69   [-13%, -7%]
+spring  flip         crush15      2211   25%     +7%    -57%   1.14   [+0%, +14%]
+spring  flip         flat         2211   27%    +14%    -46%   1.33   [+7%, +21%]
+spring  flip         pop15        2211   29%    +21%    -34%   1.58   [+14%, +28%]
+spring  flip         rich_entry   2211   25%     -4%    -54%   0.92   [-9%, +2%]
+
+=== ATM LONG CALL, DTE=180  [cohort] ===
+entry   exit         iv path         n  win%    mean     med     PF          CI(mean)
+markup  flip         crush15      2043   28%     -9%    -25%   0.70   [-12%, -6%]
+markup  flip         flat         2043   37%     +1%    -12%   1.06   [-2%, +5%]
+markup  flip         pop15        2043   50%    +12%     +0%   1.71   [+9%, +15%]
+markup  flip         rich_entry   2043   25%    -14%    -26%   0.54   [-17%, -11%]
+markup  target/stop  crush15      2008   46%     -6%    -10%   0.78   [-8%, -3%]
+markup  target/stop  flat         2008   47%     -3%     -8%   0.89   [-5%, -0%]
+markup  target/stop  pop15        2008   48%     +1%     -6%   1.02   [-2%, +3%]
+markup  target/stop  rich_entry   2008   45%     -8%    -10%   0.66   [-10%, -6%]
+spring  flip         crush15      2211   26%     -1%    -43%   0.96   [-6%, +3%]
+spring  flip         flat         2211   29%     +8%    -31%   1.28   [+4%, +13%]
+spring  flip         pop15        2211   34%    +18%    -19%   1.85   [+14%, +23%]
+spring  flip         rich_entry   2211   25%     -8%    -41%   0.78   [-12%, -4%]

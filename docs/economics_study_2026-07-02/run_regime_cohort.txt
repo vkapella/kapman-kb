@@ -1,0 +1,10 @@
+/Volumes/OWC Envoy Pro SX/App Development/kapman-polygon-mcp-v2/backtest/calibrate_targets.py:68: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  return {p.stem: pd.read_csv(p, index_col=0, parse_dates=True) for p in files}
+
+=== regime/event trades on the UNDERLYING  [cohort]  144 tickers ===
+  bull-state   n=2731  mean=  +1.6%  med=  -1.2%  win= 43%  avgW=+13.9%  avgL= -7.8%  PF=1.36  medHold= 17b  medMAE= -5.5%
+  markup       n=2125  mean=  +0.9%  med=  -1.3%  win= 41%  avgW=+10.7%  avgL= -5.9%  PF=1.25  medHold= 15b  medMAE= -4.7%
+  spring+reg   n=2271  mean=  +2.2%  med=  -5.1%  win= 26%  avgW=+30.1%  avgL= -7.7%  PF=1.39  medHold= 21b  medMAE= -7.7%
+
+  benchmark: buy&hold mean per ticker over the window = +110.0%   |  time in a bull regime = 48%
+  (long-only; entry/exit at next-bar open; exit = regime leaves the bull set)

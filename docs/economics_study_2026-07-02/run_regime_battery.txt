@@ -1,0 +1,8 @@
+
+=== regime/event trades on the UNDERLYING  [battery]  25 tickers ===
+  bull-state   n= 534  mean=  +2.3%  med=  -0.5%  win= 46%  avgW=+12.7%  avgL= -6.6%  PF=1.65  medHold= 17b  medMAE= -4.2%
+  markup       n= 437  mean=  +1.2%  med=  -1.3%  win= 41%  avgW=+10.3%  avgL= -5.1%  PF=1.40  medHold= 14b  medMAE= -3.6%
+  spring+reg   n= 388  mean=  +1.8%  med=  -3.9%  win= 33%  avgW=+20.1%  avgL= -7.1%  PF=1.38  medHold= 26b  medMAE= -6.0%
+
+  benchmark: buy&hold mean per ticker over the window = +113.1%   |  time in a bull regime = 52%
+  (long-only; entry/exit at next-bar open; exit = regime leaves the bull set)

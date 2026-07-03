@@ -1,0 +1,8 @@
+measuring 25 tickers  [battery] ...
+
+=== LONG CALL P&L on markup-onset  [battery]  DTE=90, IV=trailing HV (flat) ===
+strike       n   win%   mean ret   med ret     PF
+ATM        413    49%        +0%       -2%   1.00
+5%OTM      413    47%        -0%      -11%   0.99
+  buy call at markup onset; exit on underlying base-touch / -10% stop / expiry.
+  ILLUSTRATIVE: IV=HV held flat (ignores IV pop on up-moves), fixed strike, r=4%.

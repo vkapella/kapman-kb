@@ -1,0 +1,28 @@
+/Volumes/OWC Envoy Pro SX/App Development/kapman-polygon-mcp-v2/backtest/calibrate_targets.py:68: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  return {p.stem: pd.read_csv(p, index_col=0, parse_dates=True) for p in files}
+measuring 144 tickers  [cohort] ...
+
+=== MARKUP -> upside (long calls)  [cohort]  n=2008 onset windows ===
+  touch trigger       within 60 bars:   90%
+  touch conservative  within 60 bars:   79%
+  touch base          within 60 bars:   60%
+  touch stretch       within 60 bars:   41%
+  move% (favorable): median +11.3  |  adverse%: median 10.6  75th 18.8  90th 28.7
+  P(base before -10% stop):   53%
+  P(base before -15% stop):   57%
+
+=== MARKDOWN -> downside (PUT-SELL DANGER)  [cohort]  n=1829 onset windows ===
+  touch trigger       within 60 bars:   90%
+  touch conservative  within 60 bars:   75%
+  touch base          within 60 bars:   46%
+  touch stretch       within 60 bars:   26%
+  move% (favorable): median +10.3  |  adverse%: median 14.2  75th 23.9  90th 37.3
+  P(base before -10% stop):   38%
+  P(base before -15% stop):   42%
+
+=== late-entry decay (MARKUP: enter K bars into the trend) ===
+ K in     n  trigger   cons   base  stretch  medMFE%  medMAE%
+    0  2008      90%    79%    60%      41%    +11.3     10.6
+    5  1619      94%    82%    64%      45%    +11.4     10.0
+   10  1339      95%    84%    69%      50%    +10.7     10.4
+   20   927      97%    91%    78%      61%    +11.7     10.8

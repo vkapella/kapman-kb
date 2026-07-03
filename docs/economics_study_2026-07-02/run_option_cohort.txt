@@ -1,0 +1,10 @@
+/Volumes/OWC Envoy Pro SX/App Development/kapman-polygon-mcp-v2/backtest/calibrate_targets.py:68: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  return {p.stem: pd.read_csv(p, index_col=0, parse_dates=True) for p in files}
+measuring 144 tickers  [cohort] ...
+
+=== LONG CALL P&L on markup-onset  [cohort]  DTE=90, IV=trailing HV (flat) ===
+strike       n   win%   mean ret   med ret     PF
+ATM       2008    45%        -4%      -15%   0.90
+5%OTM     2008    43%        -2%      -22%   0.93
+  buy call at markup onset; exit on underlying base-touch / -10% stop / expiry.
+  ILLUSTRATIVE: IV=HV held flat (ignores IV pop on up-moves), fixed strike, r=4%.

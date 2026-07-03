@@ -1,0 +1,26 @@
+measuring 25 tickers  [battery] ...
+
+=== MARKUP -> upside (long calls)  [battery]  n=414 onset windows ===
+  touch trigger       within 60 bars:   91%
+  touch conservative  within 60 bars:   82%
+  touch base          within 60 bars:   64%
+  touch stretch       within 60 bars:   45%
+  move% (favorable): median +9.9  |  adverse%: median 8.4  75th 16.0  90th 26.3
+  P(base before -10% stop):   60%
+  P(base before -15% stop):   63%
+
+=== MARKDOWN -> downside (PUT-SELL DANGER)  [battery]  n=340 onset windows ===
+  touch trigger       within 60 bars:   89%
+  touch conservative  within 60 bars:   73%
+  touch base          within 60 bars:   49%
+  touch stretch       within 60 bars:   29%
+  move% (favorable): median +9.1  |  adverse%: median 11.8  75th 20.9  90th 41.4
+  P(base before -10% stop):   42%
+  P(base before -15% stop):   46%
+
+=== late-entry decay (MARKUP: enter K bars into the trend) ===
+ K in     n  trigger   cons   base  stretch  medMFE%  medMAE%
+    0   414      91%    82%    64%      45%     +9.9      8.4
+    5   324      94%    85%    67%      48%    +10.6      7.9
+   10   265      97%    87%    71%      57%    +12.6      7.1
+   20   211      97%    91%    78%      66%    +11.0      7.1

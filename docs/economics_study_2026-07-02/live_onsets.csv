@@ -1,0 +1,100 @@
+symbol,onset_date,dir,prev_regime,context,phase,conviction,regime_conf,tags,entry,up_base,up_base_prob,fwd_bars,race,base_touch,base_touch_bar,stop_bar,stopped_then_touched,mae_pct,mfe_pct,exit_flip_date,flip_ret,flip_hold,bull_ret,invalidation
+ADBE,2026-06-15,down,redistribution,redistribution,,66.0,77.0,"sow_breakdown_short, markdown_continuation",205.38,293.37,65.0,12,,,,,,8.17,7.43,,,,,235.23
+AMBA,2026-06-15,up,markdown,distribution,,62.0,68.0,markup_continuation,69.66,121.66,68.0,12,stopped,False,,5,False,13.38,34.94,2026-06-16,-2.17,1,-2.17,61.8
+NTAP,2026-06-15,up,distribution,distribution,,73.0,95.0,markup_continuation,162.065,214.87,68.0,12,in_flight,False,,,False,7.89,1.6,,,,,106.3
+ORCL,2026-06-15,up,markdown,distribution,,62.0,68.0,markup_continuation,190.01,276.5,68.0,12,stopped,False,,4,False,26.94,2.79,2026-06-17,-3.68,2,-3.68,178.8
+RR,2026-06-15,up,markdown,accumulation,,55.0,50.0,"sos_breakout_long, markup_continuation",2.12,3.36,70.0,12,stopped,False,,5,False,14.62,5.66,2026-06-16,-0.94,1,-0.94,2.34
+AMBA,2026-06-16,down,markup,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",68.15,121.66,68.0,11,,,,,,37.93,11.46,2026-06-30,-22.71,9,,76.59
+AMKR,2026-06-16,up,reaccumulation,reaccumulation,,69.0,84.0,"sos_breakout_long, markup_continuation",91,93.46,72.0,11,hit_base,True,0,4,False,24.84,5.81,,,,,72.82
+AVGO,2026-06-16,up,distribution,distribution,,63.0,69.0,markup_continuation,388.705,586.99,68.0,11,in_flight,False,,,False,8.3,6.67,2026-06-25,-4.7,6,-4.7,370.33
+BABA,2026-06-16,down,redistribution,redistribution,,70.0,88.0,"sow_breakdown_short, markdown_continuation",109.51,175.81,65.0,11,,,,,,0.98,16.0,,,,,121.98
+CRM,2026-06-16,down,accumulation,accumulation,,62.0,68.0,"sow_breakdown_short, markdown_continuation",160.25,227.5,70.0,11,,,,,,4.34,8.69,,,,,182.85
+GILT,2026-06-16,down,reaccumulation,distribution,,70.0,88.0,"sow_breakdown_short, markdown_continuation",13.56,26.96,68.0,11,,,,,,3.24,15.12,,,,,16.15
+RR,2026-06-16,down,markup,accumulation,,59.0,61.0,markdown_continuation,2.1,3.36,70.0,11,,,,,,6.67,13.81,2026-06-17,-2.86,1,,3.39
+ZM,2026-06-16,up,distribution,distribution,,67.0,80.0,markup_continuation,91.6,128.71,68.0,11,stopped,False,,5,False,10.19,0.0,2026-06-22,-7.93,3,-7.93,95.36
+AMZN,2026-06-17,down,markup,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",240.12,301.93,68.0,10,,,,,,3.99,6.07,2026-06-24,3.37,4,,262.64
+HAL,2026-06-17,down,reaccumulation,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",36.015,48.63,68.0,10,,,,,,0.0,9.51,2026-07-02,,,,39.78
+META,2026-06-17,down,ranging_undefined,distribution,,63.0,69.0,"sow_breakdown_short, markdown_continuation",572.82,772.4,68.0,10,,,,,,9.68,5.7,,,,,612.49
+NOW,2026-06-17,down,markup,accumulation,,62.0,68.0,markdown_continuation,95.31,127.76,70.0,10,,,,,,12.98,6.21,2026-06-23,1.37,3,,139.2
+ORCL,2026-06-17,down,markup,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",183.01,276.5,68.0,10,,,,,,2.72,24.14,,,,,236.43
+RGC,2026-06-17,down,reaccumulation,distribution,,73.0,95.0,"sow_breakdown_short, markdown_continuation",14.55,48.88,68.0,10,,,,,,2.06,60.14,,,,,22.15
+RR,2026-06-17,up,markdown,accumulation,,55.0,50.0,"sos_breakout_long, markup_continuation",2.16,3.36,70.0,10,stopped,False,,3,False,16.2,3.7,2026-06-18,-2.78,1,-2.78,2.36
+WDAY,2026-06-17,down,markup,accumulation,,62.0,68.0,markdown_continuation,119.492,167.37,70.0,10,,,,,,14.64,6.69,2026-06-24,3.11,4,,158.64
+APPN,2026-06-18,down,redistribution,redistribution,,62.0,68.0,"sow_breakdown_short, markdown_continuation",20.44,31.89,65.0,9,,,,,,20.6,4.75,2026-07-01,-16.44,8,,25.15
+ASTS,2026-06-18,down,markup,accumulation,,62.0,68.0,markdown_continuation,79.664,144.87,70.0,9,,,,,,15.25,20.01,2026-06-19,0.0,0,,133.86
+SHEL,2026-06-18,down,reaccumulation,distribution,,69.0,84.0,"sow_breakdown_short, markdown_continuation",79.45,100.4,68.0,9,,,,,,0.68,4.02,,,,,84.96
+TRI,2026-06-18,down,redistribution,redistribution,,70.0,88.0,"sow_breakdown_short, markdown_continuation",78.12,116.23,65.0,9,,,,,,14.57,2.36,,,,,87.08
+VOYG,2026-06-18,up,distribution,distribution,,65.0,75.0,markup_continuation,37.31,60.71,68.0,9,stopped,False,,0,False,23.67,0.0,2026-06-19,0.0,0,0.0,36.29
+ASTS,2026-06-22,down,ranging_undefined,accumulation,,62.0,68.0,markdown_continuation,71.865,144.87,70.0,8,,,,,,27.76,11.33,2026-06-29,-13.98,5,,133.86
+CAT,2026-06-22,up,distribution,reaccumulation,,73.0,95.0,"sos_breakout_long, markup_continuation",985.25,1017.15,72.0,8,hit_base,True,2,,False,3.7,8.95,,,,,897.41
+CIFR,2026-06-22,up,reaccumulation,reaccumulation,,73.0,95.0,"sos_breakout_long, markup_continuation",26.115,35.76,72.0,8,stopped,False,,4,False,25.77,10.89,,,,,22.04
+CRDO,2026-06-22,up,distribution,reaccumulation,,73.0,95.0,"sos_breakout_long, markup_continuation",277.635,291.9,72.0,8,stopped,False,,3,False,18.72,4.61,,,,,221.81
+SONY,2026-06-22,down,ranging_undefined,accumulation,,59.0,61.0,markdown_continuation,19.48,24.35,70.0,8,,,,,,6.78,0.82,2026-06-23,-3.23,1,,23.0
+VOYG,2026-06-22,up,distribution,distribution,,63.0,69.0,markup_continuation,33.89,60.71,68.0,8,stopped,False,,1,False,15.96,8.94,2026-06-25,-14.87,3,-14.87,36.29
+ZM,2026-06-22,down,markup,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",84.34,128.71,68.0,8,,,,,,8.0,2.46,,,,,103.39
+BE,2026-06-23,up,reaccumulation,reaccumulation,,69.0,84.0,"sos_breakout_long, markup_continuation",327.55,344.45,72.0,7,hit_base,True,0,2,False,24.37,7.24,,,,,276.29
+BP,2026-06-23,down,reaccumulation,distribution,,66.0,77.0,"sow_breakdown_short, markdown_continuation",38.05,54.2,68.0,7,,,,,,0.81,5.28,,,,,42.2
+MBLY,2026-06-23,down,distribution,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",7.96,12.48,68.0,7,,,,,,25.88,3.77,,,,,9.67
+NOW,2026-06-23,up,markdown,accumulation,,55.0,50.0,"sos_breakout_long, markup_continuation",94,127.76,70.0,7,in_flight,False,,,False,4.9,14.55,2026-06-24,-2.45,1,-2.45,97.98
+COP,2026-06-24,down,reaccumulation,distribution,,70.0,88.0,"sow_breakdown_short, markdown_continuation",105.31,159.53,68.0,6,,,,,,1.8,2.49,,,,,115.59
+LUNR,2026-06-24,up,distribution,distribution,,64.0,73.0,markup_continuation,19.25,67.83,68.0,6,in_flight,False,,,False,6.96,16.88,2026-06-25,-3.53,1,-3.53,30.92
+MCHP,2026-06-24,down,markup,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",95.7,117.4,68.0,6,,,,,,1.6,13.43,2026-06-25,4.83,1,,99.78
+MRNA,2026-06-24,up,accumulation,accumulation,,70.0,88.0,"sos_breakout_long, markup_continuation",60.33,75.28,70.0,6,hit_base,True,5,,False,4.01,34.92,2026-06-25,-1.43,1,,55.42
+NN,2026-06-24,down,distribution,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",16.8,29.13,68.0,6,,,,,,11.19,5.12,,,,,21.36
+PLTR,2026-06-24,down,accumulation,redistribution,,70.0,88.0,"sow_breakdown_short, markdown_continuation",111.38,203.92,65.0,6,,,,,,19.3,4.5,,,,,132.72
+QBTS,2026-06-24,down,distribution,reaccumulation,,55.0,50.0,"sow_breakdown_short, markdown_continuation",23.5,37.41,72.0,6,,,,,,5.23,10.94,2026-06-29,0.64,3,,28.22
+RMBS,2026-06-24,down,reaccumulation,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",132.045,206.09,68.0,6,,,,,,1.23,17.83,,,,,154.53
+SLB,2026-06-24,down,distribution,distribution,,63.0,69.0,"sow_breakdown_short, markdown_continuation",46.58,67.51,68.0,6,,,,,,1.93,4.27,,,,,51.99
+SONY,2026-06-24,down,ranging_undefined,accumulation,,60.0,62.0,markdown_continuation,19.77,24.35,70.0,6,,,,,,5.21,2.28,,,,,23.0
+SPCE,2026-06-24,down,distribution,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",2.72,11.43,68.0,6,,,,,,15.44,9.19,,,,,4.74
+WDAY,2026-06-24,up,markdown,accumulation,,55.0,50.0,"sos_breakout_long, markup_continuation",115.77,167.37,70.0,6,in_flight,False,,,False,1.95,18.32,2026-06-25,0.7,1,0.7,135.43
+XOM,2026-06-24,down,distribution,distribution,,66.0,77.0,"sow_breakdown_short, markdown_continuation",135.64,191.83,68.0,6,,,,,,2.58,0.51,,,,,145.86
+ZETA,2026-06-24,up,distribution,distribution,,64.0,73.0,markup_continuation,18.94,32.02,68.0,6,in_flight,False,,,False,6.18,12.8,,,,,17.82
+AI,2026-06-25,down,distribution,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",8.695,13.57,68.0,5,,,,,,11.1,2.24,,,,,10.74
+AVGO,2026-06-25,down,markup,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",370.45,586.99,68.0,5,,,,,,2.48,3.78,,,,,422.89
+BBAI,2026-06-25,down,distribution,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",3.35,7.09,68.0,5,,,,,,12.84,0.6,2026-06-26,-5.97,1,,4.11
+D,2026-06-25,up,distribution,reaccumulation,,69.0,84.0,"sos_breakout_long, markup_continuation",69.59,74.37,72.0,5,in_flight,False,,,False,3.18,0.45,,,,,66.28
+HUBS,2026-06-25,down,accumulation,accumulation,,69.0,84.0,"sow_breakdown_short, markdown_continuation",172.31,280.61,70.0,5,,,,,,12.69,0.0,,,,,200.74
+LHX,2026-06-25,down,redistribution,redistribution,,69.0,84.0,"sow_breakdown_short, markdown_continuation",290.16,334.11,65.0,5,,,,,,4.46,1.01,,,,,305.73
+LUNR,2026-06-25,down,markup,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",18.57,67.83,68.0,5,,,,,,21.16,0.38,,,,,28.92
+MCHP,2026-06-25,up,markdown,distribution,,65.0,75.0,markup_continuation,91.075,117.4,68.0,5,in_flight,False,,,False,9.03,1.04,,,,,85.28
+NOW,2026-06-25,down,ranging_undefined,accumulation,,62.0,68.0,markdown_continuation,90.44,127.76,70.0,5,,,,,,19.06,0.49,2026-06-26,-11.1,1,,139.2
+SOUN,2026-06-25,down,redistribution,accumulation,,64.0,73.0,"sow_breakdown_short, markdown_continuation",6.08,13.17,70.0,5,,,,,,15.3,0.33,2026-06-26,-7.57,1,,7.4
+VOYG,2026-06-25,down,markup,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",28.85,60.71,68.0,5,,,,,,27.97,1.28,2026-06-30,-11.79,3,,48.24
+WDAY,2026-06-25,down,markup,accumulation,,62.0,68.0,markdown_continuation,116.58,167.37,70.0,5,,,,,,17.5,1.31,2026-07-01,-11.62,4,,158.64
+WMT,2026-06-25,down,ranging_undefined,distribution,,63.0,69.0,markdown_continuation,117.29,148.33,68.0,5,,,,,,0.5,8.56,,,,,122.94
+ALB,2026-06-26,down,reaccumulation,distribution,,73.0,95.0,"sow_breakdown_short, markdown_continuation",133,255.96,68.0,4,,,,,,5.17,4.13,,,,,164.61
+CVX,2026-06-26,down,distribution,distribution,,69.0,84.0,"sow_breakdown_short, markdown_continuation",171.37,233.22,68.0,4,,,,,,0.13,3.85,,,,,181.84
+FIVN,2026-06-26,up,ranging_undefined,accumulation,,65.0,75.0,markup_continuation,21.785,21.19,70.0,4,hit_base,True,0,,False,4.93,10.65,,,,,18.15
+MRNA,2026-06-26,up,accumulation,accumulation,,70.0,88.0,"sos_breakout_long, markup_continuation",67.945,75.28,70.0,4,hit_base,True,3,,False,2.42,19.8,,,,,54.97
+BBAI,2026-06-29,down,distribution,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",3.58,7.09,68.0,3,,,,,,5.59,1.68,,,,,4.1
+QBTS,2026-06-29,up,markdown,reaccumulation,,62.0,68.0,markup_continuation,23.35,37.41,72.0,3,in_flight,False,,,False,4.5,5.91,2026-07-01,1.31,2,1.31,22.35
+SOUN,2026-06-29,down,redistribution,accumulation,,67.0,80.0,"sow_breakdown_short, markdown_continuation",6.365,13.17,70.0,3,,,,,,10.13,0.94,,,,,7.4
+AMBA,2026-06-30,up,markdown,distribution,,62.0,68.0,markup_continuation,83.63,121.66,68.0,2,in_flight,False,,,False,8.1,12.4,,,,,61.8
+ASTS,2026-06-30,up,ranging_undefined,accumulation,,64.0,73.0,markup_continuation,86.91,144.87,70.0,2,in_flight,False,,,False,5.82,5.64,2026-07-01,0.59,1,0.59,63.72
+BLDR,2026-06-30,up,redistribution,accumulation,,63.0,69.0,"sos_breakout_long, markup_continuation",88.22,101.36,70.0,2,in_flight,False,,,False,6.41,1.53,,,,,79.09
+EVTL,2026-06-30,down,redistribution,redistribution,,73.0,95.0,"sow_breakdown_short, markdown_continuation",1.72,3.22,65.0,2,,,,,,16.57,0.0,,,,,2.07
+FN,2026-06-30,down,reaccumulation,reaccumulation,,61.0,66.0,"sow_breakdown_short, markdown_continuation",543.79,892.73,72.0,2,,,,,,2.27,10.02,,,,,653.0
+HON,2026-06-30,down,distribution,distribution,,66.0,77.0,"sow_breakdown_short, markdown_continuation",227.31,531.66,68.0,2,,,,,,1.24,3.12,2026-07-01,2.21,1,,444.5
+KTOS,2026-06-30,down,accumulation,redistribution,,73.0,95.0,"sow_breakdown_short, markdown_continuation",50.29,82.0,65.0,2,,,,,,17.08,1.09,,,,,55.23
+PANW,2026-06-30,up,reaccumulation,reaccumulation,,69.0,84.0,"sos_breakout_long, markup_continuation",345.545,336.9,72.0,2,hit_base,True,0,,False,1.32,3.63,,,,,289.69
+QUBT,2026-06-30,down,reaccumulation,reaccumulation,,64.0,73.0,"sow_breakdown_short, markdown_continuation",9.69,15.62,72.0,2,,,,,,3.41,7.74,,,,,11.5
+VOYG,2026-06-30,up,markdown,distribution,,60.0,62.0,markup_continuation,32.25,60.71,68.0,2,in_flight,False,,,False,0.0,14.48,2026-07-01,4.81,1,4.81,36.29
+APPN,2026-07-01,up,markdown,redistribution,,61.0,66.0,markup_continuation,23.8,31.89,65.0,1,in_flight,False,,,False,0.0,3.57,,,,,19.47
+AXON,2026-07-01,up,redistribution,accumulation,,73.0,95.0,"sos_breakout_long, markup_continuation",587.055,665.6,70.0,1,in_flight,False,,,False,1.91,2.72,,,,,482.81
+DLO,2026-07-01,up,accumulation,accumulation,,67.0,79.0,"sos_breakout_long, markup_continuation",14.69,14.1,70.0,1,hit_base,True,0,,False,0.0,5.04,,,,,11.75
+EME,2026-07-01,down,distribution,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",804.64,1069.58,68.0,1,,,,,,0.87,5.12,,,,,866.76
+IREN,2026-07-01,down,distribution,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",42.525,78.86,68.0,1,,,,,,2.1,11.44,,,,,57.19
+NOW,2026-07-01,up,ranging_undefined,accumulation,,61.0,66.0,markup_continuation,106.22,127.76,70.0,1,in_flight,False,,,False,2.24,1.37,,,,,89.39
+QBTS,2026-07-01,down,markup,reaccumulation,,55.0,50.0,"sow_breakdown_short, markdown_continuation",23.655,37.41,72.0,1,,,,,,4.33,5.73,,,,,27.98
+STX,2026-07-01,up,distribution,distribution,,69.0,86.0,markup_continuation,900.75,1307.0,68.0,1,stopped,False,,0,False,11.67,2.48,,,,,801.89
+VOYG,2026-07-01,down,markup,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",33.8,60.71,68.0,1,,,,,,9.23,1.63,,,,,47.85
+BW,2026-07-02,down,reaccumulation,distribution,,63.0,69.0,"sow_breakdown_short, markdown_continuation",,29.91,68.0,0,,,,,,,,,,,,15.56
+CCJ,2026-07-02,down,reaccumulation,reaccumulation,,73.0,95.0,"sow_breakdown_short, markdown_continuation",,155.46,72.0,0,,,,,,,,,,,,110.56
+ED,2026-07-02,up,redistribution,accumulation,,64.0,73.0,"sos_breakout_long, markup_continuation",,117.84,70.0,0,,,,,,,,,,,,108.29
+EQIX,2026-07-02,down,reaccumulation,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",,1213.06,68.0,0,,,,,,,,,,,,1072.92
+FSLR,2026-07-02,down,distribution,distribution,,55.0,50.0,"sow_breakdown_short, markdown_continuation",,393.24,68.0,0,,,,,,,,,,,,263.34
+PCG,2026-07-02,up,accumulation,accumulation,,60.0,62.0,"sos_breakout_long, markup_continuation",,18.23,70.0,0,,,,,,,,,,,,16.37
+SMCI,2026-07-02,down,ranging_undefined,accumulation,,64.0,73.0,markdown_continuation,,43.27,70.0,0,,,,,,,,,,,,36.8
+URA,2026-07-02,down,distribution,distribution,,69.0,84.0,"sow_breakdown_short, markdown_continuation",,67.56,68.0,0,,,,,,,,,,,,47.82
+WDAY,2026-07-02,up,ranging_undefined,accumulation,,63.0,69.0,markup_continuation,,167.37,70.0,0,,,,,,,,,,,,111.5
