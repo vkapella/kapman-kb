@@ -145,6 +145,35 @@ streaks; sizing must survive them.
    forward-log-spec.md quotes the stale PF 1.88; backtest_baseline.py
    constants confirmed OK but still flagged APPROXIMATE.
 
+## Addendum (same day): portfolio-simulation results
+
+The portfolio simulator was approved and built same-day (kapman-polygon-mcp-v2
+`backtest/portfolio_sim.py`, v2 issues #20/#21; results pinned in v2
+`docs/economics_2026-07-02.md` §5; raw outputs archived here as
+`run_sim_cohort_flat.txt` / `run_sim_cohort_crush.txt`). Account-path
+distributions for the spring+flip call stream (2357 cohort trades, premium =
+f% of equity, concurrency-capped, 50% exposure ceiling):
+
+| IV path | f | cap | median year | P(+100%) | P(≤−30% trough) |
+|---|---|---|---|---|---|
+| flat | 1% | 20 | +26.3% | 1.4% | 0.1% |
+| flat | 2% | 20 | +53.8% | 25.2% | 5.4% |
+| flat | 3% | 20 | +63.1% | 34.4% | 13.8% |
+| flat | 5% | 10 | +46.3% | 31.5% | 30.5% |
+| crush15 | 2% | 20 | +20.9% | 10.0% | 17.4% |
+| crush15 | 3% | 20 | +20.8% | 17.1% | 31.7% |
+
+**[KB]** Sizing conclusions: the viable band is **f ≈ 1–3% per trade with
+WIDE breadth (up to ~20 concurrent positions)** — validating the existing
+RISK bands (floor ~1%, top ~3%); 5% per trade is over-Kelly (median plateaus,
+ruin risk explodes). Breadth roughly doubles the median year vs cap=10 —
+many small positions beat few big ones, which cuts against
+concentrate-in-conviction instincts. **A +100% year is a good-year tail
+(~25–34% probability at f=2–3%, flat IV), not a median expectation; under the
+conservative IV band medians halve.** Single-path replay (with the 2021-22
+bear first) ran well below MC medians — sequence risk is real; treat MC
+medians as ceilings.
+
 ## Re-evaluation checklist (run when the forward log has cooked)
 
 **Trigger: ~2026-09-15**, or earlier if ≥20 bullish-context onsets have

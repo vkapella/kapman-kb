@@ -1,0 +1,37 @@
+/Volumes/OWC Envoy Pro SX/App Development/kapman-polygon-mcp-v2/backtest/calibrate_targets.py:68: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  return {p.stem: pd.read_csv(p, index_col=0, parse_dates=True) for p in files}
+measuring 144 tickers  [cohort]  iv_exit_mult=1.0 ...
+trade stream: 2357 spring+flip call trades, mean +16%  median -45%  win 28%
+
+=== REPLAY 2021-2026, start $100,000, exposure ceiling 50% ===
+ f/trade  cap  taken   skip    CAGR  maxDD streak     final $
+    0.5%    5    232   2125   +0.9%  11.3%     32     104,341
+    0.5%   10    447   1910   -0.3%  19.2%     41      98,711
+    0.5%   20    841   1516  +11.2%  19.7%     28     169,832
+    1.0%    5    232   2125   +1.3%  21.4%     32     106,655
+    1.0%   10    447   1910   -1.3%  35.2%     41      93,472
+    1.0%   20    841   1516  +19.1%  35.7%     28     239,346
+    2.0%    5    232   2125   +1.1%  38.7%     32     105,605
+    2.0%   10    447   1910   -5.6%  60.8%     41      75,082
+    2.0%   20    841   1516  +26.1%  59.7%     28     318,696
+    3.0%    5    232   2125   -0.4%  54.1%     32      98,211
+    3.0%   10    447   1910  -12.0%  79.2%     41      52,829
+    3.0%   20    691   1666  +18.0%  74.8%     22     229,187
+    5.0%    5    232   2125   -6.3%  77.1%     32      72,184
+    5.0%   10    405   1952  -21.3%  90.4%     55      30,214
+    5.0%   20    418   1939  -28.4%  93.9%     55      18,879
+
+=== MONTE CARLO: 1-year outcome distribution (full trade population, 4000 bootstrap years) ===
+ f/trade  cap  tr/yr  median yr  P(+100%)  P(<=-30%)  P(<=-50%)
+    0.5%   10     89      +6.5%      0.0%       0.0%       0.0%
+    0.5%   20    168     +12.9%      0.0%       0.0%       0.0%
+    1.0%   10     89     +12.9%      0.0%       0.0%       0.0%
+    1.0%   20    168     +26.3%      1.4%       0.1%       0.0%
+    2.0%   10     89     +25.1%      5.9%       2.6%       0.0%
+    2.0%   20    168     +53.8%     25.2%       5.4%       0.1%
+    3.0%   10     89     +36.6%     17.6%      11.3%       0.7%
+    3.0%   20    138     +63.1%     34.4%      13.8%       1.7%
+    5.0%   10     81     +46.3%     31.5%      30.5%       7.9%
+    5.0%   20     84     +48.8%     32.9%      30.2%       8.0%
+
+  caveats: equity marked at cost between settlements (intratrade drawdown invisible -> maxDD understated); fills at model prices, no slippage/commissions; IV=HV at entry; signals taken first-come; single 2021-26 window; MC is iid (ignores regime clustering).
