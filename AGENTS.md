@@ -1,5 +1,22 @@
 # AGENTS.md
 
+## Scope of this file — MAINTAIN sessions only
+
+This file governs changes TO the knowledge base: scaffolding, rule
+migration, INDEX/CHANGELOG upkeep, validation, and the direct-to-main git
+workflow below.
+
+If the operator is asking you to RUN the methodology — a screening request,
+a pasted viewer or tradelog export, pass 1/pass 2, a portfolio review —
+stop reading here. None of this file's workflow (issues, commits,
+validation scripts) applies to that request. Go to
+`llm_runtime/KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md` and execute its
+session entry sequence; write run artifacts to `kapman-journal`, and treat
+this repo as read-only for the duration of that request.
+
+Mode is per-request: a session may cross between using and maintaining,
+but each request's mode decides which repo is writable.
+
 ## Project overview
 KapMan Knowledge Base is a versioned markdown repository containing the
 operational rules and reference documentation for the KapMan systematic
