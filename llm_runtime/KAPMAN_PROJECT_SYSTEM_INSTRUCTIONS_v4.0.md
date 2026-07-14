@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 4.0.0
-file_last_updated: 2026-07-02
+kb_version: 4.0.1
+file_last_updated: 2026-07-14
 status: active
 tier: T0
 ---
@@ -102,6 +102,8 @@ Apply the mode detection sequence in § Mode detection above. If mode cannot be 
 
 **3. Load journal memory and announce.**
 Load the `kapman-journal` `memory/` files — `positions.md`, `overrides.md`, `watchlist.md` — as session-start context, and announce what was loaded, distinguishing "loaded, N records" from "file not loaded" from "loaded but empty." Memory is a convenience cache, not authority: when live operator or broker input, or a pasted export, disagrees with memory, the live value wins and the mismatch is surfaced — never silently resolved. Numeric regime reads are never persisted as authoritative; the sole exemption is the entry-time snapshot in `positions.md`. `JOURNAL_MGMT_v4.0.md` owns the load mechanics, paths, and precedence; `KAPMAN_GUARDRAILS_v4.0.md` owns the memory-not-authority floor and the no-persist exemption. In the connected-repo context (Claude Code on the web with `kapman-journal` attached) the files are read directly; in a plain project session they arrive by operator paste or attachment, and if not provided the "not loaded" condition is announced and the session proceeds.
+
+Whether `kapman-journal` is attached is determined by checking for the repo directly — attempting to read `memory/positions.md` or listing the repo's path — never by consulting a session's enumerated list of working directories in isolation. That list is a convenience index, not an authority on what's actually reachable on disk, and a repo's absence from it is not evidence the repo is unattached; only a failed read or listing is. This check happens before the "not loaded" announcement, not after — announcing memory as unloaded and then discovering the repo was present the whole time is exactly the failure this note exists to prevent.
 
 **4. Derive lineage and stage the input handoff (when an export is pasted).**
 When the operator supplies a viewer/v2 or tradelog export this session, derive the `lineage_id` from the payload's `exported_at` — never the session clock — per `JOURNAL_MGMT_v4.0.md` (`VS-` viewer, `TL-` tradelog), write the export to the source-partitioned handoff path, and echo `lineage_id` + `row_count` + `as_of` back in-session so the lineage is visible. `JOURNAL_MGMT_v4.0.md` owns the derivation format and the write paths. Skip when no export is pasted this session.

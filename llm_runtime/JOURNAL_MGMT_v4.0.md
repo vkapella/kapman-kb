@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.3
-file_last_updated: 2026-06-28
+kb_version: 4.0.4
+file_last_updated: 2026-07-14
 status: active
 tier: T2
 ---
@@ -21,7 +21,7 @@ Every byte of real position, pick, and outcome data is written to `kapman-journa
 
 **At session start, the runbook loads `memory/` as starting context and announces what it loaded.**
 
-Before any screening or portfolio work, the session reads `memory/positions.md`, `memory/overrides.md`, and `memory/watchlist.md` and states, in-session, what it found — open positions and their entry-time context, any standing overrides, and the active universe — so the operator sees the starting state and can correct it immediately. The load is orientation, not instruction: it reports what was true as of the last write, not what to do now. An empty or absent memory file is reported as such, never silently treated as "no state" — the announcement distinguishes "no open positions recorded" from "positions file not loaded."
+Before any screening or portfolio work, the session reads `memory/positions.md`, `memory/overrides.md`, and `memory/watchlist.md` and states, in-session, what it found — open positions and their entry-time context, any standing overrides, and the active universe — so the operator sees the starting state and can correct it immediately. The load is orientation, not instruction: it reports what was true as of the last write, not what to do now. An empty or absent memory file is reported as such, never silently treated as "no state" — the announcement distinguishes "no open positions recorded" from "positions file not loaded." Confirming the repo is present is a direct filesystem check, not a lookup against any enumerated list of working directories — `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md`'s session entry sequence owns this check; it runs before "not loaded" is ever announced.
 
 **Live operator or broker input always overrides memory, and disagreements are surfaced, never silently resolved.**
 

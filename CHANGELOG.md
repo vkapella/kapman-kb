@@ -1,5 +1,24 @@
 # KapMan KB Changelog
 
+## 2026-07-14 — Session entry: verify kapman-journal on disk before announcing "not loaded" (closes #92)
+
+### Changed — `llm_runtime/` (runtime rule addition; operator must re-upload to project knowledge)
+
+**`llm_runtime/KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md`** (`4.0.0 → 4.0.1`): Step 3 of the
+session entry sequence ("Load journal memory and announce") gains a new paragraph — whether
+`kapman-journal` is attached is determined by a direct filesystem check (read/list the repo path),
+never by consulting a session's enumerated list of working directories in isolation, and this
+check runs before the "not loaded" announcement, not after. Provenance: a live Pass 1 screening
+session (2026-07-14) incorrectly announced the repo as unattached — it checked only the harness's
+working-directory list, not the filesystem — and skipped session-start memory load and journal
+writes as a result, corrected retroactively mid-session once the operator flagged that the repo
+was in fact present and readable. Drafted turn-by-turn with operator, approved as-is 2026-07-14.
+
+**`llm_runtime/JOURNAL_MGMT_v4.0.md`** (`4.0.3 → 4.0.4`): the parallel session-start heuristic
+("At session start, the runbook loads `memory/` as starting context...") gains a one-line
+cross-reference to the same filesystem-check rule, so it's visible from both files rather than
+only the orientation file.
+
 ## 2026-07-03 — Pass-1 spring-first priority ordering: eligible set, flagged queue, report rows (closes #90)
 
 ### Changed — `llm_runtime/` (runtime rule addition; operator must re-upload to project knowledge)
