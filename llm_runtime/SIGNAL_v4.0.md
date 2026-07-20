@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.0
-file_last_updated: 2026-07-02
+kb_version: 4.0.1
+file_last_updated: 2026-07-20
 status: active
 tier: T1
 ---
@@ -17,11 +17,15 @@ SIGNAL owns the named-trigger vocabulary that converts regime reads into runtime
 
 **Heuristic 0 — Near-event-risk veto (fires before all other trigger evaluation)**
 
-When a confirmed earnings date falls within `EARNINGS_BLOCK_DAYS` (per SYSTEM_PARAMS, currently 7 calendar days) of the screening date, the near-event-risk veto fires unconditionally. Output = WAIT. Type = NONE. Rationale = "Near event risk — earnings within [N]d." All other regime reads (Wyckoff, dealer, volatility, macro) are skipped for this candidate.
+The earnings date this heuristic consumes is fetched live from `Finnhub MCP Server:get_earnings_calendar` for the candidate ticker, with a query window from the screening date through the screening date plus `EARNINGS_CAUTION_DAYS` plus a 7-day buffer, so a next-earnings date sitting just beyond the caution window surfaces as context rather than silence. Days are counted by calendar date alone; the reported session hour (`bmo`/`amc`/`dmh`) rides in the rationale as context and never shifts the day count. An operator-declared earnings date stated in the current session takes precedence for that session and is labeled *declared* rather than *validated* in the data-quality surface. Model-internal knowledge is never an earnings-date source — a date that cannot be produced by the tool or the operator is unavailable, per the anti-hallucination floor inherited from `KAPMAN_GUARDRAILS_v4.0.md`.
 
-When a confirmed earnings date falls within `EARNINGS_CAUTION_DAYS` (per SYSTEM_PARAMS, currently 21 calendar days) but outside `EARNINGS_BLOCK_DAYS`, the near-event-risk caution fires. Output = WAIT with operator-approval gate. Rationale = "Earnings [date] — [N]d out. Operator approval required to advance to Eligible." The candidate does not enter the Eligible set until the operator explicitly redirects it in the current session.
+When a confirmed earnings date falls within `EARNINGS_BLOCK_DAYS` (per SYSTEM_PARAMS, currently 7 calendar days) of the screening date, the near-event-risk veto fires unconditionally. Output = WAIT. Type = NONE. Rationale = "Near event risk — earnings [date] ([session hour]) within [N]d." All other regime reads (Wyckoff, dealer, volatility, macro) are skipped for this candidate.
 
-When no earnings date is available, the veto does not fire. Surface in data-quality output: "Earnings date not provided."
+When a confirmed earnings date falls within `EARNINGS_CAUTION_DAYS` (per SYSTEM_PARAMS, currently 21 calendar days) but outside `EARNINGS_BLOCK_DAYS`, the near-event-risk caution fires. Output = WAIT with operator-approval gate. Rationale = "Earnings [date] ([session hour]) — [N]d out. Operator approval required to advance to Eligible." The candidate does not enter the Eligible set until the operator explicitly redirects it in the current session.
+
+When the tool query returns no earnings date inside the window, the veto does not fire and the absence is a validated read, not a blind spot. Surface in data-quality output: "No earnings within [EARNINGS_CAUTION_DAYS]d — validated via Finnhub [query timestamp]."
+
+When the tool is unavailable or errors and no operator-declared date exists, the screen cannot be evaluated — and a veto that cannot be evaluated never silently passes. The candidate receives WAIT with the same operator-approval gate as the caution window. Rationale = "Earnings screen degraded — Finnhub unavailable. Operator approval required to advance to Eligible." The prior v4.0 behavior (no date → veto does not fire, "Earnings date not provided") is retired; that silent pass is exactly the gap the named source closes.
 
 **Wyckoff veto — entry refused when the confirmed Wyckoff regime does not authorize the candidate's direction.**
 

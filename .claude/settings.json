@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "/Volumes/OWC Envoy Pro SX/App Development/kapman-polygon-mcp-v2",
+      "/Volumes/OWC Envoy Pro SX/App Development/kapman-tradelog",
+      "/Volumes/OWC Envoy Pro SX/App Development/kapman-polygon-viewer"
+    ]
+  }
+}

@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.0
-file_last_updated: 2026-07-02
+kb_version: 4.0.1
+file_last_updated: 2026-07-20
 status: active
 tier: T2
 ---
@@ -36,6 +36,10 @@ This is the same Pass 1 → Pass 2 boundary the dealer-re-fetch heuristic enforc
 **Dealer metrics are re-fetched fresh at the start of every Pass 2 run — this is not optional.**
 
 Before any chain fetch, Pass 2 re-fetches Schwab dealer metrics for every candidate ticker and for SPY. The wall levels and DGPI tier that inform strike selection must come from this fresh fetch, not from values established at Pass 1 or compacted in conversation context. A Pass 2 run that reuses Pass 1 dealer values for strike selection violates the data boundary that PIPELINE_011 (now owned by PASS1) established and that Pass 2 is required to enforce on its own behalf. The fresh fetch also produces the dealer `confidence` rating (`high` / `medium` / `low` / `invalid`) that Pass 2 reads alongside chain quality as two independent dimensions of data confidence — there is no separate `FULL/LIMITED/INVALID` "dealer-status" field; both producers emit `confidence`, and trusted (`high`/`medium`) → full dealer behavior, `low` → floor-of-band, `invalid` → the per-name dealer layer reads as absent.
+
+**The earnings screen is re-run at Pass 2 — a Pass 1 earnings pass does not carry forward across sessions.**
+
+Alongside the fresh dealer fetch, Pass 2 re-runs the Step-0 earnings check for every candidate via `Finnhub MCP Server:get_earnings_calendar`, under the same contract SIGNAL Heuristic 0 defines for Pass 1: block-window dates close the candidate (WAIT, no validation proceeds), caution-window dates require the operator-approval gate if not already granted this session, an unavailable source escalates to the operator gate rather than silently passing, and model-internal knowledge is never a source. This is the same re-fetch-at-decision-time doctrine that governs dealer metrics — an earnings date is a decision input, and the decision is being made now, not at screening time. The check is one call per candidate against an already-filtered eligible set; when Pass 2 runs in the same session as Pass 1 and the Pass-1 earnings read is minutes old, the re-check is a cheap confirmation, and when Pass 2 runs in a later session it is the difference between validating into a known event and validating blind.
 
 **Regime drift is a named heuristic, not an implicit behavior.**
 

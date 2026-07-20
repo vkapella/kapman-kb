@@ -1,5 +1,54 @@
 # KapMan KB Changelog
 
+## 2026-07-20 — Earnings source-of-authority: Finnhub MCP validates earnings exposure (closes #93)
+
+### Changed — `llm_runtime/` (runtime rule additions; operator must re-upload to project knowledge)
+
+**`llm_runtime/SIGNAL_v4.0.md`** (`4.0.0 → 4.0.1`): Heuristic 0 names its data source —
+`Finnhub MCP Server:get_earnings_calendar`, query window = screening date → +`EARNINGS_CAUTION_DAYS`
++ 7d buffer, date-only calendar-day counts with session hour (`bmo`/`amc`/`dmh`) as context.
+Operator-declared dates take session precedence (labeled *declared*); model-internal knowledge is
+never an earnings source. Two outcome changes: a tool query returning no date in-window is a
+**validated absence** ("No earnings within [N]d — validated via Finnhub [timestamp]"), and a tool
+that is unavailable **escalates to the operator-approval WAIT gate** — the prior "no date → veto
+does not fire, 'Earnings date not provided'" silent pass is retired.
+
+**`llm_runtime/PASS1_SCREENING_v4.0.md`** (`4.0.1 → 4.0.2`): Step-0 prose, the §A1 absent-field
+row, and the workflow table replace "KB-side lookup" with the named Finnhub fetch (one call per
+candidate, within the shared 60/min free-tier budget at the 30-symbol batch cap); unavailable-source
+candidates route to the operator-gated WAIT.
+
+**`llm_runtime/PASS2_VALIDATION_v4.0.md`** (`4.0.0 → 4.0.1`): new heuristic "The earnings screen is
+re-run at Pass 2" — same contract as Pass 1, applied at validation time per the re-fetch-at-decision-time
+doctrine that already governs dealer metrics.
+
+**`llm_runtime/PORTFOLIO_MGMT_v4.0.md`** (`4.0.0 → 4.0.1`): new Step 5b + principle block
+"Earnings-exposure advisory" — every Portfolio run fetches each open position's next earnings date
+and flags positions whose expiration falls on or after it ("holds through earnings unless closed or
+rolled"). Non-blocking, fires at any distance, stacks with DTE decay and Regime exit advisories;
+Finnhub-unavailable is labeled data-absent, never silently skipped. Added as item (6) to the Step 7b
+self-audit.
+
+**`llm_runtime/SYSTEM_PARAMS_v4.0.md`** (`4.0.0 → 4.0.1`): `EARNINGS_BLOCK_DAYS` /
+`EARNINGS_CAUTION_DAYS` notes name the source and the fetch-window role; consuming-files columns
+gain PASS2 (both) and PORTFOLIO_MGMT (caution). Values unchanged (7 / 21).
+
+**`llm_runtime/KAPMAN_GUARDRAILS_v4.0.md`** (`4.0.0 → 4.0.1`): *Near event risk* label definition
+names Finnhub (or operator declaration) as the only earnings-date sources, parallel to the
+validated-Schwab-data rule for strikes.
+
+### Added — `engineering_only/`
+
+**`engineering_only/FINNHUB_MCP_REFERENCE_v4.0.md`** (new): tool-surface contract for
+`Finnhub MCP Server` — endpoint parameters, response shape, `bmo`/`amc`/`dmh` semantics, error
+shape, and the free-tier constraints that matter to the runtime (60 calls/min shared budget,
+US scope, ADR estimate-currency caveat — dates only are consumed). PIPELINE_010 precedent.
+
+Provenance: kapman-finnhub-mcp-server deployed to production 2026-07-19; free/premium split
+verified against the Finnhub docs' embedded Swagger spec; operator approved the proposal and its
+four decision points (unavailable→operator gate, Pass-2 re-check, date-only counts, any-distance
+portfolio advisory) 2026-07-20.
+
 ## 2026-07-14 — Session entry: verify kapman-journal on disk before announcing "not loaded" (closes #92)
 
 ### Changed — `llm_runtime/` (runtime rule addition; operator must re-upload to project knowledge)

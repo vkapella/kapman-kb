@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 4.0.0
-file_last_updated: 2026-07-02
+kb_version: 4.0.1
+file_last_updated: 2026-07-20
 status: active
 tier: T3
 ---
@@ -39,8 +39,8 @@ SYSTEM_PARAMS defines values. It does not define what to do with them. The behav
 | `DGPI_NEUTRAL_BAND` | 10 | DGPI magnitude (\|x\|) | DEALER | Below this magnitude (`-10 < DGPI < +10`) the dealer read is **near-neutral** (the producer's "low pressure" band). Matches the producer DGPI bands (kapman-polygon-mcp-v2 `dealer_metrics.py`: <10 low / 10-30 moderate / 30-60 significant / >60 extreme) and the viewer header's go/no-go light. |
 | `DGPI_STRONG_BAND` | 30 | DGPI magnitude (\|x\|) | DEALER | At/above this magnitude the tier is **strongly supportive** (≥ +30) or **hostile** (≤ -30); between `DGPI_NEUTRAL_BAND` and this is moderately-supportive / weakening. The producer's "significant" + "extreme" (>60) bands fold into the strong tier (the KB does not surface a separate 60 cutpoint). |
 | `HOSTILE_MACRO_DGPI_MAX` | -30 | signed DGPI | DEALER, GUARDRAILS | SPY DGPI at/below this (combined with SPY below gamma flip) is the DGPI half of the hostile-macro composite. Set to the hostile tier (-`DGPI_STRONG_BAND`). Because DGPI is log-compressed, SPY's \|DGPI\| is almost always large, so the hostile-macro gate is **sign-dominated** in practice — this threshold mainly prevents firing on a near-neutral SPY. Independently tunable. |
-| `EARNINGS_BLOCK_DAYS` | 7 | calendar days | PASS1, SIGNAL | Hard WAIT. Earnings ≤ 7d from screening date: immediate WAIT output, no further regime evaluation, no override path. |
-| `EARNINGS_CAUTION_DAYS` | 21 | calendar days | PASS1, SIGNAL | Soft WAIT. Earnings 8–21d out: WAIT with named operator-approval gate. Candidate does not advance to Eligible until operator explicitly redirects in current session. |
+| `EARNINGS_BLOCK_DAYS` | 7 | calendar days | PASS1, PASS2, SIGNAL | Hard WAIT. Earnings ≤ 7d from screening date: immediate WAIT output, no further regime evaluation, no override path. Earnings date sourced from `Finnhub MCP Server:get_earnings_calendar` per SIGNAL Heuristic 0; date-only calendar-day count, session hour as context. |
+| `EARNINGS_CAUTION_DAYS` | 21 | calendar days | PASS1, PASS2, SIGNAL, PORTFOLIO_MGMT | Soft WAIT. Earnings 8–21d out: WAIT with named operator-approval gate. Candidate does not advance to Eligible until operator explicitly redirects in current session. Also defines the Step-0 fetch window (screening date + this + 7d buffer) per SIGNAL Heuristic 0. |
 | `DTE_DECAY_WARNING_THRESHOLD` | 21 | calendar days | PORTFOLIO_MGMT | The remaining DTE at or below which PORTFOLIO_MGMT surfaces a DTE decay warning for an open position. Signals that the operator may want to roll or close rather than hold to expiration. Operator-configurable; 21 days is the default, corresponding to the point where theta decay accelerates materially for most structures. |
 | `TIER_GATE_TAU_HIGH` (`τ_high`) | 0.70 | confidence score [0–0.95] | WYCKOFF, PASS1 | **Provisional — calibrate in the Stage-1 pilot.** Auto-accept threshold for the viewer/v2 ingest tier gate. When the gating confidence — `min(regime_confidence, phase_confidence)`, or `regime_confidence` alone when `phase_confidence` is null — is at or above this value, the viewer reading is accepted as `pipeline-accepted` without a propose-confirm exchange (hard force-flags still apply per WYCKOFF). Viewer/v2 confidence is capped at 0.95, so `τ_high` must stay strictly below 0.95. Boundary value resolves to accept. |
 | `TIER_GATE_TAU_LOW` (`τ_low`) | 0.45 | confidence score [0–0.95] | WYCKOFF, PASS1 | **Provisional — calibrate in the Stage-1 pilot.** Flagged-vs-estimation boundary for the viewer/v2 ingest tier gate. When the gating confidence falls in `[τ_low, τ_high)` the reading is `pipeline-flagged` and surfaced for operator resolution; below `τ_low` the viewer reading is not usable as a pipeline reading and the ticker falls to the estimation path (propose-confirm) or UNKNOWN. Boundary value resolves to flagged (conservative). `τ_low ≤ τ_high` is an invariant. |

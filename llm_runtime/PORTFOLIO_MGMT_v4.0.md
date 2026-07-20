@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.0
-file_last_updated: 2026-07-02
+kb_version: 4.0.1
+file_last_updated: 2026-07-20
 status: active
 tier: T2
 ---
@@ -34,11 +34,12 @@ In Portfolio mode, the operator is asking about existing positions only. PORTFOL
 - Step 3: Fetch current spot price and option chain snapshot for each open position, for exit-trigger context and DTE calculation.
 - Step 4: Evaluate the Regime exit advisory per position — compare the entry-time regime snapshot to the current regime across all four decay branches. Surface named decay reasons for any branch that fires.
 - Step 5: Evaluate DTE decay warnings — flag any open position whose remaining DTE has fallen below `DTE_DECAY_WARNING_THRESHOLD` per SYSTEM_PARAMS.
+- Step 5b: Evaluate the Earnings-exposure advisory — fetch the next confirmed earnings date for each open position's ticker via `Finnhub MCP Server:get_earnings_calendar` and flag any position whose expiration falls on or after that date.
 - Step 6: Evaluate exit-trigger proximity. When entry-time Stop and Profit target alert levels are present in position context, compare current spot and current option price to those levels and surface proximity language when either level is imminently relevant. When entry-time alert levels are absent from position context, do not suppress this step — instead apply the SIGNAL approximation formula fresh from current-session data: use current-session Greeks (from broker screenshot or live chain pull), Schwab dealer flip as Stop anchor, nearest call wall above spot as Profit target anchor, and the SIGNAL trail-stop reference band (20–30% mark for long calls and long puts; 15–25% mark for LEAPs; 25–35% bid/ask for long calls and long puts; 20–30% bid/ask for LEAPs). Surface all four mandatory fields per position with an inline note: "Current-session computed — entry-time levels not supplied."
 - Step 7: Assemble and surface the portfolio view. Execute the sub-sequence below in order — do not skip steps.
 
   - Step 7a: State the mandatory per-position field list from REPORT_FORMAT before generating any output. For every open position, confirm a data source or named fallback exists for each field. This manifest is stated inline before the first position block is written.
-  - Step 7b: For each open position, confirm each of the following has a data source or a named fallback reason: (1) current regime summary — DGPI tier, flip-zone, Wyckoff if confirmed this session; (2) Stop alert — anchor identified (Schwab dealer flip), estimated option price computable via delta-gamma approximation, trail mark and trail bid/ask values computable from SIGNAL reference band; (3) Profit target alert — same four fields as Stop alert; (4) DTE decay warning — checked against DTE_DECAY_WARNING_THRESHOLD per SYSTEM_PARAMS; (5) Regime exit advisory — all four branches evaluated or labeled data-absent with named reason. Any field without a data source and without a named fallback reason is a Rule 5 self-report violation and must be surfaced before output is generated.
+  - Step 7b: For each open position, confirm each of the following has a data source or a named fallback reason: (1) current regime summary — DGPI tier, flip-zone, Wyckoff if confirmed this session; (2) Stop alert — anchor identified (Schwab dealer flip), estimated option price computable via delta-gamma approximation, trail mark and trail bid/ask values computable from SIGNAL reference band; (3) Profit target alert — same four fields as Stop alert; (4) DTE decay warning — checked against DTE_DECAY_WARNING_THRESHOLD per SYSTEM_PARAMS; (5) Regime exit advisory — all four branches evaluated or labeled data-absent with named reason; (6) Earnings-exposure advisory — next earnings date fetched via Finnhub and compared to expiration, or labeled data-absent with named reason. Any field without a data source and without a named fallback reason is a Rule 5 self-report violation and must be surfaced before output is generated.
   - Step 7c: Generate the portfolio view table and per-position detail blocks.
   - Step 7d: After all positions are generated, state the output self-audit result: number of positions processed, number of fields computed fresh from current-session data, number of named fallbacks applied.
   - Step 7e: Surface Exited positions summary and Expired positions requiring acknowledgment where applicable.
@@ -60,6 +61,10 @@ Open is the default state for a position that has been entered and has not been 
 **DTE decay warning surfaces when remaining DTE falls below the threshold — it is a monitoring output, not a veto.**
 
 When an open position's remaining DTE falls below `DTE_DECAY_WARNING_THRESHOLD` per SYSTEM_PARAMS, PORTFOLIO_MGMT surfaces a named warning in the portfolio view: the position is approaching expiration and the operator may want to roll or close rather than hold to expiration. The warning does not block the position from remaining Open. It does not change the position's lifecycle state. It is informational, in the same spirit as the Regime exit advisory — it names a condition and surfaces it; the operator decides what to do. Positions in the DTE decay warning zone that also carry an active Regime exit advisory surface both flags together.
+
+**The Earnings-exposure advisory surfaces when an open position's life contains an upcoming earnings date — it is a monitoring output, not a veto.**
+
+At every Portfolio-mode run, the next confirmed earnings date for each open position's ticker is fetched from `Finnhub MCP Server:get_earnings_calendar` — the same earnings source-of-authority the Step-0 screen consumes at Pass 1 and Pass 2 per `SIGNAL_v4.0.md` Heuristic 0, under the same rules: dates counted by calendar date alone, session hour (`bmo`/`amc`) surfaced as context, model-internal knowledge never a source. When the fetched date falls on or before the position's expiration, the advisory fires with a named flag: "Earnings [date] ([session hour]) — [N]d out, inside position life. Position holds through earnings unless closed or rolled." The advisory fires at any distance — an earnings date three weeks before expiration is as much a fact about the position as one tomorrow, and the day count communicates the urgency — but it never blocks, never changes lifecycle state, and stacks alongside the DTE decay warning and Regime exit advisory when several fire together. The entry screens exist so that positions are not *opened* into earnings; this advisory exists because positions legitimately outlive the screen that admitted them — a 45-DTE entry validated clean can acquire earnings exposure the day the next quarter's date is announced. When Finnhub is unavailable, the advisory is labeled data-absent with the named reason and is not silently skipped — absence of the check is surfaced, in the same spirit as the Step 7b self-audit; the advisory does not fire conservatively on absent data.
 
 **Exit-trigger proximity is re-evaluated at every session using current spot and current option price.**
 

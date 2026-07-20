@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.0
-file_last_updated: 2026-07-02
+kb_version: 4.0.1
+file_last_updated: 2026-07-20
 status: active
 tier: T0
 ---
@@ -139,7 +139,7 @@ Any format departure not matching one of the above recognized types is a guardra
 | *Invalid post-filter* | All contracts dropped after min_oi filter |
 | *Below flip* | Spot below gamma flip; macro or ticker-level |
 | *Poor structure* | Setup fails dealer/volatility/Wyckoff alignment |
-| *Near event risk* | Earnings, Fed, or other binary event within blocking window |
+| *Near event risk* | Earnings, Fed, or other binary event within blocking window. Earnings dates come from `Finnhub MCP Server:get_earnings_calendar` (or an operator declaration) — never from model-internal knowledge, parallel to the validated-Schwab-data rule for strikes |
 | *Not provided* | Field is genuinely missing from source data |
 
 **Hostile-regime eligible structures.** When the macro gate refuses bullish long-premium directional entries (long calls / call debit spreads), these structures remain eligible by default:
