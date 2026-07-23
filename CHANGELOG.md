@@ -1,5 +1,32 @@
 # KapMan KB Changelog
 
+## 2026-07-23 — Spring-review fast-path for weekly-conflict-only flagged springs (closes #94)
+
+### Changed — `llm_runtime/` (runtime rule addition; operator must re-upload to project knowledge)
+
+**`llm_runtime/PASS1_SCREENING_v4.0.md`** (`4.0.2 → 4.0.3`): new heuristic "Spring-review fast-path
+(flagged-reading exchange short form)," immediately following the spring-first priority-ordering
+block. When a flagged reading is spring-cohort (accumulation-family regime with a confirmed fresh
+bullish phase-C `spring`/`shakeout`) and the sole flag reason is `weekly_agrees = false`, the
+flagged-reading exchange runs a structured short-form card (spring event date/location, weekly
+trend read with the note that daily-base-inside-weekly-downtrend is expected not anomalous,
+dealer/veto status, invalidation level) instead of the full exchange. Any other or additional flag
+reason routes to the full exchange unchanged. Long-side only — the bearish UTAD mirror keeps the
+full exchange pending option-space economics. No change to tier-gate thresholds, auto-accept
+behavior, unattended-run WAIT disposition, or veto outcomes; carries a standing caution that τ
+recalibration for springs stays frozen until the September 2026 re-evaluation.
+
+**`llm_runtime/WYCKOFF_v4.0.md`** (`4.0.0 → 4.0.1`): the hard force-flags section gains a one-line
+cross-reference noting that a `weekly_agrees` force-flag on a fresh spring-cohort reading resolves
+through the PASS1_SCREENING short-form fast-path when it is the sole flag reason — the flag itself
+still fires and operator resolution is still required.
+
+Provenance: the pinned 2026-07-02 economics study (spring+flip the only CI-positive call cohort on
+the honest universe) plus the 2026-07-23 live forward-log interim read (`markup_continuation`
+realized 28.9% hit-base vs 69.5% expected, n=38 — the worst cell in the production scorecard —
+while the first spring-class validations arrived at day 27 behind auto-accepted continuation
+names). Content operator-approved in a Claude Code session on 2026-07-23.
+
 ## 2026-07-20 — Earnings source-of-authority: Finnhub MCP validates earnings exposure (closes #93)
 
 ### Changed — `llm_runtime/` (runtime rule additions; operator must re-upload to project knowledge)

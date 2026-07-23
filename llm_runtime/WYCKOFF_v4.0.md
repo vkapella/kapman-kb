@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.0
-file_last_updated: 2026-07-02
+kb_version: 4.0.1
+file_last_updated: 2026-07-23
 status: active
 tier: T1
 ---
@@ -58,6 +58,8 @@ A reading that passes the validity gate is then resolved by the **confidence tie
 | Higher-timeframe disagreement | viewer `weekly_agrees == "conflict"` (string field, values `"agree"` / `"conflict"` / `"neutral"`; only `"conflict"` fires) |
 | Stale snapshot | viewer `as_of` / `data_through` outside the run's freshness window |
 | SOW-gated markdown | `regime` is `markdown` with no confirmed `sow` in `last_event` / `setup_tags` |
+
+A `weekly_agrees` force-flag on a fresh spring-cohort reading resolves through the spring-review fast-path defined in `PASS1_SCREENING_v4.0.md` when it is the sole flag reason; the flag itself still fires and the reading still awaits operator resolution.
 
 **Force-flag input completeness.** A hard force-flag can override a high confidence only if the handoff carries the field it reads. Distinguish two states explicitly:
 
