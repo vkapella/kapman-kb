@@ -1,5 +1,5 @@
 ---
-name: swing-tenor
+name: kapman-swing-tenor
 description: |
   Run the weekly KapMan Swing Tenor Scan — a standalone UP/DOWN/CHOP market-tenor
   call for the next 60-120 days (the SWING_DTE_BAND horizon), per the pilot spec
