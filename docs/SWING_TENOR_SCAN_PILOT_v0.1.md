@@ -42,6 +42,15 @@ Pass 1 / Pass 2."*
   term-structure inversion). The re-run replaces the standing call and is
   logged as a new entry with `trigger: invalidation` instead of
   `trigger: scheduled`.
+- **Correction trigger:** a variable that ran **degraded** later proves to have
+  been retrievable at run time (a source that was reachable but wasn't called,
+  or a producer fix landing). The corrected run is logged as a **new**
+  superseding entry with `trigger: correction` and a `supersedes:` lineage
+  field; the superseded entry is **never edited** — the append-only rule is
+  what makes the forward record trustworthy, and a correction that rewrites
+  history is indistinguishable from massaging a call. Only the superseding
+  entry carries the outcome back-fill, so a corrected week contributes exactly
+  one record to the §7 evaluation, not two.
 
 ## 3. Signal layers and variables
 
@@ -62,7 +71,7 @@ same idiom as the KB's degraded-input discipline).
 | 1.5 | Offensive vs defensive: XLY/XLP ratio trend | 13-wk slope up → bullish; down → bearish | Schwab weekly history XLY, XLP |
 | 1.6 | Vol term structure: VIX vs VIX3M | Contango (VIX3M > VIX by >5% **[CAL]**) → trend-supportive; flat (<5%) → chop pressure; backwardation → bearish + chop pressure | Schwab quotes `$VIX`, `$VIX3M` |
 | 1.7 | Realized-vol regime: HV20 vs HV60 (SPY proxy) | HV20 < HV60 and both falling → trend-supportive; HV20 > HV60 rising → destabilizing | kapman-polygon `get_technical_analysis` / options metrics |
-| 1.8 | Longer-dated dealer structure (SPY) | GEX/wall map on expiries 60–120 DTE: large put-wall shelf below spot → downside support context; heavy call walls just overhead → capped-upside chop context. Context only — never a directional score by itself | Schwab `get_dealer_metrics` + far-expiry `get_option_chain`; quarterly OpEx map |
+| 1.8 | Longer-dated dealer structure (SPY) | GEX/wall map on expiries 60–120 DTE: large put-wall shelf below spot → downside support context; heavy call walls just overhead → capped-upside chop context. Context only — never a directional score by itself | **kapman-polygon `get_options_metrics(include=["dealer"], dte_min=60, dte_max=120)`** — the primary source; Schwab `get_dealer_metrics` at the same window is an optional cross-check, not a dependency. Plus the quarterly OpEx map |
 
 Layer score **[CAL]**: majority read of 1.1–1.7 mapped to −2..+2; 1.8 is
 annotation. Chop-pressure flag set when ≥2 of {1.1 ranging, 1.2 flat, 1.4
@@ -174,22 +183,47 @@ actually emit, verified in the 2026-07-28 first run. Corrections from that run:
 
 - **VIX symbology (1.6):** Schwab quotes resolve `$VIX` / `$VIX3M`; the
   `$VIX.X` / `$VIX3M.X` forms are rejected as invalid symbols.
-- **Polygon `iv_term_structure` is unreliable for this scan:** the producer
-  returned null for SPY ("insufficient contracts in short (15–45) or long
-  (60–120 DTE) buckets"). VIX vs VIX3M is the operative term-structure read;
-  `iv_term_structure` is a bonus when present.
+- **Polygon `iv_term_structure` is unavailable for liquid names — do not
+  depend on it.** The producer returned null for SPY ("insufficient contracts
+  in short (15–45) or long (60–120 DTE) buckets"). Root cause confirmed in
+  source (kapman-polygon-mcp-v2#24): the chain fetch paginates in
+  expiration-ascending order and hard-breaks at a 4000-contract cap, so a
+  dense front chain starves the 60–120 DTE bucket every time —
+  `term_structure_long_contracts: 0`. It fails on precisely the liquid
+  underlyings this scan uses. **VIX vs VIX3M is the operative term-structure
+  read**; treat `iv_term_structure` as a bonus that will be absent until #24
+  lands.
 - **1.7 (HV20 vs HV60) re-keyed:** kapman-polygon emits a single
   `historical_volatility` (HV20-class) per scan, and its technical-analysis
   volatility category is ATR/band indicators only — no HV60. Until a longer
   realized-vol window exists, 1.7 is the ATM-IV (30-DTE interp) ÷ HV20 ratio
-  as an implied-vs-realized annotation, scored 0.
-- **1.8 (60–120 DTE dealer map):** Schwab `get_dealer_metrics` was
-  approval-gated in the remote pilot environment (as were the Bigdata.com
-  tearsheet and FMP `economics` / `commitmentOfTraders` — 2.2 and 2.5 ran
-  degraded). Fallback used: the kapman-polygon Wyckoff scan's options block
-  (0–60 DTE dealer read) as near-dated context, cross-asset trends from Schwab
-  weekly histories, and the event map from public schedules. When running
-  interactively, approve those calls to restore the full variable set.
+  as an implied-vs-realized annotation, scored 0. (Tracked upstream:
+  kapman-polygon-mcp-v2#26 — the producer's `historical_volatility()` is
+  already period-parameterized, so this is a surfacing gap, not a
+  computation one.)
+- **1.8 (60–120 DTE dealer map) — CORRECTED 2026-07-28.** The first run scored
+  1.8 degraded after Schwab `get_dealer_metrics` came back approval-gated, and
+  fell back to the Wyckoff scan's embedded 0–60 DTE block. **That was a
+  procedure error, not a capability gap:** kapman-polygon's
+  `get_options_metrics` already accepts `dte_min` / `dte_max`, and calling it
+  at 60–120 returns a clean far-dated read — verified live on SPY the same
+  session: 1630 source contracts, **no truncation** (the date-bounded fetch
+  starts at today+60 and so skips the near-dated mass that truncates the
+  0–120 window). 1.8 is therefore a **fully available variable with no Schwab
+  dependency**; treat a degraded 1.8 as a bug in the run, not an environment
+  limitation. Bigdata.com tearsheet and FMP `economics` /
+  `commitmentOfTraders` remain genuinely approval-gated (2.2, 2.5 degraded;
+  event map from public schedules).
+- **Do not read the far-dated dealer block through `get_wyckoff_scan`** — its
+  embedded options block is hardcoded to 0–60 DTE and cannot be
+  re-parameterized (tracked: kapman-polygon-mcp-v2#27). Call
+  `get_options_metrics` separately for the swing window.
+- **Near-dated `gamma_flip` is not trustworthy without a sanity check.** The
+  0–60 DTE read returned a flip of 497.25 against spot 739.09 (33% below) with
+  `confidence: "high"` and no rejection reason, because the producer has no
+  distance-from-spot guard (tracked: kapman-polygon-mcp-v2#25). Sanity-check
+  any flip against spot before using it, and prefer the far-dated read, which
+  degrades honestly (`no_zero_cross_in_window` → `position_vs_flip: unknown`).
 - **Weekly Wyckoff (1.1) source note:** the kapman-polygon `get_wyckoff_scan`
   runs on daily bars but emits a `weekly_context` block (trend / regime_hint /
   close_vs_30w) plus range + regime + phase — sufficient for the 1.1 read
