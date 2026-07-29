@@ -70,7 +70,7 @@ same idiom as the KB's degraded-input discipline).
 | 1.4 | Breadth: RSP/SPY ratio trend | Equal-weight outperforming (13-wk ratio slope up) → bullish confirmation; deteriorating while SPY holds high → divergence, chop/top pressure | Schwab weekly history RSP, SPY |
 | 1.5 | Offensive vs defensive: XLY/XLP ratio trend | 13-wk slope up → bullish; down → bearish | Schwab weekly history XLY, XLP |
 | 1.6 | Vol term structure: VIX vs VIX3M | Contango (VIX3M > VIX by >5% **[CAL]**) → trend-supportive; flat (<5%) → chop pressure; backwardation → bearish + chop pressure | Schwab quotes `$VIX`, `$VIX3M` |
-| 1.7 | Realized-vol regime: HV20 vs HV60 (SPY proxy) | HV20 < HV60 and both falling → trend-supportive; HV20 > HV60 rising → destabilizing | kapman-polygon `get_technical_analysis` / options metrics |
+| 1.7 | Realized-vol regime: HV20 vs HV60 (SPY proxy) | `hv20_hv60_ratio` < 1 with both falling → calming tape, trend-supportive; ratio > 1 and rising → destabilizing. Boundary (~1.0) → no contribution | kapman-polygon `get_options_metrics(include=["price"])` → `realized_vol.{hv20, hv60, hv20_hv60_ratio}` |
 | 1.8 | Longer-dated dealer structure (SPY) | GEX/wall map on expiries 60–120 DTE: large put-wall shelf below spot → downside support context; heavy call walls just overhead → capped-upside chop context. Context only — never a directional score by itself | **kapman-polygon `get_options_metrics(include=["dealer"], dte_min=60, dte_max=120)`** — the primary source; Schwab `get_dealer_metrics` at the same window is an optional cross-check, not a dependency. Plus the quarterly OpEx map |
 
 Layer score **[CAL]**: majority read of 1.1–1.7 mapped to −2..+2; 1.8 is
@@ -193,14 +193,18 @@ actually emit, verified in the 2026-07-28 first run. Corrections from that run:
   underlyings this scan uses. **VIX vs VIX3M is the operative term-structure
   read**; treat `iv_term_structure` as a bonus that will be absent until #24
   lands.
-- **1.7 (HV20 vs HV60) re-keyed:** kapman-polygon emits a single
-  `historical_volatility` (HV20-class) per scan, and its technical-analysis
-  volatility category is ATR/band indicators only — no HV60. Until a longer
-  realized-vol window exists, 1.7 is the ATM-IV (30-DTE interp) ÷ HV20 ratio
-  as an implied-vs-realized annotation, scored 0. (Tracked upstream:
-  kapman-polygon-mcp-v2#26 — the producer's `historical_volatility()` is
-  already period-parameterized, so this is a surfacing gap, not a
-  computation one.)
+- **1.7 (HV20 vs HV60) — RESOLVED 2026-07-28.** The first run scored 1.7
+  degraded because the producer emitted only a single HV20-class
+  `historical_volatility`. Fixed upstream in kapman-polygon-mcp-v2#26: the
+  price block now carries `realized_vol` =
+  `{hv10, hv20, hv60, hv120, hv20_hv60_ratio, insufficient_history}`. **1.7 is
+  now a fully scored variable**; the ATM-IV ÷ HV20 substitute is retired (it
+  measured implied-vs-realized premium richness, a different signal). Two
+  operating notes: `hv20` is byte-identical to the scalar
+  `historical_volatility`, so either may be cited; and `hv120` returns null at
+  the default `days=100` (~69 trading bars) with `insufficient_history`
+  naming it — request a wider `days` if the 120-day window is wanted, and
+  never read a shorter window as a substitute.
 - **1.8 (60–120 DTE dealer map) — CORRECTED 2026-07-28.** The first run scored
   1.8 degraded after Schwab `get_dealer_metrics` came back approval-gated, and
   fell back to the Wyckoff scan's embedded 0–60 DTE block. **That was a
