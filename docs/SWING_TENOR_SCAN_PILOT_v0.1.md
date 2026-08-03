@@ -74,15 +74,29 @@ same idiom as the KB's degraded-input discipline).
 | 1.8 | Longer-dated dealer structure (SPY) | GEX/wall map on expiries 60–120 DTE: large put-wall shelf below spot → downside support context; heavy call walls just overhead → capped-upside chop context. Context only — never a directional score by itself | **kapman-polygon `get_options_metrics(include=["dealer"], dte_min=60, dte_max=120)`** — the primary source; Schwab `get_dealer_metrics` at the same window is an optional cross-check, not a dependency. Plus the quarterly OpEx map |
 
 Layer score **[CAL]**: majority read of 1.1–1.7 mapped to −2..+2; 1.8 is
-annotation. Chop-pressure flag set when ≥2 of {1.1 ranging, 1.2 flat, 1.4
-divergence, 1.6 flat/inverted} fire.
+annotation. Chop-pressure flag set when **≥2 of the following four** fire.
+Each is defined in producer-checkable terms — nothing outside this list sets
+the flag (see *Rule clarifications*, effective 2026-08-03):
+
+| # | Condition | Fires when |
+|---|---|---|
+| 1.1 ranging | Wyckoff regime is undefined | `regime == "ranging_undefined"` on ≥2 of SPY/QQQ/IWM |
+| 1.2 flat | 40-wk MA slope inside the flat band | \|10-wk slope\| ≤ 0.5% **[CAL]** |
+| 1.4 divergence | Breadth deteriorating | RSP/SPY 13-wk ratio slope < 0 |
+| 1.6 flat/inverted | Vol term structure not trend-supportive | VIX3M/VIX contango < 5% **[CAL]**, including backwardation |
+
+Two readings that look like chop but are **not** flag conditions — a flat
+`weekly_context.trend`, and a cross-index regime-family split (e.g. SPY/IWM
+accumulation-family against QQQ distribution-family) — are recorded in the
+1.1 row and drive the §4 structural confidence brake instead. They shape
+confidence; they never flip the call.
 
 ### Layer 2 — Cross-asset + macro (confirming; weight ×1)
 
 | # | Variable | Read | Source |
 |---|---|---|---|
 | 2.1 | Credit: HYG/LQD ratio trend | 13-wk slope up (spreads tightening) → bullish; rolling over → bearish lead | Schwab weekly history HYG, LQD |
-| 2.2 | Yield curve: 2s10s level + 13-wk change | Steepening from inversion → regime-dependent; rapid bull-steepening (recession signature) → bearish | FMP `economics` treasury rates |
+| 2.2 | Yield curve: 10y level change (primary) + 2s10s slope (qualifier) | **Rate impulse is the primary read, slope qualifies it [CAL]:** 10y 13-wk change ≥ **+40bp** → bearish (rate-shock headwind, whatever the slope does); ≤ **−40bp** with bull-steepening → bearish (recession signature); ≤ **−40bp** with bull-flattening → bullish (easing tailwind); otherwise **neutral**, with the slope level and 13-wk change carried as context. An inverted 2s10s is annotated wherever it occurs | FMP `economics`, `endpoint: treasury-rates` with explicit `from_date`/`to_date` — pull both ends of the 13-wk window and difference them. **The gate on this tool is per-endpoint:** `treasury-rates` is open, `economics-calendar` is plan-gated |
 | 2.3 | Dollar: UUP 13-wk trend | Sharp sustained dollar strength → equity headwind; falling/stable → supportive | Schwab weekly history UUP |
 | 2.4 | Copper/gold ratio 13-wk trend | Up → growth-bullish; down → defensive/bearish | FMP `commodity` (HG, GC) or CPER/GLD weekly history |
 | 2.5 | COT: index-futures net positioning trend | Extremes read contrarian; trend of large-spec positioning read as confirmation | FMP `commitmentOfTraders` (ES/SPX) |
@@ -120,6 +134,22 @@ the KB's conservative-default idiom.
 medium = call made with one dissenting variable group or a sentiment brake
 (3.2); low = call made with any layer degraded. A call with ≥2 degraded
 variables in L1 is reported as CHOP / low regardless of S.
+
+**Structural confidence brake [CAL]** (effective 2026-08-03) — **caps
+confidence at medium**, never flips direction, and applies when either fires:
+
+- **Cross-index regime-family split** — SPY/QQQ/IWM do not agree on regime
+  family (accumulation-family vs distribution-family), e.g. SPY and IWM in
+  reaccumulation against QQQ in distribution.
+- **Flat higher timeframe** — `weekly_context.trend == "flat"` on ≥2 of
+  SPY/QQQ/IWM.
+
+Both are genuine chop evidence, and both were used as chop-*flag* conditions
+before 2026-08-03 even though §3 does not list them. They belong here: a
+directional call made while the indices disagree, or while the weekly
+timeframe has no trend, is a call worth making at reduced confidence — not
+one worth suppressing into CHOP. Suppressing it makes CHOP the residual
+bucket, which is exactly what §7 criterion 3 tests for.
 
 **Invalidation conditions:** every call names 2–4 observable conditions that
 flip or void it (e.g., "weekly close below the 40-wk MA", "VIX term structure
@@ -170,6 +200,41 @@ After 8–12 logged weeks, the pilot is judged on:
    chopped out), not just be the residual bucket.
 4. **Invalidation quality** — invalidation conditions should fire before the
    adverse outcome in the majority of wrong-direction calls.
+
+### Segmentation: runs before and after 2026-08-03
+
+The two entries logged before 2026-08-03 (`tenor_2026-07-28*`,
+`tenor_2026-07-29*`) set the L1 chop-pressure flag on a **broader reading**
+than §3 defines, and both called CHOP at S = +3; under the flag as now
+defined they would have been UP. Those entries are immutable and **stay
+scored as logged** — re-scoring calls that were never made is exactly what
+the append-only rule exists to prevent.
+
+The §7 evaluation must therefore **segment by date**, not pool blindly:
+
+- **Pre-2026-08-03** — broader flag reading, CHOP-biased. Usable for
+  criteria 3 and 4 (CHOP usefulness, invalidation quality); **not**
+  comparable on criteria 1 and 2 (hit rate, confidence calibration).
+- **2026-08-03 onward** — flag and 2.2 band as defined here. This is the
+  comparable series; 2026-08-03 is its first run, and both clarifications
+  reproduce that run's logged scores exactly.
+
+Report both the pooled and post-2026-08-03 hit rates. If they disagree, the
+post-2026-08-03 series governs — and say so in the write-up rather than
+quietly choosing the flattering one.
+
+### Additional re-evaluation item — the S = +3 boundary is load-bearing
+
+With L1 weighted ×2, an **L1 +1 / L2 +1** read lands exactly on the +3 UP
+threshold — and in a mixed tape that is the *common* case, not an edge case.
+The composite therefore separates UP from CHOP far less often than the
+chop-pressure flag does, which leaves a single boolean carrying most of the
+call. Every entry logged so far (3 of 3) sits on S = ±3 or inside it.
+
+At re-evaluation, check explicitly: **does S ever leave the −3..+3 band?**
+If it does not, the −2..+2 layer mapping is too coarse for the ×2/×1
+weighting, and the fix is the mapping or the threshold — not the flag.
+Flagged as a **[CAL]** item; do not self-tune it mid-pilot.
 
 Only a record that clears (1) and (2) earns KB codification (a `MARKET_TENOR`
 runtime file and any Pass-1 wiring — both HITL, drafted turn-by-turn per
@@ -232,3 +297,65 @@ actually emit, verified in the 2026-07-28 first run. Corrections from that run:
   runs on daily bars but emits a `weekly_context` block (trend / regime_hint /
   close_vs_30w) plus range + regime + phase — sufficient for the 1.1 read
   alongside the Schwab weekly candles; no separate weekly-bar engine needed.
+- **kapman-polygon weekly aggregates truncate on `limit` — 2026-08-03.**
+  `get_symbol_data(timespan="week")` applies `limit` to the underlying *daily*
+  rows, so a weekly request returns ~`limit ÷ 5` weeks counted forward from
+  `from_date` (default `limit=30` ≈ 6 weeks), and the truncated series' final
+  bar is a **partial week carrying a wrong close** with no truncation flag in
+  the response (tracked: kapman-polygon-mcp-v2#30). The producer is **not**
+  stale — that was the first-pass misdiagnosis, corrected in
+  `tenor_2026-08-03-c1.md`. Usable as a cross-check with an explicit generous
+  `limit` (≥ 5× the weeks wanted) *and* a check that the last bar's date is the
+  expected week. **Schwab `get_price_history_every_week` remains the source of
+  record for every weekly-bar variable** (1.2–1.5, 2.1, 2.3, 2.4).
+- **Never infer a producer gap from one failed or odd-looking call.** Three of
+  the pilot's first four corrections came from assuming a capability gap
+  instead of testing one: 1.8 assumed Schwab-gated (it was not),
+  Bigdata.com assumed auth-gated (it was not), polygon weekly assumed stale
+  (it was truncating). Vary the parameter, retry, and check the sibling
+  endpoint before writing "degraded" — FMP gating, for instance, is
+  **per-endpoint**: `treasury-rates` is open while `economics-calendar` and
+  `commitmentOfTraders` are genuinely plan-gated.
+
+---
+
+## 9. Rule clarifications — effective 2026-08-03
+
+Both items below are **clarifications of rules already written, not
+recalibrations**: they change no threshold that §4 or §7 depends on, and
+applied to the 2026-08-03 run they reproduce its logged scores exactly
+(L1 +1, L2 +1, S +3, UP / low). Ruled with the operator turn-by-turn per
+`AGENTS.md`; tracked in kapman-kb#96.
+
+### 9.1 The L1 chop-pressure flag is the literal four-item test
+
+§3 previously named the four conditions without defining them, and the runs
+before 2026-08-03 set the flag citing *"1.1 ranging + weekly trend flat + new
+QQQ regime divergence"* — the last two of which are not in the set (1.2 is the
+40-week MA slope, 1.4 is the RSP/SPY breadth ratio). §3 now defines all four
+in producer-checkable terms, and nothing outside them sets the flag.
+
+The two displaced readings are not discarded: they became the §4 **structural
+confidence brake**, capping a call at medium confidence rather than
+suppressing it into CHOP. The reasoning is §7 criterion 3 — a flag broad
+enough to fire in any mixed tape makes CHOP the residual bucket, and a scan
+whose default answer is CHOP cannot beat the always-UP baseline that
+criterion 1 requires.
+
+**This changed a call.** 2026-08-03 is the pilot's first non-CHOP call, at the
+same S = +3 the prior week produced, purely because the flag does not fire
+under the literal test. See §7 for how the pre/post entries are segmented.
+
+### 9.2 2.2 scores off the rate impulse, not the slope alone
+
+2.2 previously carried only *"rapid bull-steepening (recession signature) →
+bearish"*, which left the common cases unscored: the 2026-08-03 run saw
+2y +40bp and 10y +36bp over 13 weeks with the slope −4bp — a genuine equity
+headwind that the rule had no band for, so it scored neutral **by omission**.
+The 13-wk change in the 10y is now the primary read with the slope as
+qualifier, so every curve state scores by rule. At +36bp the 2026-08-03 read
+is neutral **by rule**, one band short of bearish.
+
+The ±40bp thresholds are **[CAL]** and unvalidated — they are a starting band
+chosen to sit just above the largest move the pilot has observed, not a
+calibrated one. Revisit at §7 alongside every other [CAL] item.

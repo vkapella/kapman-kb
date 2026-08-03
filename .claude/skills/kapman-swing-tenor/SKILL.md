@@ -38,16 +38,26 @@ in kapman-kb.
 
 ### Step 1 — Data pulls (all live; degraded = named + scored 0, never assumed favorable)
 Layer 1 (market-internal): Schwab weekly history SPY/QQQ/IWM (~3y) + RSP,
-XLY, XLP (~1y); Schwab quotes `$VIX`, `$VIX3M` (NOT `$VIX.X`); kapman-polygon
-`get_wyckoff_scan` on SPY/QQQ/IWM (SPY with `include_options: true` for the
-near-dated dealer/vol block); Schwab `get_dealer_metrics` SPY at 60–120 DTE
-(if approval-gated, fall back to the Wyckoff scan's 0–60 DTE options block and
-mark 1.8 degraded).
+XLY, XLP (~1y) — **Schwab is the source of record for every weekly bar**;
+Schwab quotes `$VIX`, `$VIX3M` (NOT `$VIX.X`); kapman-polygon
+`get_wyckoff_scan` on SPY/QQQ/IWM; **1.7 and 1.8 both come from kapman-polygon
+`get_options_metrics(symbol="SPY", include=["dealer","price"], dte_min=60,
+dte_max=120)`** — one call, no Schwab dependency. Do NOT read the far-dated
+dealer block through `get_wyckoff_scan` (hardcoded 0–60 DTE), and do NOT
+fall back to the 0–60 block for 1.8 — a degraded 1.8 is a bug in the run,
+not an environment limit (spec §8).
 
 Layer 2 (cross-asset/macro): Schwab weekly history HYG, LQD, UUP, CPER, GLD;
-FMP `economics` treasury rates + US economic calendar (next ~120d) + FMP
-`commitmentOfTraders` ES (if approval-gated, mark 2.2/2.5 degraded and build
-the event map from public FOMC/CPI/OpEx/earnings-season schedules).
+**2.2 via FMP `economics` `endpoint: treasury-rates` with explicit
+`from_date`/`to_date` — pull both ends of the 13-wk window and difference the
+10y and 2s10s. This endpoint is open; the plan gate is per-endpoint, so a
+denied `economics-calendar` does NOT degrade 2.2.** FMP
+`commitmentOfTraders` ES is genuinely plan-gated — mark 2.5 degraded and
+build the event map from public FOMC/CPI/OpEx/earnings-season schedules.
+
+Before writing "degraded" for any variable, vary the parameter and retry, and
+check whether a sibling endpoint or producer serves it. Three of the pilot's
+first four corrections came from assuming a gap instead of testing one.
 
 Layer 3 (sentiment, contrarian check only): Finnhub `get_market_news` +
 Bigdata.com market tearsheet/search for the consensus narrative.
@@ -61,6 +71,14 @@ layer scores (−2..+2), chop-pressure flags.
 S = 2×L1 + L2; boundary/conflict/chop-flag cases resolve to CHOP; confidence
 per the spec's rule (degraded layers cap it); name 2–4 observable invalidation
 conditions.
+
+**The L1 chop-pressure flag is the literal four-item test in spec §3** — 1.1
+`ranging_undefined`, 1.2 flat MA slope, 1.4 negative breadth slope, 1.6
+contango < 5% — and needs **≥2** to fire. Nothing else sets it. A flat weekly
+trend or a cross-index regime-family split is real chop evidence but drives
+the §4 **structural confidence brake** (caps at medium), not the flag. Record
+which conditions fired and which did not; the flag decides UP/DOWN vs CHOP at
+S = ±3, so show the work.
 
 ### Step 4 — Report + log
 1. Render the report (spec §5 section order), labeled *"Standalone context —
