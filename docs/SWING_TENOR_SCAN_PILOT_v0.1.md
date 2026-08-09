@@ -99,7 +99,7 @@ confidence; they never flip the call.
 | 2.2 | Yield curve: 10y level change (primary) + 2s10s slope (qualifier) | **Rate impulse is the primary read, slope qualifies it [CAL]:** 10y 13-wk change ≥ **+40bp** → bearish (rate-shock headwind, whatever the slope does); ≤ **−40bp** with bull-steepening → bearish (recession signature); ≤ **−40bp** with bull-flattening → bullish (easing tailwind); otherwise **neutral**, with the slope level and 13-wk change carried as context. An inverted 2s10s is annotated wherever it occurs | FMP `economics`, `endpoint: treasury-rates` with explicit `from_date`/`to_date` — pull both ends of the 13-wk window and difference them. **The gate on this tool is per-endpoint:** `treasury-rates` is open, `economics-calendar` is plan-gated |
 | 2.3 | Dollar: UUP 13-wk trend | Sharp sustained dollar strength → equity headwind; falling/stable → supportive | Schwab weekly history UUP |
 | 2.4 | Copper/gold ratio 13-wk trend | Up → growth-bullish; down → defensive/bearish | FMP `commodity` (HG, GC) or CPER/GLD weekly history |
-| 2.5 | COT: index-futures net positioning trend | Extremes read contrarian; trend of large-spec positioning read as confirmation | FMP `commitmentOfTraders` (ES/SPX) |
+| 2.5 | COT: index-futures net positioning trend | Extremes read contrarian; trend of large-spec positioning read as confirmation | **CFTC Public Reporting API** (`publicreporting.cftc.gov`, Socrata, free/keyless) — Traders in Financial Futures dataset, E-mini S&P 500. Field names pinned at first verified run per the kapman-mcp lesson (§8, 2026-08-09). FMP `commitmentOfTraders` retired: plan-gated in all five pilot runs |
 | 2.6 | Known-event map, next 120 days | FOMC, CPI, jobs, quarterly OpEx, earnings-season windows. Not scored — defines chop-likely windows and annotates the call | FMP `economics` calendar, Finnhub `get_earnings_calendar`, published FOMC schedule |
 
 Layer score **[CAL]**: majority read of 2.1–2.5 mapped to −2..+2. Chop-pressure
@@ -308,6 +308,27 @@ actually emit, verified in the 2026-07-28 first run. Corrections from that run:
   `limit` (≥ 5× the weeks wanted) *and* a check that the last bar's date is the
   expected week. **Schwab `get_price_history_every_week` remains the source of
   record for every weekly-bar variable** (1.2–1.5, 2.1, 2.3, 2.4).
+- **2.5 (COT) source swapped to the CFTC Public Reporting API — 2026-08-09,
+  operator-approved (kapman-kb#97), pending first-run verification.** FMP
+  `commitmentOfTraders` was plan-gated in all five pilot runs, leaving 2.5
+  permanently degraded and capping every call at low confidence — which
+  starves §7 criterion 2 (confidence calibration). The COT data is public:
+  the CFTC's Socrata API at `publicreporting.cftc.gov` serves the Traders
+  in Financial Futures dataset (E-mini S&P 500) free and keyless, published
+  Fridays ~3:30pm ET for the prior Tuesday. Prerequisites and caveats:
+  - The session environment's network allowlist must include
+    `publicreporting.cftc.gov` (added to the `kapman` cloud environment
+    2026-08-09; environment changes reach only sessions started after the
+    save, so the 2026-08-09 run could not use it).
+  - Per the kapman-mcp lesson, **no field names are pinned here until a run
+    has verified them live** — the first run to score 2.5 from this source
+    records the dataset ID, market name string, and column names it
+    actually used in its data-quality notes, and this spec is then updated
+    to match.
+  - TFF trader categories (dealer / asset manager / leveraged money) are
+    not the legacy commercial/non-commercial split; the "large-spec" read
+    maps to **leveraged money**, with asset-manager positioning carried as
+    context. Confirm at first verified run.
 - **Never infer a producer gap from one failed or odd-looking call.** Three of
   the pilot's first four corrections came from assuming a capability gap
   instead of testing one: 1.8 assumed Schwab-gated (it was not),

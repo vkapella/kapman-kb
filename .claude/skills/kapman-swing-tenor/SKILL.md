@@ -51,9 +51,17 @@ Layer 2 (cross-asset/macro): Schwab weekly history HYG, LQD, UUP, CPER, GLD;
 **2.2 via FMP `economics` `endpoint: treasury-rates` with explicit
 `from_date`/`to_date` — pull both ends of the 13-wk window and difference the
 10y and 2s10s. This endpoint is open; the plan gate is per-endpoint, so a
-denied `economics-calendar` does NOT degrade 2.2.** FMP
-`commitmentOfTraders` ES is genuinely plan-gated — mark 2.5 degraded and
-build the event map from public FOMC/CPI/OpEx/earnings-season schedules.
+denied `economics-calendar` does NOT degrade 2.2.** **2.5 via the CFTC
+Public Reporting API** (`publicreporting.cftc.gov`, Socrata, free/keyless;
+TFF dataset, E-mini S&P 500) — fetch with WebFetch/curl; requires the
+session environment's network allowlist to include the domain (the `kapman`
+environment has it as of 2026-08-09). Pin the exact dataset/field names used
+in the run's data-quality notes until the spec records them (spec §8,
+2026-08-09 note). FMP `commitmentOfTraders` is retired — plan-gated in all
+five pilot runs; do not call it. If CFTC is unreachable (egress-blocked
+environment), mark 2.5 degraded. Build the event map from public
+FOMC/CPI/OpEx/earnings-season schedules either way (`economics-calendar`
+stays gated).
 
 Before writing "degraded" for any variable, vary the parameter and retry, and
 check whether a sibling endpoint or producer serves it. Three of the pilot's
