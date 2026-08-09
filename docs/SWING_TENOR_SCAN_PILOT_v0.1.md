@@ -99,7 +99,7 @@ confidence; they never flip the call.
 | 2.2 | Yield curve: 10y level change (primary) + 2s10s slope (qualifier) | **Rate impulse is the primary read, slope qualifies it [CAL]:** 10y 13-wk change ≥ **+40bp** → bearish (rate-shock headwind, whatever the slope does); ≤ **−40bp** with bull-steepening → bearish (recession signature); ≤ **−40bp** with bull-flattening → bullish (easing tailwind); otherwise **neutral**, with the slope level and 13-wk change carried as context. An inverted 2s10s is annotated wherever it occurs | FMP `economics`, `endpoint: treasury-rates` with explicit `from_date`/`to_date` — pull both ends of the 13-wk window and difference them. **The gate on this tool is per-endpoint:** `treasury-rates` is open, `economics-calendar` is plan-gated |
 | 2.3 | Dollar: UUP 13-wk trend | Sharp sustained dollar strength → equity headwind; falling/stable → supportive | Schwab weekly history UUP |
 | 2.4 | Copper/gold ratio 13-wk trend | Up → growth-bullish; down → defensive/bearish | FMP `commodity` (HG, GC) or CPER/GLD weekly history |
-| 2.5 | COT: index-futures net positioning trend | Extremes read contrarian; trend of large-spec positioning read as confirmation | **CFTC Public Reporting API** (`publicreporting.cftc.gov`, Socrata, free/keyless) — Traders in Financial Futures dataset, E-mini S&P 500. Field names pinned at first verified run per the kapman-mcp lesson (§8, 2026-08-09). FMP `commitmentOfTraders` retired: plan-gated in all five pilot runs |
+| 2.5 | COT: index-futures net positioning trend | Extremes read contrarian; trend of large-spec positioning read as confirmation | **CFTC Public Reporting API** (`publicreporting.cftc.gov`, Socrata, free/keyless) — Traders in Financial Futures dataset, E-mini S&P 500. Field surface verified live and pinned in §8 (2026-08-09). FMP `commitmentOfTraders` retired: plan-gated in all five pilot runs |
 | 2.6 | Known-event map, next 120 days | FOMC, CPI, jobs, quarterly OpEx, earnings-season windows. Not scored — defines chop-likely windows and annotates the call | FMP `economics` calendar, Finnhub `get_earnings_calendar`, published FOMC schedule |
 
 Layer score **[CAL]**: majority read of 2.1–2.5 mapped to −2..+2. Chop-pressure
@@ -309,26 +309,50 @@ actually emit, verified in the 2026-07-28 first run. Corrections from that run:
   expected week. **Schwab `get_price_history_every_week` remains the source of
   record for every weekly-bar variable** (1.2–1.5, 2.1, 2.3, 2.4).
 - **2.5 (COT) source swapped to the CFTC Public Reporting API — 2026-08-09,
-  operator-approved (kapman-kb#97), pending first-run verification.** FMP
+  operator-approved (kapman-kb#97); VERIFIED LIVE 2026-08-09 (kapman-kb#98;
+  first verified run feeds `tenor_2026-08-09-c2.md`).** FMP
   `commitmentOfTraders` was plan-gated in all five pilot runs, leaving 2.5
   permanently degraded and capping every call at low confidence — which
   starves §7 criterion 2 (confidence calibration). The COT data is public:
   the CFTC's Socrata API at `publicreporting.cftc.gov` serves the Traders
   in Financial Futures dataset (E-mini S&P 500) free and keyless, published
-  Fridays ~3:30pm ET for the prior Tuesday. Prerequisites and caveats:
-  - The session environment's network allowlist must include
-    `publicreporting.cftc.gov` (added to the `kapman` cloud environment
-    2026-08-09; environment changes reach only sessions started after the
-    save, so the 2026-08-09 run could not use it).
-  - Per the kapman-mcp lesson, **no field names are pinned here until a run
-    has verified them live** — the first run to score 2.5 from this source
-    records the dataset ID, market name string, and column names it
-    actually used in its data-quality notes, and this spec is then updated
-    to match.
+  Fridays ~3:30pm ET for the prior Tuesday — verified: the Tuesday
+  2026-08-04 report carried `dataUpdatedAt` 2026-08-07T19:30Z (~3:30pm ET
+  Friday). Verified surface, per the kapman-mcp lesson:
+  - **Dataset:** TFF **Futures Only**, Socrata ID **`gpe5-46if`**
+    (`https://publicreporting.cftc.gov/resource/gpe5-46if.json`) — the 2.5
+    read. The futures+options sibling is `yw9f-hn96` ("TFF - Combined"),
+    context only. **Do not use `98ig-3k9y` / `dw8z-x6ih`** — same display
+    names, stale since 2022. `udgc-27he` ("TFF_All") mixes FutOnly and
+    Combined rows and double-counts without a `futonly_or_combined`
+    filter — avoid.
+  - **Market filter:** `contract_market_name = 'E-MINI S&P 500'` (CFTC
+    contract market code `13874A`; `market_and_exchange_names` = `E-MINI
+    S&P 500 - CHICAGO MERCANTILE EXCHANGE`). Near-collisions exist in the
+    same dataset — `S&P 500 Consolidated` (`13874+`) and `MICRO E-MINI
+    S&P 500 INDEX` (`13874U`) — so filter on the exact string or code,
+    never a `like '%S&P 500%'` match.
+  - **Columns:** date `report_date_as_yyyy_mm_dd` (ISO timestamp);
+    large-spec read **`lev_money_positions_long` /
+    `lev_money_positions_short`** (plus `lev_money_positions_spread`);
+    context **`asset_mgr_positions_long` / `asset_mgr_positions_short`**
+    (plus `asset_mgr_positions_spread`); `open_interest_all` for
+    %-of-OI normalization. Weekly deltas are pre-computed
+    (`change_in_lev_money_long` / `_short` / `_spread`). History in one
+    keyless SoQL call: `$order=report_date_as_yyyy_mm_dd DESC` +
+    `$limit=60` returned 60 weekly rows (2025-06-17 → 2026-08-04).
   - TFF trader categories (dealer / asset manager / leveraged money) are
     not the legacy commercial/non-commercial split; the "large-spec" read
     maps to **leveraged money**, with asset-manager positioning carried as
-    context. Confirm at first verified run.
+    context. **Confirmed at first verified run** — and note leveraged
+    money in E-mini S&P 500 is structurally net short (the entire first
+    verified 52-week window is negative), so trend and extreme reads are
+    about relative positioning within the range, never the raw sign.
+  - The session environment's network allowlist must include
+    `publicreporting.cftc.gov` (added to the `kapman` cloud environment
+    2026-08-09; environment changes reach only sessions started after the
+    save, so the 2026-08-09 scheduled run could not use it — corrected in
+    `tenor_2026-08-09-c2.md`).
 - **Never infer a producer gap from one failed or odd-looking call.** Three of
   the pilot's first four corrections came from assuming a capability gap
   instead of testing one: 1.8 assumed Schwab-gated (it was not),
