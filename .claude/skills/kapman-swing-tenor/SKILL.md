@@ -15,8 +15,6 @@ description: |
   never use training data for prices or vol values.
 metadata:
   spec: docs/SWING_TENOR_SCAN_PILOT_v0.1.md
-  uploaded_revision: a476ee6
-  uploaded_at: 2026-08-13
 ---
 
 # Swing Tenor Scan
