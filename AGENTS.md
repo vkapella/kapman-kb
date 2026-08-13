@@ -156,6 +156,7 @@ kapman-kb/
 ├── .gitignore
 ├── llm_runtime/         ← uploaded to LLM project knowledge (Claude.ai, Gemini, etc.)
 ├── engineering_only/    ← NOT uploaded to LLMs; reference for humans and code agents
+├── .claude/skills/      ← uploaded to claude.ai account skills, one folder per skill; see "Skills are an upload surface"
 ├── archive/             ← one folder per archived major.minor version; read-only
 │   ├── vX.Y/
 │   └── vA.B/
@@ -186,6 +187,101 @@ Tier model (lives in file frontmatter — not directory paths):
 | T2   | Runbooks (procedural workflows)       | `llm_runtime/`      |
 | T3   | Style, output format, reference maps  | `llm_runtime/`      |
 | T4   | Backend pipeline and tool reference   | `engineering_only/` |
+
+## Skills are an upload surface
+
+`.claude/skills/` has the same property as `llm_runtime/`: **the copy that
+runs is not the copy in the repo.** Each skill is manually uploaded to a
+claude.ai account skill, and that account copy is what executes from a phone,
+or from any session that does not have this repo attached. Nothing links the
+account copy back to git — no CI, no validation script, no warning on drift.
+The repo copy is the source; the account copy is a deployment.
+
+This has already gone wrong. `kapman-swing-tenor` drifted in both directions
+at once:
+
+- **Repo → account.** The account copy sat at `4d27718` (2026-07-28) while
+  `30085a4` (2026-08-03, L1 chop-pressure flag + 2.2 scoring band) and
+  `ed1d40e` (2026-08-09, 2.5 COT source swapped to the CFTC Public Reporting
+  API) landed in git unuploaded. Every tenor scan run outside this repo called
+  a retired FMP endpoint and ran with no chop-flag definition.
+- **Spec → skill.** Worse, because the skill *body paraphrased*
+  `docs/SWING_TENOR_SCAN_PILOT_v0.1.md` instead of pointing at it, it went
+  stale against the spec three separate times inside git — `4c2369f`
+  (2026-07-29, 1.8 far-dated dealer path), `059dad6` (2026-07-29, 1.7
+  consuming `realized_vol.hv20_hv60_ratio`), and `7c2e99b` (2026-08-09, pinned
+  CFTC field surface) each changed the spec without touching the skill.
+  `ed1d40e` caught it up 11 days late, and the stale 1.8 line degraded 1.8 on
+  a live run.
+
+Upload discipline alone would have fixed only the first. The duplication is
+what made the second possible, so the rules address both.
+
+### Rule 1 — a skill body is a pointer, not a copy
+
+**Skills own procedure; specs own content.** A skill may carry step
+sequencing, output routing, and its own hard rules. It must not carry
+variables, thresholds, producers, endpoints, tool-surface workarounds,
+composition rules, or scoring bands — those belong to the spec, cited by
+section reference.
+
+When reviewing a skill edit, ask of every line: **could this go stale against
+a spec?** If it could, it is content, and it becomes a section reference
+(`spec §4`) rather than a restatement. `kapman-screen` is the model — it holds
+only pointers and has never drifted. Every drift incident above traces to a
+line that answered "yes" to that question and was written out longhand anyway.
+
+A thinned skill should say outright that the spec wins on any disagreement, so
+the next reader tempted to inline "just this one threshold" has the reason in
+front of them.
+
+### Rule 2 — stamp what was uploaded
+
+Every skill records the revision the account copy is running:
+
+```yaml
+metadata:
+  spec: docs/SWING_TENOR_SCAN_PILOT_v0.1.md
+  uploaded_revision: 4d27718
+  uploaded_at: 2026-07-29
+```
+
+**It must nest under `metadata:`.** The skill validator rejects unknown
+top-level frontmatter keys — the allowed set is `name`, `description`,
+`license`, `allowed-tools`, `metadata`, `compatibility`. A provenance stamp
+written as a top-level key fails validation outright.
+
+`uploaded_revision` is the commit the *account* is running, not the current
+HEAD and not a placeholder. The operator bumps it after each upload.
+
+### The drift check
+
+```bash
+git log --oneline <uploaded_revision>..HEAD -- .claude/skills/<name>/SKILL.md
+```
+
+**Empty output means the account copy is current.** Any commits listed are
+changes that exist in git and not in the running skill.
+
+### Re-uploading
+
+Upload at **claude.ai → Settings → Capabilities → Skills**, replacing the
+skill's contents with the current `SKILL.md`. **Then** bump
+`metadata.uploaded_revision` and `uploaded_at` and commit. Order matters: the
+stamp asserts what was uploaded, so bumping first makes it a lie.
+
+That bump commit is the expected single-line diff the next drift check
+reports — a lone stamp commit in the output is the normal steady state, not a
+finding.
+
+### Editing a skill body is substantive content work
+
+Skill bodies are **human-in-the-loop** (see *Substantive content work*
+above), for the same reason principle paragraphs are: a skill defines what a
+run actually does, and a wrong line propagates to an account copy that no
+validation script in this repo checks. Scaffolding a new skill folder,
+bumping the upload stamp, and mechanical file moves stay autonomous. Writing
+or rewriting the procedure itself is drafted turn-by-turn with the operator.
 
 ## File naming convention
 - Format: `<NAME>_vMAJOR.MINOR.md` (dots, not underscores).
