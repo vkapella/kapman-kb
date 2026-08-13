@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 4.0.1
-file_last_updated: 2026-07-20
+kb_version: 4.0.2
+file_last_updated: 2026-08-13
 status: active
 tier: T3
 ---
@@ -32,7 +32,7 @@ SYSTEM_PARAMS defines values. It does not define what to do with them. The behav
 |---|---|---|---|---|
 | `SWING_DTE_BAND` | 60–120 | calendar days | PASS1, PASS2, SIGNAL | Applies to standard directional swing trades (long calls, long puts, debit spreads). Lower bound is the minimum acceptable DTE at entry; upper bound is the maximum. |
 | `CSP_DTE_BAND` | 45–60 | calendar days | PASS1, PASS2 | Applies to cash-secured puts. Shorter than the swing band — CSPs target premium decay in the 45–60 DTE window where theta accelerates most efficiently. Listed separately from `SWING_DTE_BAND` so it can be tuned independently. |
-| `LEAP_DTE_BAND` | 12–24 | months | PASS1, PASS2 | Applies to LEAP long calls. Expressed in months because LEAPS expirations are sparsely listed and month-level granularity is the practical selection unit. |
+| `LEAP_DTE_BAND` | 12–24 | months | PASS1, PASS2, SIGNAL | Applies to both LEAP structures — long call and short put (SIGNAL's LEAP structure selector resolves which). Expressed in months because LEAPS expirations are sparsely listed and month-level granularity is the practical selection unit. |
 | `IV_HV_ELEVATED_THRESHOLD` | 1.20 | ratio (IV ÷ HV) | VOLATILITY, SIGNAL | The IV/HV ratio at or above which the spread-mandate fires for new directional entries. Boundary value resolves to elevated (conservative) per VOLATILITY heuristics. |
 | `IV_RANK_EXTREME_FLOOR` | 75 | IV rank score [0–100] | VOLATILITY, SIGNAL | The IV rank score at or above which the extreme tier activates, reinforcing the spread-mandate even when IV/HV reads neutral. |
 | `NEAR_FLIP_BAND_PCT` | 0.5 | percent of spot (±) | DEALER, GUARDRAILS | The symmetric percentage band around the gamma flip level that defines the near-flip zone (the `at_flip` band). Applies identically to SPY (macro) and per-ticker. **Aligned to the producers' 0.5% `at_flip` band** (kapman-polygon-mcp-v2 + kapman-schwab-MCP) — was 0.25%, which disagreed with both producers. |
@@ -83,3 +83,4 @@ Changes to individual parameter values are recorded here in addition to the top-
 | 2026-06-28 | `CONDITIONAL_TOP_SIZE_PCT` | ~1% (reference point in RISK Appendix) | 1.0 | Promotes the v4.0 conditional-top sizing magnitude (JD1) from a RISK Appendix reference point to a named operator-tunable SYSTEM_PARAMS value (#78); RISK now references it by name. Value unchanged (~1% → 1.0%); only the ownership/tunability surface changes |
 | 2026-06-28 | `NEAR_FLIP_BAND_PCT` | 0.25 | 0.5 | Dealer contract reconciliation: aligned the KB near-flip band to the producers' actual 0.5% `at_flip` band (both kapman-polygon-mcp-v2 and kapman-schwab-MCP); the prior 0.25% disagreed with both. |
 | 2026-06-28 | `DGPI_NEUTRAL_BAND` / `DGPI_STRONG_BAND` / `HOSTILE_MACRO_DGPI_MAX` | (DEALER-hardcoded 20/50; macro ≤ -20) | 10 / 30 / -30 | Dealer contract reconciliation: re-keyed DEALER's DGPI tier cutpoints to the producer's signed-DGPI 10/30/60 magnitude bands (kapman-polygon-mcp-v2 `calculate_dgpi`), matching the viewer header; promoted from DEALER-hardcoded to named tunables. Hostile-macro set to the hostile tier (-30); sign-dominated in practice. |
+| 2026-08-13 | `LEAP_DTE_BAND` | 12–24 months, LEAP long calls only | 12–24 months, both LEAP structures (long call + short put) | Value unchanged; scope extended. The LEAP short put is added as the second LEAP structure (#99) — SIGNAL's LEAP structure selector resolves between the two off the existing `IV_HV_ELEVATED_THRESHOLD`, so no new parameter is introduced. SIGNAL added as a consuming file. |

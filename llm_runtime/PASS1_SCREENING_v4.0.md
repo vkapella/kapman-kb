@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.3
-file_last_updated: 2026-07-23
+kb_version: 4.0.4
+file_last_updated: 2026-08-13
 status: active
 tier: T2
 ---
@@ -79,6 +79,8 @@ For each ticker in the candidate list, the first per-candidate question is wheth
 
 For each candidate with a resolved Wyckoff status, the trigger sequence is: Wyckoff veto first, then dealer-timing veto, then spread-mandate. The Wyckoff veto is evaluated first because it is the strongest entry-side gate — a veto here ends the candidate's-direction long-premium eligibility regardless of how supportive the dealer or volatility regime reads. The veto is **direction-aware** (per SIGNAL): it evaluates whether the confirmed regime authorizes the candidate's resolved direction, so the candidate's direction (regime-natural or operator-declared, per the direction-resolution heuristic below) is established before the veto runs. If the Wyckoff veto does not fire, the dealer-timing veto is evaluated next using the per-ticker DGPI tier, flip-zone, near-flip flag, and dealer `confidence` (high/medium/low/invalid) delivered by MCP, plus the macro hostile-macro flag already established at Step 1. If the dealer-timing veto does not fire, the spread-mandate is evaluated using the Pass 1 IV source (Polygon `avg_iv`) and the IV/HV band it produces. The sequence stops at the first veto that fires for long-premium structures; when a veto fires, the candidate receives a NO_TRADE primary output with eligible alternatives surfaced, and the spread-mandate evaluation is skipped because there is no eligible structure to mandate a spread on. The spread-mandate is not a veto — it does not remove the candidate from the eligible set; it constrains the eligible structure to a vertical spread and shifts the sizing denominator accordingly.
 
+**LEAP-horizon candidates run a horizon-adjusted trigger sequence.** When the intended trade horizon is the LEAP band (`LEAP_DTE_BAND` per SYSTEM_PARAMS), the sequence keeps every structural gate and adjusts the regime-timing gates per SIGNAL's horizon scope. The tier gate and its hard force-flags apply unchanged — a low-confidence or force-flagged reading is no more usable for a 24-month thesis than for a 90-day one. The Wyckoff veto applies unchanged in its refusal and stand-aside cases (a distribution-family regime, markdown, or `ranging_undefined` refuses both LEAP structures — price structure is exactly what governs a 12–24-month thesis), with one structure-aware branch: a bullish-direction range regime (accumulation family) **without** its phase-C confirmation refuses the LEAP long call (long premium bleeds while awaiting the spring) but authorizes the **LEAP short put** — the candidate is paid to wait, and assignment near the support shelf is an acceptable outcome, mirroring the CSP posture — so a pre-phase-C accumulation-family candidate resolves to the short-put structure rather than NO_TRADE. The dealer-timing veto does not refuse a LEAP candidate; a met firing condition is surfaced as the timing annotation per SIGNAL's horizon scope. The spread-mandate is replaced by SIGNAL's LEAP structure selector: IV/HV below `IV_HV_ELEVATED_THRESHOLD` selects the LEAP long call (short put as alternative); at or above it, the LEAP short put (deep-ITM long call as alternative); an unreadable vol input selects the LEAP long call at floor sizing with the labeled data-quality note — except when the Wyckoff branch has authorized only the short put *and* the vol read is unavailable, in which case the candidate is WAIT with the named reason: selling long-dated puts blind to vol is not a conservative default. Both LEAP structures are bullish-to-neutral; a candidate whose resolved direction is BEARISH has no LEAP structure and receives NO_TRADE for the LEAP horizon with the named reason (no bearish LEAP structure is defined). LEAP sizing follows RISK: conviction in the underlying thesis plus the absolute single-position ceiling, with the short put sized by assignment cost; the dealer-tier narrowing and near-flip step-down do not apply at this horizon.
+
 **Direction is resolved for every eligible candidate before the candidate zone is assembled.**
 
 Direction resolution follows a priority sequence, and the resolved direction is the axis SIGNAL's direction-aware Wyckoff veto evaluates against — so it is established from the confirmed regime and any operator declaration before the veto runs. Primary signals — the confirmed regime's natural direction (an accumulation-family regime, `accumulation`/`reaccumulation`, or confirmed `markup` → BULLISH; a distribution-family regime, `distribution`/`redistribution`, or confirmed `markdown` → BEARISH), an explicit operator direction declaration, or a confirmed dealer regime read that is unambiguous — resolve direction when they are present and in agreement. When primary signals are absent or in conflict, the Wyckoff-event directional fallback applies: confirmed `sos` → BULLISH, confirmed `sow` → BEARISH, neither confirmed → NEUTRAL. The operator can override the NEUTRAL fallback by stating direction explicitly in the screening request, per GUARDRAILS override discipline (an explicit "screen for long puts" is a BEARISH declaration). A candidate that resolves to NEUTRAL receives a NEUTRAL-direction eligible output; the eligible structure for a NEUTRAL candidate is typically a defined-risk spread or CSP rather than a directional naked position. Direction is resolved at Pass 1 and carried into the candidate zone; Pass 2 consumes the resolved direction without re-deriving it.
@@ -89,7 +91,7 @@ IV/HV band computation at Pass 1 reads the Polygon options-metrics producer's `i
 
 **Pass 1 outputs are candidate zones, not validated specifics.**
 
-Every eligible candidate output contains: the resolved structure (long call, long put, debit spread, CSP, or LEAP), the resolved direction (BULLISH, BEARISH, or NEUTRAL), a candidate strike zone expressed as a price range relative to current spot (e.g., "ATM to slightly OTM"), and a DTE target band appropriate to the intended trade horizon (`SWING_DTE_BAND` for swing trades, `CSP_DTE_BAND` for cash-secured puts, `LEAP_DTE_BAND` for LEAPs, per SYSTEM_PARAMS). Exact strikes, exact expiration dates, entry prices, stop-loss prices, profit targets, and risk-reward ratios are never produced at Pass 1 — these require Pass 2 chain validation. When a candidate's structure would naturally call for a specific level (e.g., a CSP candidate's put strike), Pass 1 expresses it as a zone anchored to structural levels (e.g., "below the current support shelf, ATM to 5% OTM") rather than as a price or delta. Confidence values are assigned per the band discipline in the Appendix; alternatives carry strictly lower confidence than the primary.
+Every eligible candidate output contains: the resolved structure (long call, long put, debit spread, CSP, or LEAP — long call or short put per the LEAP structure selector), the resolved direction (BULLISH, BEARISH, or NEUTRAL), a candidate strike zone expressed as a price range relative to current spot (e.g., "ATM to slightly OTM"), and a DTE target band appropriate to the intended trade horizon (`SWING_DTE_BAND` for swing trades, `CSP_DTE_BAND` for cash-secured puts, `LEAP_DTE_BAND` for LEAPs, per SYSTEM_PARAMS). Exact strikes, exact expiration dates, entry prices, stop-loss prices, profit targets, and risk-reward ratios are never produced at Pass 1 — these require Pass 2 chain validation. When a candidate's structure would naturally call for a specific level (e.g., a CSP candidate's put strike), Pass 1 expresses it as a zone anchored to structural levels (e.g., "below the current support shelf, ATM to 5% OTM") rather than as a price or delta. Confidence values are assigned per the band discipline in the Appendix; alternatives carry strictly lower confidence than the primary.
 
 **Degraded inputs degrade outputs — the conservative default is the safety mechanism.**
 
@@ -221,7 +223,7 @@ Before per-candidate evaluation begins, three conditions must hold:
 
 | Zone field | Format | Example |
 |---|---|---|
-| Structure | Named structure label | Long call / Long put / Call debit spread / Put debit spread / CSP / LEAP (long call) |
+| Structure | Named structure label | Long call / Long put / Call debit spread / Put debit spread / CSP / LEAP (long call) / LEAP (short put) |
 | Direction | BULLISH / BEARISH / NEUTRAL | BULLISH |
 | Strike zone | Price range relative to current spot, or delta range | ATM to 5% OTM / Slightly ITM to ATM |
 | DTE band | Calendar day range | `SWING_DTE_BAND` (swing, per SYSTEM_PARAMS) / `CSP_DTE_BAND` (CSP, per SYSTEM_PARAMS) / `LEAP_DTE_BAND` (LEAP, per SYSTEM_PARAMS) |
@@ -264,7 +266,7 @@ Per GUARDRAILS and DEALER. Reproduced here as Pass 1 quick reference.
 | Call debit spreads | Refused (override required) |
 | Put debit spreads | Eligible |
 | Cash-secured puts | Eligible |
-| LEAPs (long calls, 12+ months DTE) | Eligible |
+| LEAPs (long call or short put, 12+ months DTE) | Eligible |
 | Equity hedges | Eligible |
 | Closing existing positions | Always eligible |
 

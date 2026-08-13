@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.0
-file_last_updated: 2026-07-02
+kb_version: 4.0.1
+file_last_updated: 2026-08-13
 status: active
 tier: T1
 ---
@@ -37,7 +37,7 @@ When `DEALER_v4.0.md` flags near-flip conditions, the sizing band is selected no
 A CSP's risk is the cost of taking assignment on the underlying, not the premium collected. Sizing therefore looks at how many shares the operator can absorb at the strike across the combined account base, not at premium as a percentage of portfolio value. The absolute ceiling (single-position cap) applies to the *assignment cost*, not the premium. A CSP whose assignment cost would exceed the single-position cap is too large regardless of how attractive the premium looks.
 
 **LEAP sizing decouples from short-term regime.**
-LEAPs with 12+ months to expiration are not meaningfully governed by current dealer or volatility regime — those regimes will turn over multiple times before the position closes. LEAP sizing is governed by conviction in the underlying thesis and by the absolute ceiling. A LEAP entered during hostile macro is still bounded by the single-position cap, but is not refused under the macro gate.
+LEAPs with 12+ months to expiration are not meaningfully governed by current dealer or volatility regime — those regimes will turn over multiple times before the position closes. LEAP sizing is governed by conviction in the underlying thesis and by the absolute ceiling. A LEAP entered during hostile macro is still bounded by the single-position cap, but is not refused under the macro gate. The decoupling applies to both LEAP structures — the long call and the short put (per SIGNAL's LEAP structure selector); the short put's risk denominator is assignment cost per the CSP convention below, applied at the LEAP horizon.
 
 **Portfolio-level concentration limits apply across structures.**
 The single-position ceiling is per-name across all structures combined. A long call, a CSP, and a hedge on the same ticker are one position for ceiling purposes. Sector concentration is a separate band: when multiple positions in the same sector approach a combined limit, new entries in that sector size to the floor of their individual band until the concentration eases. The specific sector concentration band is in the Appendix.
@@ -158,8 +158,9 @@ The 5% ceiling is the only value in this Appendix that does not move with regime
 | Quantity | Reference value | Notes |
 |---|---|---|
 | LEAP single-position ceiling | 5% of real-capital denominator (debit paid) | Same absolute ceiling as all other structures |
-| LEAP eligibility under hostile macro | Eligible per GUARDRAILS | Time-decoupled from current regime |
-| LEAP minimum DTE for "LEAP" classification | 365 days | Below 365 DTE, sizing follows long-call rules above |
+| LEAP short put single-position size | (Strike × 100 × contracts) ≤ 5% of real-capital denominator | Assignment cost is the risk denominator (the CSP convention applied at the LEAP horizon); premium yield reported on capital-at-risk |
+| LEAP eligibility under hostile macro | Eligible per GUARDRAILS | Time-decoupled from current regime; both LEAP structures |
+| LEAP minimum DTE for "LEAP" classification | 365 days | Below 365 DTE, sizing follows the long-call / CSP rules above |
 
 **Portfolio-level reference bands.**
 

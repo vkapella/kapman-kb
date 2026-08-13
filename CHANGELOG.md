@@ -1,5 +1,44 @@
 # KapMan KB Changelog
 
+## 2026-08-13 — LEAP-horizon screen semantics: dealer-timing veto scope, LEAP structure selector, LEAP short put (closes #99)
+
+### Changed — `llm_runtime/` (runtime rule additions; operator must re-upload to project knowledge)
+
+**`llm_runtime/SIGNAL_v4.0.md`** (`4.0.1 → 4.0.2`): heuristic 2 (dealer-timing veto) gains a
+horizon-scope paragraph — the veto's firing conditions read the *current* dealer regime, so they
+govern `SWING_DTE_BAND`/`CSP_DTE_BAND` candidates only; on LEAP candidates (`LEAP_DTE_BAND`, both
+structures) a met condition demotes to a named timing annotation, and absent/`invalid` dealer data
+degrades to a data-quality note + sizing floor instead of a refusal. This resolves the standing
+contradiction where LEAPs were simultaneously the eligible-set redirect under a fired veto and
+refusable by the same veto (per RISK's horizon decoupling and GUARDRAILS' hostile-regime eligible
+set). Heuristic 3 (spread-mandate) gains a LEAP-horizon paragraph: the elevated-IV condition
+becomes a **structure selector** between the two vega-mirror LEAP structures — IV/HV <
+`IV_HV_ELEVATED_THRESHOLD` → LEAP long call (short put as alternative); ≥ threshold → LEAP short
+put (deep-ITM long call as alternative); unreadable vol → long call at floor sizing with a labeled
+data-quality note. Appendix firing matrix gains the matching horizon-scope note.
+
+**`llm_runtime/PASS1_SCREENING_v4.0.md`** (`4.0.3 → 4.0.4`): new heuristic "LEAP-horizon
+candidates run a horizon-adjusted trigger sequence" — tier gate + hard force-flags unchanged;
+Wyckoff veto unchanged for refusal/stand-aside cases, with one structure-aware branch (pre-phase-C
+accumulation-family authorizes the LEAP short put only — paid to wait, assignment near support
+acceptable, mirroring the CSP posture); dealer-timing veto → timing annotation; spread-mandate →
+LEAP structure selector (WAIT when only the short put is authorized and vol is unreadable);
+BEARISH-direction candidates → NO_TRADE (no bearish LEAP structure). Candidate-zone structure
+vocabulary and the hostile-macro eligible table gain LEAP (short put).
+
+**`llm_runtime/RISK_v4.0.md`** (`4.0.0 → 4.0.1`): the LEAP horizon-decoupling paragraph covers
+both LEAP structures; LEAP sizing reference gains the short-put row (assignment cost is the risk
+denominator — the CSP convention at the LEAP horizon — under the same 5% absolute ceiling).
+
+**`llm_runtime/SYSTEM_PARAMS_v4.0.md`** (`4.0.1 → 4.0.2`): `LEAP_DTE_BAND` scope note now covers
+both LEAP structures and adds SIGNAL as a consuming file (value unchanged, 12–24 months); no new
+parameter — the LEAP selector reuses `IV_HV_ELEVATED_THRESHOLD`. Parameter change-log row added.
+
+Companion implementation: kapman-polygon-viewer#71 (deterministic `leap_screen_*` columns,
+`SCREEN_VERSION 2.0`). Content operator-approved turn-by-turn in the originating Claude session
+(2026-08-13): horizon scope, IV/HV structure selector, missing-IV default to the risk-defined
+long call at floor sizing, pre-phase-C short-put-only authorization, shared `LEAP_DTE_BAND`.
+
 ## 2026-07-23 — Spring-review fast-path for weekly-conflict-only flagged springs (closes #94)
 
 ### Changed — `llm_runtime/` (runtime rule addition; operator must re-upload to project knowledge)
