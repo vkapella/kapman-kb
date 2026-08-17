@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.3
+kb_version: 4.0.4
 file_last_updated: 2026-08-16
 status: active
 tier: T1
@@ -85,6 +85,38 @@ The Stop alert is a *broker-actionable* trigger, meaning its output is meant to 
 | Enforcement venue | `PORTFOLIO_MGMT_v4.0.md`; `REPORT_FORMAT_v4.0.md` |
 
 The Profit target alert mirrors the Stop alert's mechanics in every structural way — same four output fields, same delta-gamma approximation, same trail-stop bid/ask + mark dual output, same broker-actionable nature, same data-quality fallback behavior when Greeks are unavailable. The two triggers differ only in which side of current spot the underlying alert level anchors to. The pairing is intentional: every position recommendation surfaces both a Stop alert and a Profit target alert as a matched pair, so the operator has a complete exit plan at the moment of position entry rather than having to come back later to set the favorable-side alert. The favorable-side level is anchored to a Wyckoff structural target (the upper boundary of a confirmed accumulation range, a projected markup price objective, the next significant structural resistance) or a DEALER-delivered call wall (a strong call wall above current spot is a candidate ceiling). As with the Stop alert, the runtime does not derive the structural level; it consumes it from the upstream regime files and composes the four output fields. One asymmetry worth noting: the delta-gamma approximation tends to be slightly more reliable for favorable-side alerts than unfavorable-side alerts at equal distance, because favorable moves in long-premium positions are accompanied by expanding delta (the position becomes more directional as it works), which the gamma term captures; unfavorable moves are accompanied by contracting delta (the position bleeds), which the gamma term also captures but with the offsetting fact that gamma itself is shrinking. The accuracy band — ±5-10% within ~1σ near-term — is reported identically for both alerts to avoid suggesting a precision the approximation doesn't deliver.
+
+**Theta-adjusted target horizon — the exit-trigger contract carries a time dimension, not only price levels.**
+
+| Contract part | Specification |
+|---|---|
+| Inputs consumed | `daily_theta` from the same chain snapshot that already supplies delta and gamma for the delta-gamma projection; the projected option price at the alert level (Stop or Profit target, computed above); the position's current option price and remaining DTE; aggregate position delta and spot; `pt_horizon_bars` from the §A1 envelope |
+| Firing condition | Two independent tests, each evaluated per alert level. **Horizon affordability** fires when `T_θ` is shorter than the target's calibrated horizon. **Life affordability** fires when `T_θ` exceeds remaining DTE |
+| Behavioral consequence | **Annotation only — neither test refuses, resizes, or closes anything.** A fired test surfaces a named line in the position's exit plan; the operator decides. No new `SYSTEM_PARAMS` value is introduced — both tests anchor to quantities the runtime already holds |
+| Enforcement venue | `REPORT_FORMAT_v4.0.md` renders the theta / time-to-target subsection; `PORTFOLIO_MGMT_v4.0.md` evaluates both tests per open position at Step 5 |
+
+Every field the Stop alert and Profit target alert produce is a **price**. The contract could say where a position should exit and how likely the level was, but never *by when*, and never what waiting costs. Two quantities close that gap, both computed from data already in hand:
+
+```
+T_θ  (theta-adjusted target horizon, calendar days)
+   = (projected_option_price_at_target − current_option_price) / |daily_theta|
+
+D_θ  (break-even drift, the underlying move required just to offset decay)
+   = |daily_theta| / aggregate_delta          → $/day
+   = that quotient / spot                     → %/day
+```
+
+`T_θ` reads as *"days of decay this position can fund before the target stops being worth reaching."* `D_θ` converts theta into the units regime reads already speak, so decay can be compared directly against whether the confirmed regime is expected to produce drift at all — WYCKOFF owns that claim, and SIGNAL consumes it the same way it consumes a sizing-band ceiling.
+
+**Theta is a calendar-day quantity; the calibrated horizon is in trading bars. Convert before comparing.** `daily_theta` decays over weekends, so `T_θ` is in calendar days, while `pt_horizon_bars` counts trading bars — roughly five per seven calendar days. Comparing the two raw understates the available window by about 40% and would fire the horizon test on positions that can comfortably afford to wait. The horizon test converts the delivered bar count to calendar days before the comparison and states both units in the annotation.
+
+**`pt_horizon_bars` is delivered data, and `null` does not mean 60.** The producer emits the field in the §A1 envelope, bound at source to the field name its probabilities are parsed through (`hit_rates_within_60_bars`), so the delivered number and the window actually measured cannot drift apart — a recalibration renames the field, the probabilities read null, and the producer's own tests fail before a stale horizon can ship. A `null` value means **the catalog was unavailable at export time**, not that the horizon is 60. Substituting the default on null would reintroduce exactly the hardcoded constant this field exists to remove, while looking data-driven — so on null the horizon-affordability test degrades to **unresolvable** and says so. Life affordability is unaffected: it reads remaining DTE, not the horizon.
+
+This is also the fix for the standing defect where SIGNAL consumed the producer's `pt_*` and `*_prob` as a confidence annotation and dropped the window entirely. **A hit rate without the window it was measured over is not a probability, and the horizon test is what makes the delivered `horizon` load-bearing rather than discarded.**
+
+**Both quantities are recomputed every session, and a material move is stated rather than silently re-rendered.** `T_θ` and `D_θ` are functions of current theta, current option price and current spot — all of which move — so they are recomputed on each portfolio evaluation exactly as the nine other recomputed levels are. When a recomputed value moves materially from the prior session's rendering, the report says so and names the driver (decay, a spot move, a vol change, or a changed fetch window). Silently re-rendering a moved number is the failure this discipline exists to prevent: an operator who acted on last session's horizon deserves to be told it moved, not to discover it by comparing reports.
+
+Degradation follows the exit-trigger convention: when Greeks are unavailable from the chain snapshot — the same condition that already suppresses the option-price-at-alert field — both quantities surface as *"Pending — theta unavailable"* rather than being estimated. Neither test is ever inferred from a stale prior session's theta.
 
 **Regime exit advisory — non-actionable flag when the regime that authorized the position has decayed materially.**
 

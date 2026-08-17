@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.4
+kb_version: 4.0.5
 file_last_updated: 2026-08-13
 status: active
 tier: T2
@@ -40,6 +40,7 @@ In the v4.0 runtime the candidate list is most often a filtered viewer/v2 watchl
 | `weekly_agrees`, `structure_conflict` | WYCKOFF hard force-flags | force the flagged-reading exchange regardless of confidence |
 | `invalidation_level` | SIGNAL Stop anchor | structural stop |
 | `dgpi`, `gamma_flip`, `dealer_position`, `position_vs_flip`, `net_gex`, `gex_slope`, `dealer_confidence` | dealer-timing veto (Pass-1 triage) | **Schwab re-fetch at Pass 2** |
+| `iv_percentile`, `iv_rank`, `iv_rank_status` | **IV tier** per VOLATILITY — the tier resolves from `iv_percentile` (a fraction in [0, 1]); `iv_rank` is context only; `iv_rank_status` gates whether a tier exists at all and which floor applies (`NATIVE` → `IV_EXTREME_PERCENTILE_FLOOR`, `SEEDED` → `IV_EXTREME_PERCENTILE_FLOOR_SEEDED`). `ILLIQUID_SEED` / `INSUFFICIENT_HISTORY` / `NO_LIVE_IV` carry no number and yield **no tier reading — never a "low" tier** | absent on exports below `SCREEN_VERSION 2.2`; treat the tier as absent, never as low |
 | `atm_iv`, `iv_hv_ratio`, `iv_hv_status`; `average_iv`, `iv_skew_25delta`, `iv_term_structure`, `put_call_ratio`, `historical_volatility` | IV/HV band + spread-mandate (Pass-1 firing) — the canonical `iv_hv_ratio` (ATM `atm_iv` ÷ HV20) is consumed directly from the handoff per VOLATILITY source-authority; `average_iv` is the band-average context read and the producer's flagged ATM fallback | labeled *Needs chain validation*; no live MCP fetch when `iv_hv_ratio` is present |
 | `dealer_consistent`, `volatility_consistent` | informational — surfaced in the reading; no independent gate or trim | from v2 `cross_checks`; already priced into `regime_confidence` per WYCKOFF, so re-gating or trimming on them double-counts. A `false` is visible context only — it has already pulled `regime_confidence` down and may push the tier gate to the flagged-reading exchange |
 | `pt_up_*`, `pt_down_*` + `*_prob` | candidate zone + expectancy context | calibrated hit-rates |
@@ -53,6 +54,8 @@ Two viewer dealer fields use vocabularies that must not be conflated with their 
 - **`position_vs_flip`** (`above_flip`/`below_flip`/`at_flip`/`unknown`) is a **coarse Pass-1 triage** that maps onto `DEALER_v4.0.md`'s flip-zone vocabulary: `at_flip` ≈ **Near-flip**, `above_flip` / `below_flip` ≈ above / below the flip. The precise **Well above / Near-flip / Well below** resolution — keyed on the `NEAR_FLIP_BAND_PCT` band around the flip per SYSTEM_PARAMS — is a **Pass-2 determination** from the live Schwab flip distance; the viewer's three-way read is a starting hint, not that resolution. `unknown` is no Pass-1 flip hint — the dealer-timing triage proceeds without one, and Pass 2 re-fetches the live flip regardless.
 
 **The handoff envelope may carry screen provenance and a macro-context block; both are triage context, never authority.**
+
+The envelope also carries two run-level fields the rows do not. **`pt_horizon_bars`** is the calibration window for every `*_prob` in the export — the number of trading bars the producer's hit rates were measured over — and SIGNAL's horizon-affordability test reads it directly. It is bound at source to the field name the probabilities are parsed through, so the delivered value cannot drift from the window actually measured. **`null` means the catalog was unavailable at export time, not that the horizon is 60**: on null the dependent test degrades to unresolvable and says so, and the runtime never substitutes a default, because a substituted constant that looks like delivered data is worse than an acknowledged gap. **`breadth_context`** is a run-level market-breadth block (`log_date`, `pct_above_sma200`, `delta_above_sma200`, `band`, `symbols`) whose `band` — `strong` / `mixed` / `weak` — is computed by the producer against fixed 35/65 edges. It is **labeled context only and never a gate**: it does not enter the macro gate, does not modify a disposition, and does not affect sizing. The runtime carries the producer's `band` verbatim and **does not re-derive the edges**; `breadth_context` is `null` when the producer has no breadth series yet, which is a data-absent note, not a neutral reading.
 
 A viewer export that carries the `screen_*` fields also carries `screen_version` (the implementation that produced them — cite it in the run's data-quality surface so dispositions stay attributable) and `screen_thresholds` (the τ / IV-HV / DGPI values that implementation used). When `screen_thresholds` disagree with SYSTEM_PARAMS, **SYSTEM_PARAMS governs**: the run flags the drift, treats the pre-computed dispositions as stale, and re-derives from the raw §A1 fields. The envelope's `macro_context` block (the viewer's SPY dealer read — signed DGPI, flip, `position_vs_flip`, `confidence` — as of export time) seeds the Step-1 macro gate exactly as a pasted SPY reading would; the gate is still evaluated by the runtime per DEALER, and a stale or absent block degrades to a live SPY fetch, never to an assumed-supportive macro.
 

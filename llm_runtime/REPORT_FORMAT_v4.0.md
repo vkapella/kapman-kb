@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 4.0.2
+kb_version: 4.0.3
 file_last_updated: 2026-08-16
 status: active
 tier: T3
@@ -136,7 +136,7 @@ When REPORT_FORMAT and a T1 or T2 file appear to conflict on a structural questi
 | `WYCKOFF_v4.0.md` (T1) | Phase labels; event labels | REPORT_FORMAT renders Wyckoff phase in the screening table and portfolio detail; renders confirmed events in rationale |
 | `PASS1_SCREENING_v4.0.md` (T2) | Eligible/NO_TRADE/WAIT determinations; candidate zones; alternatives with confidence; Pass 1 data-quality labels; macro gate result; override acknowledgments | REPORT_FORMAT renders the screening table and per-ticker detail from Pass 1 output; applies zone rendering to all Pass 1 strike and expiration fields |
 | `PASS2_VALIDATION_v4.0.md` (T2) | Validated/Flagged/Rejected states; exact strikes and expirations; chain quality label; dealer-confidence label; entry price range; sizing band | REPORT_FORMAT renders exact values for Pass 2 validated candidates; renders Flagged and Rejected states with named reasons; renders chain quality badge in source bar |
-| `PORTFOLIO_MGMT_v4.0.md` (T2) | Position context schema; lifecycle state labels (Open/Advisory/Exited/Expired); advisory flag format; DTE decay warning format; Regime exit advisory decay reasons | REPORT_FORMAT renders the portfolio view table and per-position detail from position context; renders advisory flag with named decay reason; renders DTE decay warning when active; renders Exited and Expired summary sections when present |
+| `PORTFOLIO_MGMT_v4.0.md` (T2) | Position context schema; lifecycle state labels (Open/Advisory/Exited/Expired); advisory flag format; DTE decay warning format; Regime exit advisory decay reasons; Catalyst-affordability advisory | REPORT_FORMAT renders the portfolio view table and per-position detail from position context; renders advisory flag with named decay reason; renders DTE decay warning when active; renders Exited and Expired summary sections when present |
 | `SYSTEM_PARAMS_v4.0.md` | DTE band values (SWING_DTE_BAND, CSP_DTE_BAND, DTE_DECAY_WARNING_THRESHOLD) | REPORT_FORMAT uses DTE band values as the canonical expiration-band labels in Pass 1 zone rendering; uses DTE_DECAY_WARNING_THRESHOLD to determine when the decay warning renders in the portfolio detail |
 
 The HTML render artifact for Pass 1 reports is `REPORT_TEMPLATE_PASS1_v4.0.html` — the executable expression of the screening table column spec in this file's Appendix. The template fills at render time; this file remains the authoritative column-spec source. When the spec changes, the template is updated to match; the template never overrides the spec.
@@ -337,8 +337,9 @@ One block per open position, appearing below the portfolio view table in the sam
 | 1 | Current regime summary | 35 words | Dealer regime (DGPI tier, flip-zone), volatility regime (IV/HV band, IV rank tier), Wyckoff phase if confirmed this session |
 | 2 | Regime exit advisory | 50 words | Present only when State = Advisory; names each active decay branch; omitted entirely when no advisory active |
 | 3 | Exit-trigger proximity | 30 words | Distance of current spot from Stop alert and Profit target alert levels; directional framing. When SIGNAL carries a forward-tested-target confluence annotation on an alert level (position context held a fresh viewer target), render the same suffix as the screening Exit plan — *"…— viewer forward-tested hit-rate ~Z%, as-of [date]"* — never as the price (overflow to footnote per cap discipline) |
-| 4 | DTE decay warning | 20 words | Present only when DTE ≤ DTE_DECAY_WARNING_THRESHOLD (per SYSTEM_PARAMS, currently 21 days); names DTE and threshold; omitted when DTE is above threshold |
-| 5 | Position notes | 25 words | Operator-supplied notes from position context; omitted when position context contains no notes field |
+| 4 | Theta and time-to-target | 45 words | `T_θ` per alert level (days of decay the position can fund to reach it) and `D_θ` (break-even drift, %/day) per SIGNAL. Appends any fired affordability test — horizon (`T_θ` shorter than the calibrated window, both units stated) or life (`T_θ` beyond remaining DTE) — and the Catalyst-affordability advisory line when PORTFOLIO_MGMT Step 5c fires, naming both the theta cost and the gain. States the driver when a value has moved materially since the prior session. Renders *"Pending — theta unavailable"* when Greeks are absent, and *"horizon unresolvable — `pt_horizon_bars` not delivered"* on a null envelope field, never a substituted default |
+| 5 | DTE decay warning | 20 words | Present only when DTE ≤ DTE_DECAY_WARNING_THRESHOLD (per SYSTEM_PARAMS, currently 21 days); names DTE and threshold; omitted when DTE is above threshold |
+| 6 | Position notes | 25 words | Operator-supplied notes from position context; omitted when position context contains no notes field |
 
 ---
 

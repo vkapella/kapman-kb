@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.1
+kb_version: 4.0.2
 file_last_updated: 2026-07-20
 status: active
 tier: T2
@@ -35,6 +35,8 @@ In Portfolio mode, the operator is asking about existing positions only. PORTFOL
 - Step 4: Evaluate the Regime exit advisory per position — compare the entry-time regime snapshot to the current regime across all four decay branches. Surface named decay reasons for any branch that fires.
 - Step 5: Evaluate DTE decay warnings — flag any open position whose remaining DTE has fallen below `DTE_DECAY_WARNING_THRESHOLD` per SYSTEM_PARAMS.
 - Step 5b: Evaluate the Earnings-exposure advisory — fetch the next confirmed earnings date for each open position's ticker via `Finnhub MCP Server:get_earnings_calendar` and flag any position whose expiration falls on or after that date.
+- Step 5c: Evaluate the **Catalyst-affordability advisory** — using the same earnings date already fetched at Step 5b (no additional call), compute the theta cost of holding to that catalyst and compare it to the position's current unrealized gain. Fires when the cost of reaching the catalyst exceeds the gain being protected.
+- Step 5d: Evaluate the **theta-adjusted target horizon** per SIGNAL for each open position's Stop and Profit target levels — `T_θ`, `D_θ`, and the two affordability tests. Annotation only; no branch here closes, resizes, or refuses anything.
 - Step 6: Evaluate exit-trigger proximity. When entry-time Stop and Profit target alert levels are present in position context, compare current spot and current option price to those levels and surface proximity language when either level is imminently relevant. When entry-time alert levels are absent from position context, do not suppress this step — instead apply the SIGNAL approximation formula fresh from current-session data: use current-session Greeks (from broker screenshot or live chain pull), Schwab dealer flip as Stop anchor, nearest call wall above spot as Profit target anchor, and the SIGNAL trail-stop reference band (20–30% mark for long calls and long puts; 15–25% mark for LEAPs; 25–35% bid/ask for long calls and long puts; 20–30% bid/ask for LEAPs). Surface all four mandatory fields per position with an inline note: "Current-session computed — entry-time levels not supplied."
 - Step 7: Assemble and surface the portfolio view. Execute the sub-sequence below in order — do not skip steps.
 
@@ -43,6 +45,20 @@ In Portfolio mode, the operator is asking about existing positions only. PORTFOL
   - Step 7c: Generate the portfolio view table and per-position detail blocks.
   - Step 7d: After all positions are generated, state the output self-audit result: number of positions processed, number of fields computed fresh from current-session data, number of named fallbacks applied.
   - Step 7e: Surface Exited positions summary and Expired positions requiring acknowledgment where applicable.
+
+**The Catalyst-affordability advisory fires on the cost of reaching an event, not on exposure to it.**
+
+The Earnings-exposure advisory (Step 5b) fires on the **presence** of a confirmed earnings date inside a position's life. This one fires on the **cost of getting there**:
+
+```
+fires when:  theta_to_next_confirmed_catalyst  >  current_unrealized_gain
+```
+
+where the theta cost is `|daily_theta| × calendar_days_to_catalyst` and the catalyst date is the one Step 5b already fetched from `Finnhub MCP Server:get_earnings_calendar` per SIGNAL Heuristic 0 — **no new source, no second call.**
+
+The two advisories are deliberately separate and they **stack**. A position can be exposed to earnings and able to afford the wait; exposed and unable; or unaffected by either. Collapsing them would lose the distinction that matters, because the operator's action differs: exposure argues about whether to hold through an event, affordability argues about whether holding is even economic before the event arrives.
+
+The advisory names both numbers rather than reporting a verdict — *"holding to the 2026-11-02 print costs ~$2,754 in theta against $2,553 unrealized"* — because the comparison is the finding. Like every other advisory in this file it flags, it does not force a close, and it does not propose a specific action. When theta is unavailable, or when Finnhub returns no confirmed date, the advisory surfaces as data-absent with the reason named, per the Step 7b self-report discipline; it is never evaluated from an operator-declared date without labeling it *declared*.
 
 **Position lifecycle has four states: Open, Advisory, Exited, Expired.**
 

@@ -1,5 +1,86 @@
 # KapMan KB Changelog
 
+## 2026-08-16 — the exit-trigger contract gains a time dimension; §A1 linkage closed at SCREEN_VERSION 2.2 (closes #100)
+
+### Changed — `llm_runtime/` (runtime rule additions)
+
+The exit-trigger contract was **entirely price-denominated**. Stop alert and Profit target
+alert each surfaced four fields and every one was a price, so the KB could say *where* a
+position should exit and *how likely* the level was, but never *by when* — and never what
+waiting costs. Evidence is recorded in `kapman-journal` for 2026-08-13/14: ANET was closed
+on decay arithmetic computed ad hoc in-session because the KB could not produce it, and the
+same computation then flagged MSFT (−$3,621 of theta to reach the 10/27 print against a
+−$2,503 unrealized loss). Operator decisions carried into this change: **annotate, never
+gate**; **no new `SYSTEM_PARAMS` value**; catalyst affordability is **its own advisory**
+rather than a clause of the horizon tests; the regime→drift claim lands in **WYCKOFF**.
+
+**`llm_runtime/SIGNAL_v4.0.md`** (`4.0.3 → 4.0.4`): new exit-trigger heuristic defining
+**`T_θ`** (theta-adjusted target horizon — days of decay the position can fund before the
+target stops being worth reaching) and **`D_θ`** (break-even drift, the underlying move
+required just to offset decay, in $/day and %/day). Two tests, both annotation-only:
+**horizon affordability** (`T_θ` shorter than the calibrated window) and **life
+affordability** (`T_θ` beyond remaining DTE). Theta comes from the chain snapshot that
+already supplies delta and gamma — no new source, no new fetch.
+
+Three things the clause pins that would otherwise fail silently. **Unit conversion:** theta
+is a calendar-day quantity and the horizon is in trading bars (~5 per 7 calendar days);
+compared raw, the available window is understated by about 40% and the test fires on
+positions that can comfortably afford to wait. **Null semantics:** `pt_horizon_bars = null`
+means the catalog was unavailable at export, **not** 60 — substituting the default would
+reintroduce the hardcoded constant the field exists to remove while looking data-driven, so
+the test degrades to unresolvable. **Recompute discipline:** `T_θ` and `D_θ` are recomputed
+each session like the nine other recomputed levels, and a material move is **stated with its
+driver** rather than silently re-rendered.
+
+This also retires the standing defect where SIGNAL consumed `pt_*` and `*_prob` as a
+confidence annotation and **discarded the window entirely**. A hit rate without the window
+it was measured over is not a probability; the horizon test makes the delivered `horizon`
+load-bearing.
+
+**`llm_runtime/WYCKOFF_v4.0.md`**: new heuristic — a confirmed regime now carries an
+**expected-drift characterization**, because trends fund theta and ranges do not. `markup`,
+`markdown` and range phases D/E are drift-producing; a range regime is range-bound, with
+**phase B the extreme case** where expected drift is approximately zero. That is not a
+forecast — it restates what the phase label means. The consequence is a comparison the KB
+could not previously make: in a range-bound regime the expected drift is not merely lower
+than `D_θ` but **structurally absent**, which is materially different from a `markup`
+position whose drift is simply slower than its decay. Characterization only — no veto, no
+resize — and unavailable without a confirmed reading.
+
+**`llm_runtime/PORTFOLIO_MGMT_v4.0.md`**: new **Catalyst-affordability advisory** (Step 5c)
+firing when `theta_to_next_confirmed_catalyst > current_unrealized_gain`, using the earnings
+date **already fetched at Step 5b** — no new source, no second call. Deliberately separate
+from the Earnings-exposure advisory and they **stack**: that one fires on the *presence* of
+an event inside position life, this one on the *cost of reaching it*. A position can be
+exposed and able to afford the wait, or exposed and unable. New Step 5d evaluates the two
+SIGNAL affordability tests per open position.
+
+**`llm_runtime/REPORT_FORMAT_v4.0.md`**: the Portfolio per-position detail schema had
+**exactly five subsections and none carried theta or time-to-target**, which is why the
+analysis silently vanished between the 2026-08-13 and 08-14 sessions — the format contract
+is immutable between runs, so an omitted subsection cannot be added mid-session. New
+subsection 4, *Theta and time-to-target* (45 words), renders `T_θ`, `D_θ`, any fired
+affordability test, and the catalyst-affordability line; states the driver when a value has
+moved; and renders *"horizon unresolvable"* on a null envelope field rather than a
+substituted default.
+
+**`llm_runtime/PASS1_SCREENING_v4.0.md`**: §A1 ingest map gains the per-row IV tier trio
+(`iv_percentile` / `iv_rank` / `iv_rank_status`) and the two new run-level envelope fields.
+`breadth_context` is recorded as **labeled context only, never a gate** — the runtime carries
+the producer's `band` verbatim and **does not re-derive the fixed 35/65 edges**.
+
+### Changed — `engineering_only/` (no re-upload)
+
+**`engineering_only/PIPELINE_FEED_VIEW_SPEC_v4.0.md`**: re-keyed to **`SCREEN_VERSION 2.2`**
+with the full envelope contract — emitted field order, the `pt_horizon_bars` binding
+(`PT_HIT_RATES_FIELD = f"hit_rates_within_{PT_HORIZON_BARS}_bars"`, held by two producer
+tests so a renamed window fails rather than shipping stale), null semantics, and
+`breadth_context` recorded at its **actual** path (its own top-level block from
+`/api/forward-log/status → .breadth` — an earlier assumption that it rode `macro_context`
+was wrong and is corrected here). Notes the ≥ 20-point rank-vs-percentile disagreement
+annotation, and that `KbParityTests` now binds both percentile floors so the drift class
+behind the `[0, 100]` defect trips producer `pytest`.
+
 ## 2026-08-16 — journal branch-state honesty floor; feed spec re-keyed to SCREEN_VERSION 2.1 (closes #106, #109)
 
 ### Changed — `llm_runtime/` (runtime rule addition)

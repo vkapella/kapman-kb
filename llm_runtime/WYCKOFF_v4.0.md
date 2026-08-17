@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.1
+kb_version: 4.0.2
 file_last_updated: 2026-07-23
 status: active
 tier: T1
@@ -115,6 +115,16 @@ Regime confirmation establishes the cycle-stage (one of the seven regimes) and, 
 **The priority order governs readings when multiple event signals appear in the same session.**
 
 When price action presents evidence of more than one event type in the same period, the priority order determines which event is treated as regime-setting for the proposal: `sc` → `spring` → `sos` → `bc` → `ut`/`utad` → `sow`. This priority is not a recommendation to ignore lower-priority signals — all observed signals should appear in the proposal reasoning — but the dominant phase reading derives from the highest-priority event present. The operator may confirm a lower-priority event as regime-setting if the reading better fits their judgment; the runtime accepts that correction without resistance.
+
+**A confirmed regime carries an expected-drift characterization, because trends fund theta and ranges do not.**
+
+Whether a regime is expected to produce directional drift is a **regime statement**, so it is owned here rather than assembled downstream. The runtime characterizes each confirmed reading as drift-producing or range-bound, and SIGNAL consumes that characterization the same way it consumes a sizing-band ceiling — it does not re-derive it.
+
+`markup` and `markdown` are drift-producing by definition: a trend in force is the regime whose whole content is directional movement, and phase D and E of a range are the resolution phases where that movement begins. A range regime is range-bound by definition, and **phase B is the extreme case** — the accumulation or distribution phase whose defining property is that price oscillates without net progress. Expected drift there is approximately zero, and saying so is not a forecast; it is a restatement of what the phase label means.
+
+The consequence is a comparison the KB could not previously make. A long-premium position pays theta every calendar day and needs the underlying to drift to stand still — SIGNAL expresses that requirement as `D_θ`, a break-even drift in %/day. **When a position sits in a regime this file has characterized as range-bound, the expected drift is not merely lower than `D_θ`, it is structurally absent**, and the position is paying to wait for movement the confirmed regime does not predict. That is a materially different situation from a position in `markup` whose drift is simply slower than its decay, and the report should not render them identically.
+
+This characterization does **not** fire a veto, force a close, or resize anything. It is a regime property surfaced for SIGNAL's exit-trigger annotations and for the operator's judgment. It is available only for an operator-confirmed or pipeline-accepted reading — an unconfirmed regime yields no drift characterization, and the dependent annotation degrades to data-absent with the reason named, per the conservative-default discipline above.
 
 **The session-start state for all tickers is UNKNOWN.**
 

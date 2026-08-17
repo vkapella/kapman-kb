@@ -114,8 +114,7 @@ fallback.
 
 The Stage-1 pilot's conclusion (`docs/CODE_VS_JUDGMENT_ASSESSMENT_2026-06-29.md`) is
 implemented: the viewer computes the deterministic Pass-1 screen per row
-(`backend/app/pass1_screen.py`, **`SCREEN_VERSION 2.1`** as of viewer `c830d35`,
-2026-08-16) and the export carries the disposition, not just the raw fields.
+(`backend/app/pass1_screen.py`, **`SCREEN_VERSION 2.2`** as of 2026-08-16) and the export carries the disposition, not just the raw fields.
 
 **Version history of the pinned screen** — each bump is behavioral, per the drift
 discipline below:
@@ -126,6 +125,7 @@ discipline below:
 | 1.1 | 2026-07-02 (viewer #54) | Stale-snapshot force-flag added (four total), off the Stage-F SATS finding |
 | **2.0** | 2026-08-13 (viewer #71 / kb#99) | Five **`leap_screen_*`** columns (tier / disposition / structure / sizing / reasons) added to `A1_FIELDS` on **every** Export view; new `leap_selector_iv_hv_threshold` key in `screen_thresholds`; envelope `macro_context.spy` gains **`spot_price`** and **`gamma_flip`**; new LEAP structure vocabulary (`LEAP_LONG_CALL` / `LEAP_SHORT_PUT` / `NONE`), distinct from the swing set |
 | **2.1** | 2026-08-16 (viewer `c830d35`) | kb#99's extreme-IV tilt **implemented** and status-gated — it had been skipped on the since-falsified premise that the producer emits no IV rank |
+| **2.2** | 2026-08-16 | §A1 linkage closed: per-row `iv_percentile` / `iv_rank` / `iv_rank_status`; envelope gains **`pt_horizon_bars`** and **`breadth_context`**; `screen_thresholds` gains `iv_extreme_percentile_floor` (0.75) and `iv_extreme_percentile_floor_seeded` (0.80) |
 
 **Five screen columns**, on the three **long-premium** Export views only (the CSP
 view stays raw — the premium-sell screen contract is unpinned):
@@ -238,3 +238,57 @@ options cache (viewer change) or treat frozen screen fields as options-off reads
   mechanics (formulas, windows, thresholds).
 - `kapman-polygon-viewer/docs/pipeline-feed-views.md` — the viewer-side story and
   acceptance criteria.
+
+## Envelope fields added at SCREEN_VERSION 2.2
+
+Top level, in emitted order: `kind`, `source`, `exported_at`, `as_of`, `data_through`,
+`v2_schema_version`, `engine_version`, `include_options`, `watchlist`, `view`,
+`row_count`, `screen_version`, `screen_thresholds`, **`pt_horizon_bars`**,
+**`breadth_context`**, `macro_context`, `rows`.
+
+**`pt_horizon_bars`** — `number | null`, currently **60**. The calibration window for
+every `*_prob` in the export, also exposed at `GET /api/catalog → screen.pt_horizon_bars`.
+
+The binding is what makes it trustworthy, and the KB clause cites it: in
+`backend/app/flatten.py`, `PT_HORIZON_BARS = 60` and
+`PT_HIT_RATES_FIELD = f"hit_rates_within_{PT_HORIZON_BARS}_bars"`. `flatten_scan` reads
+the producer's probabilities **through** the derived field name while `catalog()` emits
+the number, so the delivered value and the field actually parsed cannot diverge. Two
+tests hold it (`backend/tests/test_pass1_screen.py::PtHorizonBindingTests`): the derived
+name matches the constant, and a scan carrying `hit_rates_within_90_bars` yields
+`pt_up_base_prob = None` rather than silently accepting a renamed window as the 60-bar
+one. A v2 recalibration therefore renames the field, probabilities read null, and the
+tests fail before a stale horizon can ship.
+
+**`null` does not mean 60.** It means the catalog was unavailable at export time
+(`opts.screen?.pt_horizon_bars ?? null`). A consumer that substitutes the default on null
+reintroduces exactly the hardcoded constant the field exists to remove, and does so while
+*looking* data-driven — which is worse than a documented producer property, because the
+guess is invisible. On null the horizon-affordability test degrades to unresolvable.
+
+**`breadth_context`** — object | `null`. Sourced from `GET /api/forward-log/status → .breadth`:
+`log_date`, `pct_above_sma200`, `delta_above_sma200`, `band`, `symbols`, `note`.
+
+`band` is `strong` / `mixed` / `weak`, computed server-side by
+`forward_eval._breadth_band` against **fixed 35/65 edges** and passed straight through.
+**Downstream must not re-derive the edges** — the producer owns them, and a consumer that
+recomputes will silently disagree the moment the producer retunes. `null` when the forward
+log has no breadth series yet: a data-absent note, not a neutral reading.
+
+It is **context only, never a gate**, honoring the producer's measurement-only stance
+until `by_breadth` shows a readable split. The KB carries it as a labeled run-level
+annotation; it does not enter the macro gate, modify a disposition, or affect sizing.
+
+**Per-row IV tier fields:** `iv_percentile` and `iv_rank` (both `float [0,1] | null`) and
+`iv_rank_status` (`NATIVE` / `SEEDED` / `ILLIQUID_SEED` / `INSUFFICIENT_HISTORY` /
+`NO_LIVE_IV`). The last three carry no number. The screen annotates a material
+rank-vs-percentile disagreement — **≥ 20 points** — in `leap_screen_reasons`.
+
+`leap_selector_iv_hv_threshold` is unchanged and remains the IV/HV boundary, kept under
+its own key so LEAP handoffs stay attributable if the KB ever splits it from the swing
+threshold.
+
+**Parity guard extended:** `KbParityTests` now also binds `IV_EXTREME_PERCENTILE_FLOOR`
+and `IV_EXTREME_PERCENTILE_FLOOR_SEEDED`, so the scale-and-threshold class of drift that
+caused the `[0, 100]` defect now trips viewer `pytest` instead of silently disabling a KB
+clause.
