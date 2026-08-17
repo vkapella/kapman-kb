@@ -36,7 +36,10 @@ check_repo() {
 
   # A stale remote ref would produce precisely the false negative this check
   # exists to prevent, so a failed fetch is a hard error, not a warning.
-  if ! git -C "$dir" fetch --quiet origin 2>/dev/null; then
+  # --prune is load-bearing: without it, remote-tracking refs for branches that
+  # were already deleted upstream survive locally and get reported as stranded.
+  # First live run of this script did exactly that on two already-deleted refs.
+  if ! git -C "$dir" fetch --quiet --prune origin 2>/dev/null; then
     echo "ERROR   ${label}: git fetch failed; refusing to compare against a stale remote ref." >&2
     problems=$((problems + 1))
     return 0
@@ -81,12 +84,14 @@ check_repo() {
     problems=$((problems + 1))
   fi
 
+  local dirty=""
   if [[ -n "$(git -C "$dir" status --porcelain)" ]]; then
+    dirty="yes"
     echo "DIRTY    ${label}: uncommitted or untracked changes present"
     problems=$((problems + 1))
   fi
 
-  if [[ "$behind" == "0" && "$ahead" == "0" && -z "$stranded" ]]; then
+  if [[ "$behind" == "0" && "$ahead" == "0" && -z "$stranded" && -z "$dirty" ]]; then
     echo "OK       ${label}: in sync with origin/main, no stranded branches"
   fi
 
