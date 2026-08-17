@@ -186,3 +186,90 @@ building this.
 - **No block bootstrap yet.** Non-overlapping subsampling is a floor on rigour,
   not a substitute for interval estimates. The n=39 and n=7 samples deserve
   confidence intervals before anything is published beyond this repo.
+
+---
+
+# Phase 3b — per-variable information coefficient
+
+**Run:** 2026-08-17 · **Code:** `phase3b_variable_ic.py`
+
+Tests whether any *individual* variable carries signal, to distinguish "the
+inputs are worthless" from "the compositing destroyed usable inputs."
+
+## In-sample (S2, 2012-02..2026-08), Spearman IC vs forward return
+
+Magnitudes oriented bullish-positive. Non-overlapping n=39 (120d) / 75 (60d).
+
+| Var | Name | IC 120d | IC 60d |
+|---|---|---|---|
+| 1.6 | vol term structure | **−0.356** (t −2.32) | **−0.288** (t −2.57) |
+| 1.3 | dist from 52wk high | **−0.328** (t −2.11) | **−0.254** (t −2.24) |
+| 2.1 | credit HYG/LQD | −0.069 | **−0.358** (t −3.28) |
+| 2.2 | rate impulse | +0.071 | **+0.324** (t +2.92) |
+| S | composite (live) | +0.120 | −0.161 |
+
+The composite has no IC, consistent with Phase 3. Several individual variables
+do — **and the two strongest carry the sign OPPOSITE to how the spec scores
+them.** More contango and closer-to-highs both predicted *lower* forward
+returns, which is the well-documented behaviour of coincident risk-appetite
+gauges: the spec reads "conditions are calm now" as "conditions will continue,"
+and at a 60–120 day horizon that is backwards for mean-reverting state
+variables.
+
+## Out-of-sample sign check (S3+S4, 2007-07..2012-02)
+
+A genuine holdout — this period played no part in finding the above.
+
+| Var | IS 120d | OOS 120d | IS 60d | OOS 60d | Sign holds |
+|---|---|---|---|---|---|
+| 1.3 dist from 52wk high | −0.328 | −0.226 | −0.254 | −0.116 | **both** |
+| 1.4 breadth RSP/SPY | +0.200 | +0.197 | +0.056 | +0.248 | **both** |
+| 2.3 dollar UUP | +0.187 | +0.181 | +0.062 | +0.196 | **both** |
+| 1.6 vol term structure | −0.356 | −0.006 | −0.288 | +0.028 | no |
+| 2.1 credit HYG/LQD | −0.069 | +0.110 | **−0.358** | +0.186 | no |
+| 2.2 rate impulse | +0.071 | −0.007 | **+0.324** | −0.196 | no |
+
+**Both Bonferroni-passing in-sample results (2.1 at t −3.28, 2.2 at t +2.92)
+reverse sign out of sample.** The strongest in-sample finding (1.6, −0.356)
+collapses to ~0.00. This is a textbook demonstration that the in-sample
+significance was a data-mining artifact, and it is why the OOS check was run
+before drawing any conclusion.
+
+## What survives
+
+Three of eleven variables hold sign across all four tests:
+
+| Var | Direction | vs spec |
+|---|---|---|
+| 1.4 breadth RSP/SPY | positive, IC +0.06..+0.25 | **correct** |
+| 2.3 dollar (weakness bullish) | positive, IC +0.06..+0.20 | **correct** |
+| 1.3 distance from 52wk high | negative, IC −0.12..−0.33 | **INVERTED** |
+
+**Chance baseline:** with the first test fixing the sign, a variable holds
+across the other three by coin-flip with probability ⅛, so ~1.4 of 11 are
+expected by chance. Three is suggestive, not decisive. OOS n is 6–24 and the
+OOS ICs are computed on overlapping samples (non-overlapping was too small even
+to rank), so this is a *sign check*, not a significance test.
+
+## Answer to the question Phase 3b was built to settle
+
+Neither of the two framings. It is not "no signal anywhere," and not "good
+inputs ruined by compositing." It is:
+
+**~3 of 11 variables carry weak, directionally stable signal (|IC| 0.06–0.33);
+one of those three is scored backwards by the spec; and the strongest
+in-sample effects do not replicate.** Aggregating eleven variables of which
+three are weakly informative, one is sign-inverted, and seven are noise
+produces exactly the zero composite edge Phase 3 measured.
+
+## The finding underneath all of it
+
+The binding constraint is **the horizon, not the design**. A 60–120 day forecast
+yields ~4–6 independent observations per year. Two decades of history gives
+~40–80. No forecaster of modest edge (|IC| ~0.2) can be validated at that sample
+size — the confidence intervals will always swamp the effect.
+
+This is a property of the question the scan asks, not a fixable flaw in how it
+asks it. Rebuilding around the three survivors would face the identical wall:
+by the time enough independent observations accumulate to demonstrate edge, the
+regime that produced it has turned over.
