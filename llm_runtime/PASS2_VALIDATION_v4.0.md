@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.1
-file_last_updated: 2026-07-20
+kb_version: 4.0.2
+file_last_updated: 2026-08-16
 status: active
 tier: T2
 ---
@@ -110,7 +110,7 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 | `SIGNAL_v4.0.md` (T1) | Spread-mandate contract (heuristic 3); anti-hallucination floor (heuristic 10); alternative-confidence ordering (heuristic 8) | PASS2 enforces the spread-mandate's three-outcome resolution; honors anti-hallucination floor on truncated chains; orders validated-set summary by descending confidence |
 | `WYCKOFF_v4.0.md` (T1) | Operator-confirmed phase and event readings; structural levels from confirmed phase | Structural levels inform strike selection anchoring within the candidate zone |
 | `RISK_v4.0.md` (T1) | Sizing band ladder; chain-quality sizing step-down discipline | PASS2 inherits Pass 1 sizing band note and may step down based on Pass 2 chain quality; step-down direction and magnitude follow RISK's band ladder |
-| `SYSTEM_PARAMS_v4.0.md` (T3) | `SWING_DTE_BAND`, `CSP_DTE_BAND`, `LEAP_DTE_BAND`, `IV_HV_ELEVATED_THRESHOLD`, `IV_RANK_EXTREME_FLOOR` | DTE band values govern expiration selection scope; IV threshold values govern spread-mandate resolution |
+| `SYSTEM_PARAMS_v4.0.md` (T3) | `SWING_DTE_BAND`, `CSP_DTE_BAND`, `LEAP_DTE_BAND`, `IV_HV_ELEVATED_THRESHOLD`, `IV_EXTREME_PERCENTILE_FLOOR`, `IV_EXTREME_PERCENTILE_FLOOR_SEEDED` | DTE band values govern expiration selection scope; IV threshold values govern spread-mandate resolution |
 
 **What PASS2 delivers to each downstream file.**
 
@@ -179,11 +179,11 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 
 **Spread-mandate resolution quick reference.**
 
-| Outcome | Pass 2 IV/HV condition | Pass 2 IV rank condition | Consequence |
+| Outcome | Pass 2 IV/HV condition | Pass 2 IV tier condition | Consequence |
 |---|---|---|---|
 | Confirmed | ≥ `IV_HV_ELEVATED_THRESHOLD` per SYSTEM_PARAMS | Any | Spread required; naked long-premium refused; sizing denominator = spread-risk |
-| Confirmed (rank reinforcement) | Neutral band | ≥ `IV_RANK_EXTREME_FLOOR` per SYSTEM_PARAMS | Spread required despite neutral IV/HV; *Stretched IV* annotation |
-| Overridden | Below elevated threshold | Below extreme floor | Spread mandate lifts; naked long-premium eligible; sizing denominator = underlying-notional |
+| Confirmed (IV-tier reinforcement) | Neutral band | `iv_percentile` ≥ `IV_EXTREME_PERCENTILE_FLOOR` per SYSTEM_PARAMS (fraction [0, 1]; `_SEEDED` floor when `iv_rank_status` is `SEEDED`; no tier on a non-computing status) | Spread required despite neutral IV/HV; *Stretched IV* annotation |
+| Overridden | Below elevated threshold | Below the applicable extreme floor, or no tier reading | Spread mandate lifts; naked long-premium eligible; sizing denominator = underlying-notional |
 | Fire-by-default | Pass 2 producer re-fetch unavailable or chain too degraded to compute reliable IV/HV | N/A | Spread required; *Spread mandated — chain validation failed* label |
 
 **DTE band reference — per SYSTEM_PARAMS.**

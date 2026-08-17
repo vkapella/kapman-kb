@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 4.0.1
-file_last_updated: 2026-07-03
+kb_version: 4.0.2
+file_last_updated: 2026-08-16
 status: active
 tier: T3
 ---
@@ -132,7 +132,7 @@ When REPORT_FORMAT and a T1 or T2 file appear to conflict on a structural questi
 | `KAPMAN_GUARDRAILS_v4.0.md` (T0) | Hard-cap mandate; rule-ID-legend-only rule; override acknowledgment requirement; data-quality vocabulary; mode discipline | REPORT_FORMAT enforces caps numerically; places rule IDs in legend/footer only; places override acknowledgment in subtitle or footnote per heuristic; uses GUARDRAILS vocabulary in source bar flags |
 | `SIGNAL_v4.0.md` (T1) | Label vocabulary for trigger states; four-field exit-trigger output format; the forward-tested-target confluence annotation on the underlying alert level; NO_TRADE/WAIT consistency rule; confidence ordering rule; anti-hallucination floor substitution labels | REPORT_FORMAT renders trigger-state labels verbatim; renders the four exit-trigger fields as a matched pair per position, with the forward-tested-target confluence annotation rendered as a suffix on the underlying alert level when SIGNAL carries it (never as the alert price); enforces NO_TRADE/WAIT row structure; renders alternatives in descending confidence order; renders zone substitutions per pass label discipline |
 | `DEALER_v4.0.md` (T1) | DGPI tier names; flip-zone labels; dealer-confidence labels (high/medium/low/invalid); hostile-macro flag | REPORT_FORMAT renders DGPI tier in the screening table and Macro Regime card; renders flip-zone in rationale where relevant; renders dealer confidence in the source bar |
-| `VOLATILITY_v4.0.md` (T1) | IV/HV band labels; IV rank tier labels; volatility-status labels; stale-data flag | REPORT_FORMAT renders volatility regime in the screening table; renders "Stretched IV" annotation for extreme tier; renders stale-data flag in source bar with timestamp |
+| `VOLATILITY_v4.0.md` (T1) | IV/HV band labels; IV tier labels (resolved from `iv_percentile`); `iv_rank_status`; volatility-status labels; stale-data flag | REPORT_FORMAT renders volatility regime in the screening table; renders "Stretched IV" annotation for extreme tier; renders the rank-vs-percentile divergence annotation when VOLATILITY flags one; names the `iv_rank_status` when no tier reading exists; renders stale-data flag in source bar with timestamp |
 | `WYCKOFF_v4.0.md` (T1) | Phase labels; event labels | REPORT_FORMAT renders Wyckoff phase in the screening table and portfolio detail; renders confirmed events in rationale |
 | `PASS1_SCREENING_v4.0.md` (T2) | Eligible/NO_TRADE/WAIT determinations; candidate zones; alternatives with confidence; Pass 1 data-quality labels; macro gate result; override acknowledgments | REPORT_FORMAT renders the screening table and per-ticker detail from Pass 1 output; applies zone rendering to all Pass 1 strike and expiration fields |
 | `PASS2_VALIDATION_v4.0.md` (T2) | Validated/Flagged/Rejected states; exact strikes and expirations; chain quality label; dealer-confidence label; entry price range; sizing band | REPORT_FORMAT renders exact values for Pass 2 validated candidates; renders Flagged and Rejected states with named reasons; renders chain quality badge in source bar |
@@ -391,7 +391,7 @@ The session-meta-timing CSS class applies to both lines of element #5. Element #
 - Footnotes are numbered sequentially (¹, ², ³...) across the entire report, regardless of which section generated the overflow.
 - The superscript appears immediately after the last word of the capped content in the cell: "Spring confirmed, dealer long gamma¹"
 - Footnotes appear in the legend/footer in the order their superscripts appear in the report, top to bottom, left to right.
-- A footnote is self-contained: it begins with the ticker or position it refers to, then the field name, then the full content. Format: "¹ HON | Rationale: Spring confirmed on above-average volume with dealer flipping long gamma intraday; IV rank at 34th percentile supports naked long-call structure at current sizing band; near-flip flag not active."
+- A footnote is self-contained: it begins with the ticker or position it refers to, then the field name, then the full content. Format: "¹ HON | Rationale: Spring confirmed on above-average volume with dealer flipping long gamma intraday; IV percentile 0.34 (rank 0.31, NATIVE) supports naked long-call structure at current sizing band; near-flip flag not active."
 - When a source bar overflow moves to footnote ¹, all other footnotes in the session shift to ² onward.
 
 ---

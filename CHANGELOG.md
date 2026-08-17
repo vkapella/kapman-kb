@@ -1,5 +1,86 @@
 # KapMan KB Changelog
 
+## 2026-08-16 — IV tier re-key: percentile-resolved, rescaled to [0, 1], status-gated; LEAP selector veto scope (closes #107, #108)
+
+### Changed — `llm_runtime/` (runtime rule changes; operator must re-upload to project knowledge)
+
+Two defects and one judgment change, all in the IV-tier surface that had been dormant since v4.0
+and went live when kapman-polygon-viewer #59 shipped an IV-history producer and c830d35
+(`SCREEN_VERSION 2.1`) implemented the #99 tilt.
+
+**Defect 1 — the scale could never fire.** The producer emits `iv_percentile` and `iv_rank` as
+**fractions in [0, 1]**; the KB asserted `[0, 100]` in eight places and set
+`IV_RANK_EXTREME_FLOOR = 75`. No `[0, 1]` value reaches 75, so every consumer comparing them
+directly was dead code — and silently so. Root cause is contract drift, not an authoring slip: the
+v2.3 formula preserved in `VOLATILITY_011` carries a `* 100` that the new producer dropped. The
+consequence was worse than dead code, because the viewer implements on the fraction scale: once
+activated the screen would have fired the tilt while the KB clause could not, diverging one-sidedly
+on a live structure decision.
+
+**Defect 2 — the KB modelled a diagnostic the producer does not emit.** The `insufficient_iv_history`
+boolean does not exist. The producer discloses provenance through `iv_rank_status`
+(`NATIVE` / `SEEDED` / `ILLIQUID_SEED` / `INSUFFICIENT_HISTORY` / `NO_LIVE_IV`), which decides
+whether a tier reading exists at all and at which floor.
+
+**Judgment change — the tier resolves from IV percentile, not IV rank** (operator-approved). Rank is
+a range statistic: the trailing window's min and max set the whole scale, so two days govern every
+reading. Percentile uses the full distribution. The producer's own slice-2 validation measured rank
+as its least reliable IV statistic (agreement within 5 points ranging 52% to 93%) and names
+percentile the headline stat. Both halves of the KB's original rationale for preferring rank had
+expired: "normalizes against the full historical range" is precisely the measured weakness, and
+DGPI stopped requiring `iv_rank` when the 2026-06-28 dealer alignment made it optional. The tier
+question — where does current IV sit against this ticker's own history — is distributional, which
+is what percentile answers. **Rank remains delivered, reported and read as context**, and where the
+two disagree materially the runtime reports both rather than collapsing them, reusing the discipline
+already applied to IV/HV-vs-tier disagreement.
+
+**`llm_runtime/SYSTEM_PARAMS_v4.0.md`** (`4.0.2 → 4.0.3`): `IV_RANK_EXTREME_FLOOR` (75, 0–100 scale)
+**retired and replaced** by `IV_EXTREME_PERCENTILE_FLOOR` (**0.75**, fraction [0–1]) and
+`IV_EXTREME_PERCENTILE_FLOOR_SEEDED` (**0.80**), the latter matching the producer-side margin so a
+borderline reconstruction cannot flip an options structure. Unit column states the scale explicitly.
+Consumer lists updated.
+
+**`llm_runtime/VOLATILITY_v4.0.md`** (`4.0.0 → 4.0.1`, anchor): dormancy language retired — the tier
+**is now produced**. Tier keying switched to `iv_percentile` with the reasoning stated; new
+`iv_rank_status` gating table replacing the `insufficient_iv_history` contract; new
+rank-vs-percentile divergence annotation; Appendix band table rescaled to quartiles of [0, 1] with
+the extreme boundary expressed as the named parameter; glossary rows corrected and re-scoped
+(percentile resolves the tier, rank is context). Legacy anchors `VOLATILITY_010` and `VOLATILITY_011`
+retained **verbatim** with dated supersession notes — `VOLATILITY_011`'s note points at the `* 100`
+that caused the drift.
+
+**`llm_runtime/SIGNAL_v4.0.md`** (`4.0.2 → 4.0.3`): spread-mandate firing condition, Appendix firing
+matrix and annotation-trigger row re-keyed to `iv_percentile` and the named parameters. The #99 LEAP
+tilt clause now reads on percentile and is **status-gated** — it applies at the `NATIVE` floor, at
+the higher `SEEDED` floor, and **not at all** on `ILLIQUID_SEED` / `INSUFFICIENT_HISTORY` /
+`NO_LIVE_IV`.
+
+**`llm_runtime/PASS2_VALIDATION_v4.0.md`** (`4.0.1 → 4.0.2`) and
+**`llm_runtime/REPORT_FORMAT_v4.0.md`** (`4.0.1 → 4.0.2`): spread-mandate resolution matrix and
+render contract re-keyed; REPORT_FORMAT gains the divergence annotation and now names the
+`iv_rank_status` when no tier reading exists (*"IV tier not available — [status]"*), because
+"limited history" and "options too thin to reconstruct" are different facts about the ticker.
+
+### Fixed — the LEAP selector's "never a veto" contradicted PASS1 (closes #108)
+
+`PASS1_SCREENING_v4.0.md` already resolved the pre-phase-C intersection correctly and already
+carried the named WAIT reason; **SIGNAL was the sole defect**, asserting the selector is "never a
+veto — the candidate remains eligible either way" without acknowledging that exception. SIGNAL
+heuristic 3 now states the rule in both directions: the selector never refuses a structure PASS1 has
+authorized, **and never manufactures an authorization PASS1 has withheld**. Where the Wyckoff branch
+has authorized the short put alone and the vol read is unreadable, the degraded default cannot reach
+for the long call — its job is to pick the safe member of the authorized set, not to enlarge it —
+and the resulting WAIT is a PASS1 disposition on an empty authorized set, not a selector veto. No
+behavior change: this ratifies what PASS1 and the viewer already do. No new parameter.
+
+Prioritisation note: on the frozen 2026-08-07 panel, 72 accumulation-family rows resolved 71
+FLAGGED + 1 ESTIMATION with zero ACCEPT, so `LEAP_SHORT_PUT` has never executed end-to-end on live
+data (kapman-polygon-viewer #76). Both changes land before the path first carries weight.
+
+**Follow-up, deliberately not taken here:** the tier is still called the "IV rank tier" in several
+files while resolving from percentile. Renaming the vocabulary was outside the approved scope and is
+left as a separate decision.
+
 ## 2026-08-13 — LEAP-horizon screen semantics: dealer-timing veto scope, LEAP structure selector, LEAP short put (closes #99)
 
 ### Changed — `llm_runtime/` (runtime rule additions; operator must re-upload to project knowledge)

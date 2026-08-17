@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 4.0.2
-file_last_updated: 2026-08-13
+kb_version: 4.0.3
+file_last_updated: 2026-08-16
 status: active
 tier: T3
 ---
@@ -34,7 +34,8 @@ SYSTEM_PARAMS defines values. It does not define what to do with them. The behav
 | `CSP_DTE_BAND` | 45–60 | calendar days | PASS1, PASS2 | Applies to cash-secured puts. Shorter than the swing band — CSPs target premium decay in the 45–60 DTE window where theta accelerates most efficiently. Listed separately from `SWING_DTE_BAND` so it can be tuned independently. |
 | `LEAP_DTE_BAND` | 12–24 | months | PASS1, PASS2, SIGNAL | Applies to both LEAP structures — long call and short put (SIGNAL's LEAP structure selector resolves which). Expressed in months because LEAPS expirations are sparsely listed and month-level granularity is the practical selection unit. |
 | `IV_HV_ELEVATED_THRESHOLD` | 1.20 | ratio (IV ÷ HV) | VOLATILITY, SIGNAL | The IV/HV ratio at or above which the spread-mandate fires for new directional entries. Boundary value resolves to elevated (conservative) per VOLATILITY heuristics. |
-| `IV_RANK_EXTREME_FLOOR` | 75 | IV rank score [0–100] | VOLATILITY, SIGNAL | The IV rank score at or above which the extreme tier activates, reinforcing the spread-mandate even when IV/HV reads neutral. |
+| `IV_EXTREME_PERCENTILE_FLOOR` | 0.75 | **fraction [0–1]** (IV percentile) | VOLATILITY, SIGNAL | The IV **percentile** at or above which the extreme tier activates, reinforcing the spread-mandate even when IV/HV reads neutral. **Scale is a 0–1 fraction, not a 0–100 score** — the producer emits `iv_percentile` and `iv_rank` as fractions, and a threshold written on the 0–100 scale can never fire. Replaces `IV_RANK_EXTREME_FLOOR` (75, on the retired 0–100 scale); see CHANGELOG for the rename and rescale. |
+| `IV_EXTREME_PERCENTILE_FLOOR_SEEDED` | 0.80 | fraction [0–1] (IV percentile) | VOLATILITY, SIGNAL | The higher floor applied when `iv_rank_status` reads `SEEDED` — the trailing window includes reconstructed history, so a borderline reading should not flip an options structure. Matches the producer-side margin (kapman-polygon-viewer). `ILLIQUID_SEED`, `INSUFFICIENT_HISTORY` and `NO_LIVE_IV` yield no tier reading at all rather than a higher bar. |
 | `NEAR_FLIP_BAND_PCT` | 0.5 | percent of spot (±) | DEALER, GUARDRAILS | The symmetric percentage band around the gamma flip level that defines the near-flip zone (the `at_flip` band). Applies identically to SPY (macro) and per-ticker. **Aligned to the producers' 0.5% `at_flip` band** (kapman-polygon-mcp-v2 + kapman-schwab-MCP) — was 0.25%, which disagreed with both producers. |
 | `DGPI_NEUTRAL_BAND` | 10 | DGPI magnitude (\|x\|) | DEALER | Below this magnitude (`-10 < DGPI < +10`) the dealer read is **near-neutral** (the producer's "low pressure" band). Matches the producer DGPI bands (kapman-polygon-mcp-v2 `dealer_metrics.py`: <10 low / 10-30 moderate / 30-60 significant / >60 extreme) and the viewer header's go/no-go light. |
 | `DGPI_STRONG_BAND` | 30 | DGPI magnitude (\|x\|) | DEALER | At/above this magnitude the tier is **strongly supportive** (≥ +30) or **hostile** (≤ -30); between `DGPI_NEUTRAL_BAND` and this is moderately-supportive / weakening. The producer's "significant" + "extreme" (>60) bands fold into the strong tier (the KB does not surface a separate 60 cutpoint). |
@@ -52,11 +53,11 @@ SYSTEM_PARAMS defines values. It does not define what to do with them. The behav
 This file is consumed by:
 
 - `PASS1_SCREENING_v4.0.md` — reads `SWING_DTE_BAND`, `CSP_DTE_BAND`, `LEAP_DTE_BAND` for candidate zone DTE band assembly
-- `PASS2_VALIDATION_v4.0.md` — reads the same DTE bands for expiration selection scope; reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` as spread-mandate resolution inputs
-- `SIGNAL_v4.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` for spread-mandate trigger specification; reads `SWING_DTE_BAND` and `CSP_DTE_BAND` for anti-hallucination label text; reads `FORWARD_TEST_CONFLUENCE_BAND_PCT` as the forward-tested-target confluence tolerance on the exit anchors
+- `PASS2_VALIDATION_v4.0.md` — reads the same DTE bands for expiration selection scope; reads `IV_HV_ELEVATED_THRESHOLD`, `IV_EXTREME_PERCENTILE_FLOOR` and `IV_EXTREME_PERCENTILE_FLOOR_SEEDED` as spread-mandate resolution inputs
+- `SIGNAL_v4.0.md` — reads `IV_HV_ELEVATED_THRESHOLD`, `IV_EXTREME_PERCENTILE_FLOOR` and `IV_EXTREME_PERCENTILE_FLOOR_SEEDED` for spread-mandate trigger specification; reads `SWING_DTE_BAND` and `CSP_DTE_BAND` for anti-hallucination label text; reads `FORWARD_TEST_CONFLUENCE_BAND_PCT` as the forward-tested-target confluence tolerance on the exit anchors
 - `REPORT_FORMAT_v4.0.md` — reads `FORWARD_TEST_CONFLUENCE_BAND_PCT` as the divergence boundary for rendering the forward-tested-target confidence suffix on the exit-plan / exit-trigger-proximity rows
 - `RISK_v4.0.md` — reads `CONDITIONAL_TOP_SIZE_PCT` as the conditional-top sizing-band magnitude
-- `VOLATILITY_v4.0.md` — reads `IV_HV_ELEVATED_THRESHOLD` and `IV_RANK_EXTREME_FLOOR` as the Appendix band boundary values
+- `VOLATILITY_v4.0.md` — reads `IV_HV_ELEVATED_THRESHOLD`, `IV_EXTREME_PERCENTILE_FLOOR` and `IV_EXTREME_PERCENTILE_FLOOR_SEEDED` as the Appendix band boundary values
 - `DEALER_v4.0.md` — reads `NEAR_FLIP_BAND_PCT` as the near-flip zone Appendix band value, and `DGPI_NEUTRAL_BAND` / `DGPI_STRONG_BAND` / `HOSTILE_MACRO_DGPI_MAX` as the DGPI tier cutpoints and hostile-macro DGPI threshold
 - `PORTFOLIO_MGMT_v4.0.md` — reads `DTE_DECAY_WARNING_THRESHOLD` for DTE decay warning evaluation at Step 5 of the Portfolio mode workflow
 - `WYCKOFF_v4.0.md` — reads `TIER_GATE_TAU_HIGH` and `TIER_GATE_TAU_LOW` as the viewer/v2 ingest tier-gate boundaries that resolve a pasted reading to `pipeline-accepted`, `pipeline-flagged`, or estimation-path
