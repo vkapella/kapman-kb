@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.4
+kb_version: 4.0.5
 file_last_updated: 2026-08-16
 status: active
 tier: T1
@@ -85,6 +85,18 @@ The Stop alert is a *broker-actionable* trigger, meaning its output is meant to 
 | Enforcement venue | `PORTFOLIO_MGMT_v4.0.md`; `REPORT_FORMAT_v4.0.md` |
 
 The Profit target alert mirrors the Stop alert's mechanics in every structural way — same four output fields, same delta-gamma approximation, same trail-stop bid/ask + mark dual output, same broker-actionable nature, same data-quality fallback behavior when Greeks are unavailable. The two triggers differ only in which side of current spot the underlying alert level anchors to. The pairing is intentional: every position recommendation surfaces both a Stop alert and a Profit target alert as a matched pair, so the operator has a complete exit plan at the moment of position entry rather than having to come back later to set the favorable-side alert. The favorable-side level is anchored to a Wyckoff structural target (the upper boundary of a confirmed accumulation range, a projected markup price objective, the next significant structural resistance) or a DEALER-delivered call wall (a strong call wall above current spot is a candidate ceiling). As with the Stop alert, the runtime does not derive the structural level; it consumes it from the upstream regime files and composes the four output fields. One asymmetry worth noting: the delta-gamma approximation tends to be slightly more reliable for favorable-side alerts than unfavorable-side alerts at equal distance, because favorable moves in long-premium positions are accompanied by expanding delta (the position becomes more directional as it works), which the gamma term captures; unfavorable moves are accompanied by contracting delta (the position bleeds), which the gamma term also captures but with the offsetting fact that gamma itself is shrinking. The accuracy band — ±5-10% within ~1σ near-term — is reported identically for both alerts to avoid suggesting a precision the approximation doesn't deliver.
+
+**The dealer-anchor read window is pinned, and any anchor derived from a wall names it.**
+
+Wall levels are not a fallback of last resort. Per this file's input contract a wall becomes the Stop or Profit target anchor when no Wyckoff structural level is available **or when the wall is simply closer** — and proximity wins often enough that the wall path is ordinary, not exceptional. That makes the DTE window of the dealer read a **decision input**: the window selects which expiries the wall scan sees, the walls set the anchor, and the anchor is a price the operator places at a broker.
+
+Left unpinned it produced exactly that failure. Two sessions one day apart read the same PLTR position at different windows and produced stop anchors **$10 apart** — a move with no market content in it, from a parameter neither session stated. The runtime therefore reads dealer metrics for anchor purposes at **`DEALER_ANCHOR_DTE_BAND` per SYSTEM_PARAMS**, and a session that deviates from it says so.
+
+The window is narrow on purpose. Dealer gamma is a near-term hedging phenomenon — DEALER reads it as a days-scale positioning signal — so widening the window dilutes the very flow that makes a wall behave as a level at all. A wider read returns strikes that sit further from spot and carry less hedging obligation, which is how the PLTR anchor moved $10 while the tape did not move at all.
+
+**At the LEAP horizon the pinned band does not apply, and the read is not free.** `get_wyckoff_scan`'s embedded options block is fixed at 0–60 DTE by producer design (kapman-polygon-mcp-v2#27) and cannot be re-parameterized, so a LEAP-horizon dealer read **requires a separate explicit `get_options_metrics` call with a stated window**. A LEAP anchor taken from the scan's embedded block is reading near-dated positioning against a 12–24 month thesis: that is a data error, not a conservative approximation, and it is named as one rather than degraded quietly.
+
+**Disclosure is the standing half of this rule.** Whenever an exit anchor derives from a wall, the report names the window the wall came from. And when a recomputed anchor has moved materially since the prior session, the named driver must distinguish a **market** move from a **window** change — the recompute discipline introduced above is only honest if a parameter artifact cannot be reported as decay or a spot move.
 
 **Theta-adjusted target horizon — the exit-trigger contract carries a time dimension, not only price levels.**
 

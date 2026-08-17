@@ -1,5 +1,66 @@
 # KapMan KB Changelog
 
+## 2026-08-16 — pin the dealer-anchor read window; wall-derived levels name it (closes #110)
+
+### Changed — `llm_runtime/` (runtime rule additions)
+
+Wall levels are not a fallback of last resort: SIGNAL's input contract makes a wall the
+Stop or Profit target anchor when no Wyckoff structural level is available **or when the
+wall is simply closer**, and proximity wins often enough that the wall path is ordinary.
+That quietly turned the DTE window of the dealer read into a **decision input** — the
+window selects which expiries the wall scan sees, the walls set the anchor, and the anchor
+is a price placed at a broker.
+
+Nothing in `llm_runtime/` pinned it. Evidence: two sessions one day apart read the same
+PLTR position at `dte 0–120` and `dte 0–60` and produced stop anchors **$10 apart** — walls
+150/110/120 against 150/155/160 — a move with no market content, from a parameter neither
+session stated. The 2026-08-14 record's own words: *"I did not state the change, and it
+moves levels."*
+
+**Why this was structural rather than careless.** Both candidate homes excluded it by
+explicit rule. `DEALER` lists DTE windows among the pipeline parameters that "do not appear
+in this file," and `SYSTEM_PARAMS` excludes "tool-surface or pipeline parameters." Both
+rules are individually right; the exit-anchor fall-through promoted a tool-surface filter
+into a trading-logic input and the architecture had no seam for it.
+
+**`llm_runtime/SYSTEM_PARAMS_v4.0.md`** (`4.0.3 → 4.0.4`): new `DEALER_ANCHOR_DTE_BAND`
+(**0–60**, calendar days). Promoted here deliberately, resolving the exclusion against this
+file's own claim to own what the runtime "consumes directly when making structure, sizing,
+or expiration decisions" — a wall that becomes a broker-actionable level is exactly that.
+Function over form. Naming it also satisfies the file's *"parameters are consumed by name,
+not by value"* heuristic, which a literal window written into SIGNAL prose would have
+broken — the two rules are satisfiable together only by naming it here.
+
+**`llm_runtime/SIGNAL_v4.0.md`** (`4.0.4 → 4.0.5`): new exit-trigger heuristic. Anchor reads
+use `DEALER_ANCHOR_DTE_BAND`; a session that deviates says so. The band is narrow on purpose
+— dealer gamma is a near-term hedging phenomenon, so a wider read returns strikes further
+from spot carrying less hedging obligation, which is precisely how the PLTR anchor moved $10
+while the tape did not. Follows the producer's own precedent: kapman-polygon-mcp-v2#27 fixed
+the Wyckoff scan's embedded options block at the same window by design, reasoning that a
+per-call window makes the output parameter-dependent.
+
+**At the LEAP horizon the band does not apply and the read is not free.** The scan's embedded
+options block is fixed at 0–60 and cannot be re-parameterized, so a LEAP-horizon dealer read
+requires a separate explicit `get_options_metrics` call with a stated window. A LEAP anchor
+taken from the scan's block reads near-dated positioning against a 12–24 month thesis —
+**named as a data error, not degraded quietly as a conservative approximation.**
+
+**Disclosure is the standing half of the rule.** Any wall-derived anchor names its window,
+and when such a level moves materially between sessions the named driver must distinguish a
+**market** move from a **window** change. This is what keeps #100's recompute discipline
+honest: without it, a parameter artifact can be reported as decay or a spot move.
+
+**`llm_runtime/REPORT_FORMAT_v4.0.md`** (`4.0.3 → 4.0.4`): Portfolio per-position subsection 3
+(Exit-trigger proximity) renders the window beside a wall-derived level and names window-vs-walls
+when it moves. Cap 30 → 35 words.
+
+**`llm_runtime/DEALER_v4.0.md`** (`4.0.0 → 4.0.1`): one cross-reference line recording the
+exception in the consumer, so DEALER's silence on windows reads as deliberate rather than as
+a gap for the next reader to re-derive.
+
+No behavior change to any dealer metric itself; this pins how the anchor read is parameterized
+and requires it be stated.
+
 ## 2026-08-16 — the exit-trigger contract gains a time dimension; §A1 linkage closed at SCREEN_VERSION 2.2 (closes #100)
 
 ### Changed — `llm_runtime/` (runtime rule additions)

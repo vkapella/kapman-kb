@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.0
-file_last_updated: 2026-07-02
+kb_version: 4.0.1
+file_last_updated: 2026-08-16
 status: active
 tier: T1
 ---
@@ -111,7 +111,7 @@ If any condition fails, the affected layer reads as absent (for ticker) or as th
 **When DEALER is silent.** DEALER does not own:
 
 - Pipeline computation. The formulas for net GEX, strike-level GEX, gamma flip interpolation, wall weighting, slope, DGPI, position class, and confidence resolution all live in the engineering-only pipeline reference. The runtime reads outputs; it does not derive them.
-- Filter thresholds. DTE windows, open-interest minimums, volume minimums, max moneyness, and similar pipeline parameters are engineering concerns and do not appear in this file.
+- Filter thresholds. DTE windows, open-interest minimums, volume minimums, max moneyness, and similar pipeline parameters are engineering concerns and do not appear in this file — **with one documented exception in the consumer**: when SIGNAL derives an exit anchor from a wall level, the read window is pinned as `DEALER_ANCHOR_DTE_BAND` per SYSTEM_PARAMS, because that read stops being a pipeline filter and becomes a broker-actionable price. DEALER's silence on windows is deliberate and remains correct for every other dealer read; it is not a gap.
 - Pipeline defaults. The walls-top-n value, the slope-range percentage, the contract multiplier, and other backend defaults are engineering concerns.
 - Chain-depth / OI cutoffs that produce the `confidence` rating. The runtime consumes the rating, not the count.
 - Chain-quality categorization (full / limited / weak as it relates to executable contract depth). That is PASS2's domain. DEALER's `confidence` (high / medium / low / invalid) measures data depth for the dealer-metrics calculation specifically and is not the same thing as PASS2's executable chain quality.

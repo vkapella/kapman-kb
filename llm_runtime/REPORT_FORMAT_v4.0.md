@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: format
-kb_version: 4.0.3
+kb_version: 4.0.4
 file_last_updated: 2026-08-16
 status: active
 tier: T3
@@ -336,7 +336,7 @@ One block per open position, appearing below the portfolio view table in the sam
 |---|---|---|---|
 | 1 | Current regime summary | 35 words | Dealer regime (DGPI tier, flip-zone), volatility regime (IV/HV band, IV rank tier), Wyckoff phase if confirmed this session |
 | 2 | Regime exit advisory | 50 words | Present only when State = Advisory; names each active decay branch; omitted entirely when no advisory active |
-| 3 | Exit-trigger proximity | 30 words | Distance of current spot from Stop alert and Profit target alert levels; directional framing. When SIGNAL carries a forward-tested-target confluence annotation on an alert level (position context held a fresh viewer target), render the same suffix as the screening Exit plan — *"…— viewer forward-tested hit-rate ~Z%, as-of [date]"* — never as the price (overflow to footnote per cap discipline) |
+| 3 | Exit-trigger proximity | 35 words | Distance of current spot from Stop alert and Profit target alert levels; directional framing. When a level is **wall-derived**, name the dealer read window beside it (*"put wall 770, 0–60 DTE"*); when such a level has moved since the prior session, the driver names whether the **window** changed or the **walls** did. When SIGNAL carries a forward-tested-target confluence annotation on an alert level (position context held a fresh viewer target), render the same suffix as the screening Exit plan — *"…— viewer forward-tested hit-rate ~Z%, as-of [date]"* — never as the price (overflow to footnote per cap discipline) |
 | 4 | Theta and time-to-target | 45 words | `T_θ` per alert level (days of decay the position can fund to reach it) and `D_θ` (break-even drift, %/day) per SIGNAL. Appends any fired affordability test — horizon (`T_θ` shorter than the calibrated window, both units stated) or life (`T_θ` beyond remaining DTE) — and the Catalyst-affordability advisory line when PORTFOLIO_MGMT Step 5c fires, naming both the theta cost and the gain. States the driver when a value has moved materially since the prior session. Renders *"Pending — theta unavailable"* when Greeks are absent, and *"horizon unresolvable — `pt_horizon_bars` not delivered"* on a null envelope field, never a substituted default |
 | 5 | DTE decay warning | 20 words | Present only when DTE ≤ DTE_DECAY_WARNING_THRESHOLD (per SYSTEM_PARAMS, currently 21 days); names DTE and threshold; omitted when DTE is above threshold |
 | 6 | Position notes | 25 words | Operator-supplied notes from position context; omitted when position context contains no notes field |
