@@ -114,9 +114,18 @@ fallback.
 
 The Stage-1 pilot's conclusion (`docs/CODE_VS_JUDGMENT_ASSESSMENT_2026-06-29.md`) is
 implemented: the viewer computes the deterministic Pass-1 screen per row
-(`backend/app/pass1_screen.py`, `SCREEN_VERSION 1.1` — v1.1 shipped 2026-07-02,
-viewer #54, off the Stage-F SATS finding) and the export carries the disposition,
-not just the raw fields.
+(`backend/app/pass1_screen.py`, **`SCREEN_VERSION 2.1`** as of viewer `c830d35`,
+2026-08-16) and the export carries the disposition, not just the raw fields.
+
+**Version history of the pinned screen** — each bump is behavioral, per the drift
+discipline below:
+
+| Version | Shipped | Change |
+|---|---|---|
+| 1.0 | 2026-07-01 (viewer #53 / KB #84) | Five screen columns; three hard force-flags |
+| 1.1 | 2026-07-02 (viewer #54) | Stale-snapshot force-flag added (four total), off the Stage-F SATS finding |
+| **2.0** | 2026-08-13 (viewer #71 / kb#99) | Five **`leap_screen_*`** columns (tier / disposition / structure / sizing / reasons) added to `A1_FIELDS` on **every** Export view; new `leap_selector_iv_hv_threshold` key in `screen_thresholds`; envelope `macro_context.spy` gains **`spot_price`** and **`gamma_flip`**; new LEAP structure vocabulary (`LEAP_LONG_CALL` / `LEAP_SHORT_PUT` / `NONE`), distinct from the swing set |
+| **2.1** | 2026-08-16 (viewer `c830d35`) | kb#99's extreme-IV tilt **implemented** and status-gated — it had been skipped on the since-falsified premise that the producer emits no IV rank |
 
 **Five screen columns**, on the three **long-premium** Export views only (the CSP
 view stays raw — the premium-sell screen contract is unpinned):
@@ -166,13 +175,30 @@ resolution stay KB-side.
   defense-in-depth so the export's tier column stops asserting eligibility the
   KB will flag anyway.
 - **Phase-C confirmation** uses the completed-phase evidence set (pinned in SIGNAL
-  3.0.8).
+  3.0.8 — the pre-rename 3.0.x line; SIGNAL is **4.0.3** as of 2026-08-16, and the
+  predicate is unchanged across the rename).
 - **Deliberate exclusions** (in the module docstring): Step-0 earnings (no viewer
   earnings field — dispositions are pre-event-screen), macro gate (envelope-only),
-  IV-rank mandate arm (producer emits no IV rank), SOW-*recency* (the screen
+  SOW-*recency* (the screen
   implements the code-detectable **absence** half; staleness stays a run-level
   freshness judgment — **kb#85 decided not to parameterize it**, see WYCKOFF_v4.0
   3.0.10), CSP screen.
+
+**IV-rank mandate arm — exclusion retired 2026-08-16.** This list previously
+excluded the IV-rank arm because "the producer emits no IV rank." That is no
+longer true: viewer #59 ships `iv_rank`, `iv_percentile` and `iv_rank_status`,
+reconstructed from Polygon flat files and graded against a vendor ruler, and the
+tilt is implemented as of `SCREEN_VERSION 2.1`. kb#107 re-keyed the KB side to
+resolve the tier from **`iv_percentile`** (rank is a range statistic set by the
+window's two extreme days; percentile uses the full distribution) on a **[0, 1]
+fraction scale** — the KB had carried a 0–100 scale forward from the v2.3
+producer, which made every boundary unfirable.
+
+**Caveat for the §A1 contract:** `iv_rank`, `iv_percentile` and `iv_rank_status`
+are grid and LEAPS-view columns but are **not yet in `A1_FIELDS`**, so the handoff
+does not carry them today. Until they are added (viewer-side), a KB session
+consuming only the §A1 export cannot fire the IV-tier arm and must treat the tier
+as absent — which per VOLATILITY means *no tier reading*, never a "low" tier.
 
 **Drift discipline:** the viewer's `test_pass1_screen.py::KbParityTests` parses
 `SYSTEM_PARAMS_v4.0.md` from the sibling checkout (τ_high / τ_low /

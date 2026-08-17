@@ -1,5 +1,48 @@
 # KapMan KB Changelog
 
+## 2026-08-16 — journal branch-state honesty floor; feed spec re-keyed to SCREEN_VERSION 2.1 (closes #106, #109)
+
+### Changed — `llm_runtime/` (runtime rule addition)
+
+**`llm_runtime/JOURNAL_MGMT_v4.0.md`** (`4.0.4 → 4.0.5`): new heuristic — *"A record's
+absence is a claim about the whole repo, not about the working tree."* A negative
+assertion about the journal ("no Pass 2 exists", "no entry-time snapshot", "first run
+this month") is a claim about the entire repo, and a session sees only its clone.
+Twice — 2026-08-13 and 2026-08-16 — a session made exactly that claim while real
+records sat in an unmerged branch and then an unmerged clone; both times the false
+claim was written into an append-only record and inherited downstream, and the first
+produced four wrong same-day findings during live position management.
+
+The clause requires a branch/remote check before any such assertion
+(`scripts/check_repo_sync.sh`, or a fetch plus ahead/behind plus a `claude/*` sweep),
+**advisory not blocking** — a run does not halt on divergence. The non-optional half is
+the honesty floor: when the check has not run, cannot run, or returns dirty, the
+assertion is **scoped to what the session can see** rather than stated as fact. Names
+the underlying asymmetry: a positive finding is self-evidencing, a negative one is only
+as good as the session's visibility.
+
+### Changed — `engineering_only/` (no re-upload)
+
+**`engineering_only/PIPELINE_FEED_VIEW_SPEC_v4.0.md`**: re-keyed from the stale
+`SCREEN_VERSION 1.1` pin to **2.1**, with a version-history table recording both
+behavioral bumps — **2.0** (viewer #71 / kb#99: five `leap_screen_*` columns in
+`A1_FIELDS` on every Export view, new `leap_selector_iv_hv_threshold` in
+`screen_thresholds`, `macro_context.spy` gains `spot_price` + `gamma_flip`, new LEAP
+structure vocabulary) and **2.1** (viewer `c830d35`: kb#99's extreme-IV tilt
+implemented and status-gated).
+
+Two stale statements corrected. The deliberate-exclusion list carried *"IV-rank mandate
+arm (producer emits no IV rank)"* — false since viewer #59; the exclusion is retired and
+annotated with the kb#107 re-key (tier resolves from `iv_percentile` on a [0, 1] scale).
+The phase-C predicate's *"pinned in SIGNAL 3.0.8"* citation now notes SIGNAL is 4.0.3 and
+the predicate is unchanged across the rename.
+
+New caveat recorded: `iv_rank` / `iv_percentile` / `iv_rank_status` are grid and
+LEAPS-view columns but are **not yet in `A1_FIELDS`**, so the handoff does not carry them.
+Until they are (viewer-side), a session consuming only the §A1 export cannot fire the
+IV-tier arm and must treat the tier as absent — which per VOLATILITY means *no tier
+reading*, never a "low" tier.
+
 ## 2026-08-16 — IV tier re-key: percentile-resolved, rescaled to [0, 1], status-gated; LEAP selector veto scope (closes #107, #108)
 
 ### Changed — `llm_runtime/` (runtime rule changes; operator must re-upload to project knowledge)

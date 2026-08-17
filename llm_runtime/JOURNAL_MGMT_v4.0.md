@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.4
-file_last_updated: 2026-07-14
+kb_version: 4.0.5
+file_last_updated: 2026-08-16
 status: active
 tier: T2
 ---
@@ -26,6 +26,14 @@ Before any screening or portfolio work, the session reads `memory/positions.md`,
 **Live operator or broker input always overrides memory, and disagreements are surfaced, never silently resolved.**
 
 Memory is a convenience cache; it is never the authority a decision rests on. When the operator states something — or a broker/tradelog snapshot shows something — that conflicts with what `memory/` holds, the live value wins and the session says so explicitly ("memory has three open SPY puts; you're reporting two — proceeding with two, flagging the mismatch"). The session does not quietly prefer either side and does not average them. This precedence is what lets memory be a convenience without becoming a stale authority: the cost of a wrong remembered value is a surfaced discrepancy, not a bad decision. (The behavioral floor lives in `KAPMAN_GUARDRAILS`; this runbook owns the load-and-reconcile mechanics.)
+
+**A record's absence is a claim about the whole repo, not about the working tree — verify branch state before asserting one.**
+
+"No Pass 2 exists for this position." "There is no entry-time snapshot." "This is the first run this month." Each is a **negative assertion about the entire journal**, and a session can only see the clone in front of it. Twice — 2026-08-13 and 2026-08-16 — a session made exactly this class of claim while real records sat in an unmerged branch and then an unmerged clone, and each time the false claim was written into an append-only record and inherited by the sessions that followed. On 2026-08-13 it produced four wrong same-day findings during live position management, including a "no Pass 2" claim about five legs that had been validated twenty-five minutes before they filled. The failure is invisible from inside the session that makes it: nothing about a stale clone looks stale.
+
+So, before any negative assertion about the journal, the session **checks remote and branch state** — `scripts/check_repo_sync.sh` in the `kapman-kb` checkout covers both repos, or equivalently a fetch plus an ahead/behind read and a sweep for `claude/*` branches carrying unmerged commits (both repos deliver direct-to-main, so any such branch is by definition a delivery failure). The check is **advisory, not blocking**: a clone two commits behind rarely invalidates a screen, and a run does not halt on divergence. What is not optional is the honesty floor — **when the check has not run, cannot run, or comes back dirty, the assertion is stated as scoped to what the session can see** ("no Pass 2 record for this position *in this working tree*, which is 22 commits behind origin"), never as an unqualified fact about the repo. A scoped claim invites the operator to correct it; an unqualified one forecloses that.
+
+The asymmetry is deliberate and worth naming: a *positive* finding is self-evidencing — the record is either there or it is not — while a negative finding is only ever as good as the session's visibility. Absence of evidence is the one claim this runbook requires the session to qualify.
 
 **The lineage ID is derived from the export's own `exported_at` timestamp, copied verbatim everywhere, and echoed back in-session.**
 
