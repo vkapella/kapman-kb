@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 4.0.0-alpha
-file_last_updated: 2026-07-02
+kb_version: 4.0.1-alpha
+file_last_updated: 2026-08-17
 status: draft
 tier: —
 ---
@@ -49,7 +49,8 @@ This file documents the dealer-metrics pipeline mechanics extracted from `llm_ru
 |---|---|
 | GEX slope | `slope = (upper_gex - lower_gex) / price_range` over `±2%` of spot |
 | Slope range default | `gex_slope_range_pct = 0.02` |
-| DGPI components | Signed log-scaled net GEX, slope multiplier with `±0.3` clamp, optional IV-rank weighting, output clamp to `[-100, 100]` |
+| DGPI components | Signed log-scaled net GEX, slope multiplier with `±0.3` clamp, optional IV-rank weighting (**dormant** — see below), output clamp to `[-100, 100]` |
+| IV-rank weighting status | **Never applied in production.** `calculate_dgpi` accepts an optional `iv_rank` parameter, but the sole production call path omits it — and kapman-polygon-mcp-v2 emits no IV-rank surface, so it could not supply one (verified 2026-08-17; IV rank is viewer-computed and reaches the KB only via the §A1 envelope). Every delivered DGPI is unweighted |
 | DGPI exact formula | [CONTENT GAP — operator input required] Source anchor names the components but does not provide the complete algebraic formula. |
 
 ### Position class
@@ -112,7 +113,7 @@ This file documents the dealer-metrics pipeline mechanics extracted from `llm_ru
 | `DEALER_006` | `1.0 / 0.7 / 0.4 / 0.2` |
 | `DEALER_007` | Default `top_n = 3` |
 | `DEALER_008` | `slope = (upper_gex - lower_gex) / price_range` over `±2%` of spot |
-| `DEALER_009` | Signed log-scaled net GEX, slope multiplier with `±0.3` clamp, optional IV-rank weighting, output clamp to `[-100, 100]` |
+| `DEALER_009` | Signed log-scaled net GEX, slope multiplier with `±0.3` clamp, optional IV-rank weighting (dormant — never passed in production; see Slope and DGPI), output clamp to `[-100, 100]` |
 | `DEALER_010` | `|net_gex| < 1,000,000` → neutral; positive → `long_gamma`; negative → `short_gamma` |
 | `DEALER_011` | Contracts-with-gamma `5/10` cutoffs; total OI `≥ 1000` for `high` |
 | `DEALER_012` | FULL requires `eligible_options >= 25`; LIMITED requires `>= 1` |

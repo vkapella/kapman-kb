@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.2
-file_last_updated: 2026-07-20
+kb_version: 4.0.3
+file_last_updated: 2026-08-17
 status: active
 tier: T2
 ---
@@ -107,7 +107,7 @@ When a validated trade specification arrives from Pass 2 and the operator confir
 | `PASS2_VALIDATION_v4.0.md` (T2) | Validated trade specifications: structure, direction, ticker, strikes, expiration, entry price range, sizing band, chain quality label, dealer `confidence`, entry-time regime snapshot | Carried forward as the reference record when the operator confirms execution and supplies actual fill details; forms the foundation of the position context schema |
 | `SIGNAL_v4.0.md` (T1) | Stop alert and Profit target alert four-field output; the **direction-aware** Regime exit advisory firing condition and four decay branches (the Wyckoff branch covers regime succession + phase regression D→B/A); delta-gamma approximation formula | PORTFOLIO_MGMT carries the four exit-trigger fields in position context; evaluates the Regime exit advisory branch by branch per Operational heuristics, reading the Wyckoff branch relative to the position's direction; may refresh the estimated option price at alert using the delta-gamma formula when current Greeks are available |
 | `DEALER_v4.0.md` (T1) | Fresh dealer metrics per session: DGPI tier, flip-zone classification, dealer confidence, call/put wall levels | Fetched fresh at each Portfolio mode session for each open position's ticker; DGPI tier and flip-zone used for Regime exit advisory DGPI and spot-vs-flip branches; dealer confidence used to determine whether the DGPI branch can evaluate (`high`/`medium`/`low`) or must be labeled data-absent (`invalid`) |
-| `VOLATILITY_v4.0.md` (T1) | Fresh volatility metrics per session: IV/HV band, IV rank tier, volatility-status label | Fetched fresh at each Portfolio mode session; IV/HV band used for the Regime exit advisory volatility branch; volatility-status label used to determine branch evaluability |
+| `VOLATILITY_v4.0.md` (T1) | Fresh volatility metrics per session: IV/HV band, volatility-status label. **The IV rank tier is not fetchable** — it is viewer-computed and delivered only in the §A1 handoff envelope | IV/HV band and volatility-status are fetched fresh at each Portfolio mode session; IV/HV band used for the Regime exit advisory volatility branch; volatility-status label used to determine branch evaluability. A Portfolio-mode session with no §A1 envelope has no current IV tier for the position; the entry-time tier in `positions.md` is the entry anchor and is never presented as a current reading |
 | `WYCKOFF_v4.0.md` (T1) | Current session's confirmed Wyckoff **regime + phase (A–E)** per ticker, via propose-confirm protocol; the canonical regime/phase vocabulary and succession **graph** | Consumed for the Regime exit advisory regime-succession & phase-regression branch (read relative to the position's direction); if no confirmed reading exists for a ticker in the current session, the branch is suppressed and labeled rather than fired conservatively |
 | `KAPMAN_GUARDRAILS_v4.0.md` (T0) | Mode discipline (Portfolio / Hybrid); data-quality vocabulary; override discipline; Hybrid output section ordering | PORTFOLIO_MGMT confirms mode at session start per GUARDRAILS; applies data-quality labels to all degraded or missing fields; honors the Hybrid output discipline (Screening first, Portfolio second) |
 | `SYSTEM_PARAMS_v4.0.md` (T3) | `DTE_DECAY_WARNING_THRESHOLD` | Applied at Step 5 of the Portfolio mode workflow to surface DTE decay warnings for positions approaching expiration |

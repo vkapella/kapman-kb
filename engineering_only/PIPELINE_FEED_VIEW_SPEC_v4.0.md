@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 4.0.1
-file_last_updated: 2026-07-02
+kb_version: 4.0.2
+file_last_updated: 2026-08-17
 status: active
 tier: —
 ---
@@ -194,11 +194,23 @@ window's two extreme days; percentile uses the full distribution) on a **[0, 1]
 fraction scale** — the KB had carried a 0–100 scale forward from the v2.3
 producer, which made every boundary unfirable.
 
-**Caveat for the §A1 contract:** `iv_rank`, `iv_percentile` and `iv_rank_status`
-are grid and LEAPS-view columns but are **not yet in `A1_FIELDS`**, so the handoff
-does not carry them today. Until they are added (viewer-side), a KB session
-consuming only the §A1 export cannot fire the IV-tier arm and must treat the tier
-as absent — which per VOLATILITY means *no tier reading*, never a "low" tier.
+**§A1 contract — caveat retired 2026-08-16.** `iv_rank`, `iv_percentile` and
+`iv_rank_status` were added to `A1_FIELDS` on 2026-08-16, so the handoff carries
+them alongside the grid and LEAPS views. The earlier caveat — that a KB session
+consuming only the §A1 export could not fire the IV-tier arm — no longer applies
+at `SCREEN_VERSION 2.2`; below it, the fields are absent and the tier is *no tier
+reading*, never a "low" tier.
+
+**The envelope is the only path, which makes it load-bearing (kb#112).** These
+three fields are computed here — `backend/app/iv_history.py`, viewer #59, ranking
+the scan's `atm_iv` against the stitched `polygon_recon` + native forward-panel
+series — and nowhere else. Verified live 2026-08-17: kapman-polygon-mcp-v2's
+`get_options_metrics(include=["volatility"])` returns ~30 keys with no IV-rank
+field of any kind, and Schwab's `get_options_volatility_metrics` returns only
+`IV_Skew`, `IV_Term_Structure` and `OI_Ratio`. The KB consequence is recorded in
+VOLATILITY, PASS2_VALIDATION and SIGNAL: **Pass 2 cannot re-derive the IV tier
+from a chain re-fetch**, so dropping these fields from `A1_FIELDS` would strand
+the tier rather than degrade it.
 
 **Drift discipline:** the viewer's `test_pass1_screen.py::KbParityTests` parses
 `SYSTEM_PARAMS_v4.0.md` from the sibling checkout (τ_high / τ_low /

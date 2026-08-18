@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.2
-file_last_updated: 2026-08-16
+kb_version: 4.0.3
+file_last_updated: 2026-08-17
 status: active
 tier: T2
 ---
@@ -106,7 +106,7 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 | `PASS1_SCREENING_v4.0.md` (T2) | Per-candidate eligible-set output: structure, direction, candidate zones, DTE band, Pass 1 IV source label, sizing band note, confidence value | Entry contract for every Pass 2 run; PASS2 does not re-derive any of these |
 | `KAPMAN_GUARDRAILS_v4.0.md` (T0) | Anti-hallucination floor; data-quality vocabulary; override discipline | PASS2 enforces the floor on every output; exact strikes and expirations appear only from validated chain; data-quality labels applied throughout |
 | `DEALER_v4.0.md` (T1) | Fresh dealer `confidence` (`high` / `medium` / `low` / `invalid`); call/put wall levels; signed DGPI tier; near-flip flag (`position_vs_flip` `at_flip`) | Re-fetched fresh at Pass 2 start; wall levels inform strike selection; dealer `confidence` combined with chain quality for output-state determination |
-| `VOLATILITY_v4.0.md` (T1) | Pass 2 IV/HV (the Polygon producer's `iv_hv_ratio`, re-fetched fresh); IV/HV band; IV rank tier; volatility-status label; source-authority discipline | Spread-mandate resolution: IV/HV band and IV rank tier determine confirmed / overridden / fire-by-default outcome |
+| `VOLATILITY_v4.0.md` (T1) | Pass 2 IV/HV (the Polygon producer's `iv_hv_ratio`, re-fetched fresh); IV/HV band; volatility-status label; source-authority discipline. **IV rank tier is carried from the §A1 envelope, not re-fetched** — it is viewer-computed and absent from the producer surface | Spread-mandate resolution: IV/HV band and IV rank tier determine confirmed / overridden / fire-by-default outcome. The Pass 2 re-fetch re-confirms IV/HV; the tier is inherited from Pass 1 |
 | `SIGNAL_v4.0.md` (T1) | Spread-mandate contract (heuristic 3); anti-hallucination floor (heuristic 10); alternative-confidence ordering (heuristic 8) | PASS2 enforces the spread-mandate's three-outcome resolution; honors anti-hallucination floor on truncated chains; orders validated-set summary by descending confidence |
 | `WYCKOFF_v4.0.md` (T1) | Operator-confirmed phase and event readings; structural levels from confirmed phase | Structural levels inform strike selection anchoring within the candidate zone |
 | `RISK_v4.0.md` (T1) | Sizing band ladder; chain-quality sizing step-down discipline | PASS2 inherits Pass 1 sizing band note and may step down based on Pass 2 chain quality; step-down direction and magnitude follow RISK's band ladder |
@@ -139,7 +139,7 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 **Cross-references this file expects to be honored.**
 
 - `SIGNAL_v4.0.md` owns the spread-mandate contract that PASS2 enforces. When SIGNAL and PASS2 appear to specify different spread-mandate outcomes, SIGNAL governs.
-- `VOLATILITY_v4.0.md` owns the IV source-authority rules. PASS2's re-fetch of the Polygon producer for the Pass 2 re-confirm is an application of VOLATILITY's source-authority discipline, not an independent PASS2 decision.
+- `VOLATILITY_v4.0.md` owns the IV source-authority rules. PASS2's re-fetch of the Polygon producer for the Pass 2 re-confirm is an application of VOLATILITY's source-authority discipline, not an independent PASS2 decision. That discipline also fixes the boundary of the re-fetch: it re-confirms IV/HV, and it cannot re-confirm the IV tier, which no producer emits.
 - `KAPMAN_GUARDRAILS_v4.0.md` owns the anti-hallucination floor and override discipline. Neither may be relaxed by PASS2 heuristics, even implicitly.
 - `RISK_v4.0.md` owns the sizing band ladder. PASS2 applies chain-quality sizing step-downs per RISK's ladder; it does not define its own step-down magnitudes.
 - `engineering_only/PASS2_MCP_REFERENCE_v4.0.md` (forthcoming) owns the specific MCP tool-surface contracts for Pass 2 data fetching — endpoint names, chain-quality numeric thresholds, truncation detection heuristics, and strike-count reduction parameters. PASS2 is silent on all of these; operators and engineers consult the engineering-only reference for tool-surface details.
@@ -185,6 +185,16 @@ When a candidate is validated, Pass 2 captures the entry-time record into `kapma
 | Confirmed (IV-tier reinforcement) | Neutral band | `iv_percentile` ≥ `IV_EXTREME_PERCENTILE_FLOOR` per SYSTEM_PARAMS (fraction [0, 1]; `_SEEDED` floor when `iv_rank_status` is `SEEDED`; no tier on a non-computing status) | Spread required despite neutral IV/HV; *Stretched IV* annotation |
 | Overridden | Below elevated threshold | Below the applicable extreme floor, or no tier reading | Spread mandate lifts; naked long-premium eligible; sizing denominator = underlying-notional |
 | Fire-by-default | Pass 2 producer re-fetch unavailable or chain too degraded to compute reliable IV/HV | N/A | Spread required; *Spread mandated — chain validation failed* label |
+
+**The Pass 2 IV-tier condition is inherited, not re-derived.** `iv_percentile`,
+`iv_rank` and `iv_rank_status` are viewer-computed (kapman-polygon-viewer
+`iv_history.py`, viewer #59) and delivered only in the §A1 handoff envelope; no
+MCP volatility surface emits them, verified live 2026-08-17. The Pass 2 re-fetch
+therefore re-confirms **IV/HV only** — the tier column above is read from the
+tier that entered at Pass 1. If no §A1 envelope carried a tier into the session,
+there is no tier reading: the IV-tier reinforcement arm cannot fire, and its
+absence is never read as a low tier authorizing a naked long. The IV/HV arm and
+the fire-by-default arm are unaffected.
 
 **DTE band reference — per SYSTEM_PARAMS.**
 

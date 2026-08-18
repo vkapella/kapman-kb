@@ -1,5 +1,78 @@
 # KapMan KB Changelog
 
+## 2026-08-17 — the IV tier's producer is the viewer, not the MCP volatility surface (closes #112)
+
+### Fixed — provenance error that would strand a Pass 2 run
+
+`VOLATILITY_v4.0.md` attributed `iv_percentile`, `iv_rank` and `iv_rank_status`
+to the "Volatility-metrics MCP tool surface" — in the Principle paragraph and in
+four rows of the input table. They are not on that surface and never have been.
+
+Verified live 2026-08-17 against both producers. kapman-polygon-mcp-v2's
+`get_options_metrics(include=["volatility"])` returns ~30 keys — `atm_iv` and its
+source/target/floor stamps, `average_iv` + `avg_iv_status`/`avg_iv_reason`,
+`iv_skew_25delta`, `iv_term_structure` and its anchor/method/reason fields,
+`put_call_ratio`, `oi_ratio`, the contract counts, `volatility_chain_dte_max`,
+`volatility_chain_truncated` — and **no IV-rank field of any kind**. Schwab's
+`get_options_volatility_metrics` returns `IV_Skew`, `IV_Term_Structure` and
+`OI_Ratio` only.
+
+The real producer is the **viewer**: kapman-polygon-viewer
+`backend/app/iv_history.py` (viewer #59) ranks the scan's `atm_iv` against a
+stitched trailing series — the offline Polygon flat-file reconstruction
+(`iv_seed`, `source='polygon_recon'`) stitched with native `atm_iv` accumulated
+daily by the forward panel, native winning on overlapping dates. Delivery is the
+§A1 handoff envelope (in `A1_FIELDS` since 2026-08-16), plus the grid and LEAPS
+views.
+
+**Why this was operational, not cosmetic.** SIGNAL says Pass 2 re-confirms the
+selection against a fresh chain fetch. A Pass 2 session that re-fetched the chain
+to re-confirm the **IV tier** would find nothing — and a runtime that reads a
+missing tier as a low tier authorizes exactly the naked long the extreme-IV arm
+exists to refuse. The correction is therefore stated wherever the re-confirm is
+described, not only where the field is sourced.
+
+**`llm_runtime/VOLATILITY_v4.0.md`** (`4.0.1 → 4.0.2`): Principle corrected; new
+heuristic *"The IV tier's producer is the viewer, not the options-metrics MCP
+surface — and it is not re-derivable from a chain re-fetch"*; all four input-table
+rows re-sourced to the §A1 envelope; entry-point condition 1 marks the tier as
+carried-forward rather than fetched; new IV-tier row in the source-authority pass
+table; Pass 2 row scoped to IV/HV; new report label *"IV tier not available — no
+§A1 envelope this session"*.
+
+**`llm_runtime/PASS2_VALIDATION_v4.0.md`** (`4.0.2 → 4.0.3`): the VOLATILITY input
+row and the spread-mandate quick reference now say the tier is inherited from Pass
+1, not re-derived; the re-fetch boundary is named in the cross-reference list.
+
+**`llm_runtime/SIGNAL_v4.0.md`** (`4.0.5 → 4.0.6`): the spread-mandate input
+contract, the LEAP-horizon re-confirm sentence, and entry-point condition 3 each
+state that the Pass 2 re-fetch covers IV/HV and cannot cover the tier. No tier in
+session → the IV-tier arm fires in neither direction.
+
+**`llm_runtime/PASS1_SCREENING_v4.0.md`** (`4.0.5 → 4.0.6`): §A1 ingest map names
+the viewer as producer and the envelope as the only path in.
+
+**`llm_runtime/PORTFOLIO_MGMT_v4.0.md`** (`4.0.2 → 4.0.3`): the "fetched fresh at
+each Portfolio mode session" claim no longer covers the tier; the entry-time tier
+in `positions.md` is the entry anchor and is never presented as a current reading.
+
+**`engineering_only/DEALER_PIPELINE_v4.0.md`** (`4.0.0-alpha → 4.0.1-alpha`): the
+DGPI IV-rank weighting is marked **dormant**. `calculate_dgpi` accepts the
+parameter; the sole production call path omits it, and with no IV-rank surface in
+v2 it could not supply one. Every delivered DGPI is unweighted. (Viewer #84 fixes
+the same stale claim on its side.)
+
+**`engineering_only/PIPELINE_FEED_VIEW_SPEC_v4.0.md`** (`4.0.1 → 4.0.2`): the
+"not yet in `A1_FIELDS`" caveat is retired — they landed 2026-08-16 — and replaced
+with the load-bearing note: the envelope is the *only* path, so dropping these
+fields would strand the tier rather than degrade it.
+
+**Unchanged and re-affirmed:** the tier resolves from `iv_percentile` on the
+`[0, 1]` fraction scale, `iv_rank` is secondary context, `iv_rank_status` gates,
+the floors stay `IV_EXTREME_PERCENTILE_FLOOR` 0.75 / `_SEEDED` 0.80 (bound by the
+viewer's `KbParityTests`), and `SCREEN_VERSION` is 2.2. No rule-ID destinations
+changed, so `INDEX.md` is untouched.
+
 ## 2026-08-16 — pin the dealer-anchor read window; wall-derived levels name it (closes #110)
 
 ### Changed — `llm_runtime/` (runtime rule additions)
