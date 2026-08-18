@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.6
-file_last_updated: 2026-08-17
+kb_version: 4.0.7
+file_last_updated: 2026-08-18
 status: active
 tier: T1
 ---
@@ -103,7 +103,7 @@ The window is narrow on purpose. Dealer gamma is a near-term hedging phenomenon 
 | Contract part | Specification |
 |---|---|
 | Inputs consumed | `daily_theta` from the same chain snapshot that already supplies delta and gamma for the delta-gamma projection; the projected option price at the alert level (Stop or Profit target, computed above); the position's current option price and remaining DTE; aggregate position delta and spot; `pt_horizon_bars` from the §A1 envelope |
-| Firing condition | Two independent tests, each evaluated per alert level. **Horizon affordability** fires when `T_θ` is shorter than the target's calibrated horizon. **Life affordability** fires when `T_θ` exceeds remaining DTE |
+| Firing condition | Two independent tests, each evaluated per alert level, and both defined only where net theta is negative (per the non-negative-theta guard below). **Horizon affordability** fires when `T_θ` is shorter than the target's calibrated horizon — the position runs out of premium before the target comes due. **Life affordability** fires when `T_θ` exceeds remaining DTE — the position runs out of contract before it runs out of premium |
 | Behavioral consequence | **Annotation only — neither test refuses, resizes, or closes anything.** A fired test surfaces a named line in the position's exit plan; the operator decides. No new `SYSTEM_PARAMS` value is introduced — both tests anchor to quantities the runtime already holds |
 | Enforcement venue | `REPORT_FORMAT_v4.0.md` renders the theta / time-to-target subsection; `PORTFOLIO_MGMT_v4.0.md` evaluates both tests per open position at Step 5 |
 
@@ -119,6 +119,12 @@ D_θ  (break-even drift, the underlying move required just to offset decay)
 ```
 
 `T_θ` reads as *"days of decay this position can fund before the target stops being worth reaching."* `D_θ` converts theta into the units regime reads already speak, so decay can be compared directly against whether the confirmed regime is expected to produce drift at all — WYCKOFF owns that claim, and SIGNAL consumes it the same way it consumes a sizing-band ceiling.
+
+**The two tests fire on opposite failures, and only one of them is a warning.** Horizon affordability fires when `T_θ` is *short*: decay consumes the target's payoff before the calibrated window has elapsed, so the position runs out of premium before the target comes due. That is the cautionary case, and the annotation reads as one. Life affordability fires when `T_θ` is *long* — longer than the contract has left — and that is not a decay problem at all. It says decay is **not** the binding constraint; expiry is. The position can fund more decay than it will ever be asked to pay, because it is underwriting a move large enough that the payoff dwarfs the bleed: it runs out of contract before it runs out of premium. A fired life test is therefore a **structure diagnosis, not a caution** — the annotation names what the position is, and whether the confirmed regime can deliver that move inside the remaining DTE is a WYCKOFF question, not a theta question. Narrating a fired life test as an inability to fund decay inverts its meaning, and that inversion is the specific misreading this paragraph exists to close.
+
+**Both tests are defined only on a position that pays to wait; on non-negative net theta they are not applicable.** `T_θ` asks how many days of decay a position can fund, which names nothing when the position is not paying decay. A structure whose net theta is zero or positive — routinely a debit vertical whose short leg out-decays its long leg — therefore gets **not applicable** for both tests, rendered as such: *"Affordability tests N/A — net theta non-negative ([value])."* Never a fired test, and never a computed `T_θ`: taking `|daily_theta|` on a credit-theta position returns a finite, plausible-looking horizon for a quantity that does not exist, which is worse than silence. This is a distinct state from *Pending — theta unavailable* — there theta is unknown, here theta is known and the test does not apply — and the two are never collapsed into one label. **`D_θ` is unaffected and still renders**, carrying its sign: on a credit-theta position it is the adverse daily drift the position can absorb and still break even, which is a real quantity and the one the structure comparison below needs.
+
+**`D_θ` compares structures on one underlying; `T_θ` does not.** `T_θ` is a per-target deadline, and it is inversely proportional to `|theta|` — so *reducing* decay risk *raises* it. Ranking candidate structures by `T_θ` therefore ranks them backwards: a vertical that cuts theta by a factor of five posts a `T_θ` five times longer and appears to fire the affordability test harder than the naked long it improves on. `D_θ` is the quantity that carries across structures, because it normalizes decay by the directional exposure bought — "what daily drift does this position need just to stand still" is the same question for a naked long, a vertical, or a diagonal, and it is comparable across all three, sign included. When a session weighs structures on the same underlying, the decay comparison is `D_θ`. `T_θ` is read only against its own target.
 
 **Theta is a calendar-day quantity; the calibrated horizon is in trading bars. Convert before comparing.** `daily_theta` decays over weekends, so `T_θ` is in calendar days, while `pt_horizon_bars` counts trading bars — roughly five per seven calendar days. Comparing the two raw understates the available window by about 40% and would fire the horizon test on positions that can comfortably afford to wait. The horizon test converts the delivered bar count to calendar days before the comparison and states both units in the annotation.
 

@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.3
-file_last_updated: 2026-08-17
+kb_version: 4.0.4
+file_last_updated: 2026-08-18
 status: active
 tier: T2
 ---
@@ -55,6 +55,8 @@ fires when:  theta_to_next_confirmed_catalyst  >  current_unrealized_gain
 ```
 
 where the theta cost is `|daily_theta| × calendar_days_to_catalyst` and the catalyst date is the one Step 5b already fetched from `Finnhub MCP Server:get_earnings_calendar` per SIGNAL Heuristic 0 — **no new source, no second call.**
+
+**The advisory is defined only where net theta is negative.** Like the two affordability tests it sits beside, it presumes a position that pays to wait: on a structure whose net theta is zero or positive the wait is a credit, not a cost, and `|daily_theta| × days` reports that credit as an expense by discarding the sign. The advisory is therefore **not applicable** and renders as *"Catalyst affordability N/A — net theta non-negative ([value])"* — a distinct state from the data-absent case below, where theta is unknown rather than known and inapplicable.
 
 The two advisories are deliberately separate and they **stack**. A position can be exposed to earnings and able to afford the wait; exposed and unable; or unaffected by either. Collapsing them would lose the distinction that matters, because the operator's action differs: exposure argues about whether to hold through an event, affordability argues about whether holding is even economic before the event arrives.
 

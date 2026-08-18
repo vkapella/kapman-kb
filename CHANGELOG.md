@@ -1,5 +1,84 @@
 # KapMan KB Changelog
 
+## 2026-08-18 — theta-adjusted target horizon: name the life test's direction, guard non-negative theta (closes #115)
+
+### Fixed — a test that fired on the comfortable case and read as a warning
+
+`SIGNAL_v4.0.md`'s theta-adjusted target horizon defines two affordability tests over
+
+```
+T_θ = (projected_option_price_at_target − current_option_price) / |daily_theta|
+```
+
+and never said which direction a fired **life** test cuts. The file's own gloss reads `T_θ`
+as *"days of decay this position can fund"*, by which `T_θ > DTE` is the **comfortable**
+case — yet that is exactly when the test fires. The runtime narrated it as a warning
+("cannot fund the decay to reach its target") across five specs in Pass 2 run
+`VS-20260818-1425-01` before the operator caught it. The arithmetic was right the whole
+time; only the prose was missing, and a contract that computes correctly and can be
+narrated either way is a defect in the contract.
+
+**A fired life test now has a stated meaning: decay is not the binding constraint, expiry
+is.** The position is underwriting a move large enough that the payoff dwarfs the bleed —
+it runs out of contract before it runs out of premium. That is a **structure diagnosis, not
+a caution**, and whether the confirmed regime can deliver the move inside the remaining DTE
+is a WYCKOFF question, not a theta question. Horizon affordability remains the cautionary
+test of the pair.
+
+### Fixed — `|daily_theta|` manufactured a horizon for positions that don't pay decay
+
+Debit verticals routinely carry **net positive theta** — the short leg out-decays the long.
+The same run produced three: COP 130/140, COP 130/135, and the mandated XOM 165/175 (net
+theta +0.005). `T_θ` names "days of decay this position can fund", which names nothing when
+the position is not paying decay, and `|daily_theta|` hides that by returning a finite,
+plausible-looking number. Both affordability tests are now **not applicable** on
+non-negative net theta and render as such — never a fired test, never a computed `T_θ`.
+This is held explicitly distinct from *Pending — theta unavailable*: there theta is
+unknown, here it is known and the test does not apply.
+
+`D_θ` is unaffected and still renders, **carrying its sign** — on a credit-theta position
+it is the adverse daily drift the position can absorb and still break even, which is a real
+quantity and the one the structure comparison needs.
+
+**The same absolute-value defect was fixed one file over.** `PORTFOLIO_MGMT_v4.0.md`'s
+Step 5c Catalyst-affordability advisory computes `|daily_theta| × calendar_days_to_catalyst`
+and would report a credit as an expense on the same positions. It gets the same guard.
+
+### Fixed — `T_θ` was ranking structures backwards
+
+`T_θ` is inversely proportional to `|theta|`, so **reducing** decay risk **raises** it. Same
+run, same underlying, same expiration:
+
+| Structure | theta | `T_θ` vs 94 DTE | `D_θ` |
+|---|---|---|---|
+| XLE 65C naked | −0.017 | 168d → fires | 0.060 %/day |
+| XLE 65/70 spread | −0.003 | ~370d → fires harder | 0.024 %/day |
+
+The spread is strictly better on decay and fired the affordability test twice as hard. The
+file now states that **`D_θ`, not `T_θ`, is the cross-structure comparator** — `D_θ`
+normalizes decay by the directional exposure bought, so it asks the same question of a
+naked long, a vertical, and a diagonal. `T_θ` is a per-target deadline, read only against
+its own target.
+
+### Files
+
+- **`llm_runtime/SIGNAL_v4.0.md`** (`4.0.6 → 4.0.7`) — firing-condition cell names each
+  test's direction and its precondition; three paragraphs added after the `T_θ`/`D_θ` gloss
+  (opposite-failure directions, the non-negative-theta guard, `D_θ` as comparator).
+- **`llm_runtime/REPORT_FORMAT_v4.0.md`** (`4.0.4 → 4.0.5`) — per-position detail
+  subsection 4 gains the not-applicable rendering and the direction-aware wording rule,
+  alongside the existing *Pending* and null-`pt_horizon_bars` cases.
+- **`llm_runtime/PORTFOLIO_MGMT_v4.0.md`** (`4.0.3 → 4.0.4`) — Step 5c Catalyst-affordability
+  advisory gains the non-negative-theta guard.
+
+No `SYSTEM_PARAMS` value changed — the tests introduce no parameter and this fix needed
+none. `TIER_GATE_TAU_HIGH` untouched. `INDEX.md` unchanged: no status and no rule-ID
+destination moved.
+
+Provenance: `kapman-journal` `log/pass2/2026-08/VS-20260818-1425-01.md`, sections "Structure
+comparison — XLE and COP as debit spreads" and "KB DEFECT RAISED", commit `d1026d2`.
+Content approved by the operator in-session before commit.
+
 ## 2026-08-17 — re-key VOLATILITY_MCP_REFERENCE against the live producers (closes #114)
 
 ### Fixed — a file that carried every value twice and marked neither
