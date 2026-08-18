@@ -19,13 +19,23 @@ This directory follows the same boundary the pilot spec declares for itself:
   and pooling ~900 synthetic calls with the real forward record would destroy
   exactly what the append-only rule protects.
 
+## Status: CLOSED 2026-08-17 — see docs/RECOMMENDATION.md
+
+The study is complete and returned a negative. Read `docs/RECOMMENDATION.md`
+first; the phase docs are the supporting evidence.
+
 ## Why this exists
 
-The forward pilot cannot answer §7 criteria 1 and 2. Across all five logged
-run dates `layer1_score`, `layer2_score` and `composite_S` never took any
-value other than `+1`, `+1`, `+3`; the governing post-2026-08-03 series has
-disagreed with the always-UP baseline zero times in four runs. A forecaster
-that never disagrees with its benchmark cannot beat it, at any sample size.
+The forward pilot could not answer §7 criteria 1 and 2 on its own. Across all
+five logged run dates `layer1_score`, `layer2_score` and `composite_S` never
+took any value other than `+1`, `+1`, `+3`, and the governing post-2026-08-03
+series disagreed with the always-UP baseline zero times in four runs.
+
+**That was a property of the sample, not the design** — a point this study
+corrected. Backtested over 2012-2026 the composite ranges -6..+6 and calls
+non-UP 66% of the time. The problem is not that it stays silent; it is that
+its disagreements are not right more often than chance. See
+`docs/RECOMMENDATION.md` §7 for the full correction record.
 
 The backtest answers a prior question: **do these variables separate regimes
 at all?** It does not replace the pilot — data degradation, producer bugs and
