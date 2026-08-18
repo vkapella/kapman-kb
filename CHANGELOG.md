@@ -1,5 +1,84 @@
 # KapMan KB Changelog
 
+## 2026-08-17 — retire two layers inherited from the excised v2.3 surface (closes #113)
+
+Follow-up to #112, same class of defect: runtime content describing a producer
+surface that no longer exists. Both items verified across all three live
+surfaces — kapman-polygon-mcp-v2, Schwab, and the viewer §A1 envelope.
+
+### Changed — `insufficient_iv_history` re-keyed to `iv_rank_status`
+
+VOLATILITY's Appendix keyed three sites to a boolean diagnostic no producer
+emits (the token is absent from kapman-polygon-mcp-v2 and kapman-polygon-viewer
+alike). The live gate — the five-value `iv_rank_status` — was already documented
+in the same file's Operational heuristics, and the two disagreed on the case
+that matters: the Appendix said an active flag means the tier reads null, which
+is lossless only if every non-computing reason is "limited history". It is not.
+`ILLIQUID_SEED` (options too thin to reconstruct) and `NO_LIVE_IV` (no current
+`atm_iv` to rank against) are different facts about the ticker, and the live
+heuristic requires the report to name which applies. A session resolving against
+the Appendix emitted the wrong label.
+
+**`llm_runtime/VOLATILITY_v4.0.md`** (`4.0.2 → 4.0.3`): the Appendix contract
+retitled to the no-tier-reading contract and re-keyed; both table rows re-keyed
+with the never-a-low-tier rule stated inline; report label folded into the
+existing *"IV tier not available — [status]"* form; metric-vocabulary entry
+replaced with `iv_rank_status`; the `VOLATILITY_012` anchor records the
+diagnostic as retired.
+
+**`engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md`**
+(`4.0.0-alpha → 4.0.1-alpha`): parallel-diagnostic row marked v2.3-era and
+retired, pointing at the live gate. The verbatim-extract appendix is left intact
+as a faithful record of the v2.3 anchor.
+
+Confirmed against a live §A1 export (87 rows, 2026-08-17): 75 rows carried both
+percentile and rank, 12 carried neither, none carried one without the other, and
+every null was explained by a non-computing status.
+
+### Removed — the IV-dispersion layer (`VOLATILITY_006` → DROPPED)
+
+Stronger than a mis-attribution: there was no source to repoint it to.
+kapman-polygon-mcp-v2 contains no `dispersion` or `stddev` token and its live
+`get_options_metrics` volatility payload has no such key; Schwab's
+`get_options_volatility_metrics` returns `IV_Skew`, `IV_Term_Structure` and
+`OI_Ratio` only; the viewer has no occurrence anywhere, so it is absent from
+`A1_FIELDS` and from a live 87-row export. The layer was inherited from the v2.3
+`kapman-mcp` surface excised in #72.
+
+Dispersion was never a gate, so the failure mode was mild — but it was the same
+shape #112 corrected: a runtime told the surface delivers a field can read its
+absence as *low* dispersion, i.e. a clean chain, which inverts the conservative
+default.
+
+It is also superseded on the merits. A plain standard deviation across contract
+IVs is a confounded proxy — it sums the volatility smile, the term structure and
+liquidity noise into one number, so a healthy chain with an ordinary smile reads
+as dispersed. The producer already answers the chain-quality question directly
+and specifically, through `contracts_analyzed` / `contracts_passing_filter` /
+`contracts_in_band`, `avg_iv_status`, `iv_hv_status`, `volatility_band_fallback`
+and `volatility_chain_truncated` — each of which names *which* thing is wrong.
+
+**`llm_runtime/VOLATILITY_v4.0.md`** (`4.0.3 → 4.0.4`): dropped from the
+Principle's delivered-field list, the input table, the output table and the
+metric vocabulary. The *"Skew and dispersion are surfaced when the structure is
+asymmetric"* heuristic becomes *"Skew is surfaced when the structure is
+asymmetric"*, with a second paragraph routing chain quality to the producer's own
+quality fields and recording why dispersion went. `VOLATILITY_008`'s
+cross-reference follows the retitle.
+
+**`INDEX.md`**: `VOLATILITY_006` moves from `MIGRATED` to **`DROPPED` from
+runtime** with the rationale, per the legacy rule-ID discipline — the ID
+survives, and the v2.3 `ddof=0` formula is retained in engineering-only as an
+archival extract rather than a live contract. The v4.0 "Deferred (tracked)" note
+on the IV-rank/percentile/dispersion dormancy pass is marked resolved: the
+producer shipped (viewer #59), #106/#107 re-keyed the scale, #112 corrected the
+provenance, and this change closes the dispersion half. The absolute-IV guard
+for the ratio's low-absolute-IV blind spot remains deferred.
+
+**`engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md`**
+(`4.0.1-alpha → 4.0.2-alpha`): the `ddof=0` row and the `VOLATILITY_006` anchor
+pointer both marked archival-only.
+
 ## 2026-08-17 — the IV tier's producer is the viewer, not the MCP volatility surface (closes #112)
 
 ### Fixed — provenance error that would strand a Pass 2 run

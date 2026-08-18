@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 4.0.1-alpha
+kb_version: 4.0.2-alpha
 file_last_updated: 2026-08-17
 status: draft
 tier: —
@@ -34,7 +34,7 @@ This file documents volatility-metrics MCP tool-surface mechanics extracted from
 | Put/call OI ratio | `put_oi / call_oi` when `call_oi > 0`, null otherwise |
 | Put/call volume ratio | `put_volume / call_volume` when `call_volume > 0`, null otherwise |
 | OI ratio | `total_volume / total_open_interest` when total OI is positive, null otherwise |
-| IV dispersion | Population standard deviation across contract IVs, `ddof=0` |
+| IV dispersion | Population standard deviation across contract IVs, `ddof=0` — **v2.3-era, no live producer.** Dropped from the runtime in kb#113 (2026-08-17); no surface emits it. Retained here as an archival extract of the v2.3 anchor, not as a live contract |
 | IV skew | `(put_iv - call_iv) * 100`, scaled to percentage points |
 
 ### 25-delta IV retrieval fallback chain
@@ -99,7 +99,7 @@ This file documents volatility-metrics MCP tool-surface mechanics extracted from
 - `VOLATILITY_003` → Contents / Put/call OI ratio.
 - `VOLATILITY_004` → Contents / Put/call volume ratio.
 - `VOLATILITY_005` → Contents / OI ratio.
-- `VOLATILITY_006` → Contents / IV dispersion.
+- `VOLATILITY_006` → Contents / IV dispersion (archival extract only — DROPPED from the runtime in kb#113).
 - `VOLATILITY_007` → Contents / 25-delta IV retrieval fallback chain.
 - `VOLATILITY_008` → Contents / IV skew.
 - `VOLATILITY_009` → Contents / Term-structure formulas.

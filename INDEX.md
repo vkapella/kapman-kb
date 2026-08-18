@@ -211,6 +211,11 @@ This repository separates runtime and engineering materials:
   panel). **Deferred (tracked):** the IV-rank/percentile/dispersion dormancy honesty pass — existing `insufficient_iv_history`
   null-handling keeps it pilot-safe — and an absolute-IV guard for the ratio's low-absolute-IV blind spot (both await the phase-2
   IV-history producer). Closes the IV/HV + vol-status halves of P0-2.
+  **[Dormancy pass resolved 2026-08-17.]** The phase-2 IV-history producer shipped (viewer #59), and the pass is complete:
+  kb#106/#107 re-keyed the tier to `iv_percentile` on the `[0, 1]` fraction scale, **kb#112** corrected its provenance (the
+  fields are viewer-computed and reach the runtime only through the §A1 envelope — no MCP surface emits them, so Pass 2
+  cannot re-derive the tier), and **kb#113** re-keyed `insufficient_iv_history` → `iv_rank_status` and dropped the IV-dispersion
+  layer outright (no producer on any live surface). The absolute-IV guard remains deferred.
 
 ## v4.0 file directory (live)
 
@@ -365,7 +370,7 @@ This repository separates runtime and engineering materials:
 | VOLATILITY_003 | engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md | VOLATILITY_003 | MIGRATED |
 | VOLATILITY_004 | engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md | VOLATILITY_004 | MIGRATED |
 | VOLATILITY_005 | engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md | VOLATILITY_005 | MIGRATED |
-| VOLATILITY_006 | llm_runtime/VOLATILITY_v4.0.md § Operational heuristics; engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md | VOLATILITY_006 | MIGRATED |
+| VOLATILITY_006 | engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md (v2.3 formula record only) | — | DROPPED from runtime (kb#113, 2026-08-17) — IV dispersion has no producer on any live surface (kapman-polygon-mcp-v2, Schwab, viewer §A1, all verified) and was never a gate; the chain-quality question it proxied is answered directly by the producer's contract-count and status fields. v2.3 `ddof=0` formula retained in engineering-only as an archival extract. |
 | VOLATILITY_007 | engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md | VOLATILITY_007 | MIGRATED |
 | VOLATILITY_008 | llm_runtime/VOLATILITY_v4.0.md § Operational heuristics; engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md | VOLATILITY_008 | MIGRATED |
 | VOLATILITY_009 | llm_runtime/VOLATILITY_v4.0.md § Operational heuristics; engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md | VOLATILITY_009 | MIGRATED |
