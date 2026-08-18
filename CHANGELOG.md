@@ -1,5 +1,79 @@
 # KapMan KB Changelog
 
+## 2026-08-17 — re-key VOLATILITY_MCP_REFERENCE against the live producers (closes #114)
+
+### Fixed — a file that carried every value twice and marked neither
+
+`engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md` held each value in two
+places with identical text and two different jobs:
+
+```
+Contents  -> | IV percentile  | Rank fraction of history values <= current, scaled to [0, 100] |
+Appendix  -> | VOLATILITY_010 | Rank fraction of history values <= current, scaled to [0, 100] |
+```
+
+The Appendix is keyed by source anchor and is correct — v2.3 really did say
+`[0, 100]`. Contents claims to document what the tool surface does and was
+wrong: the live producer emits `[0, 1]` fractions. Because both copies read
+identically, nothing told a reader which question a row answered. That is the
+seam #112 slipped through — kb#107 re-keyed the scale on the runtime side and
+this file was never touched, so the two files disagreed about the scale of the
+same field inside the same repo for weeks.
+
+**Fix shape: Contents is now live-only; the Appendix carries v2.3 alone.** The
+verbatim table is **byte-identical** to its prior state (verified
+programmatically against `HEAD`), and the legacy-anchor bullets now point into
+it rather than into Contents, each noting whether a live counterpart exists.
+The Purpose states the boundary outright: Contents governs engineering
+questions, the Appendix governs "what did `VOLATILITY_0NN` originally say".
+
+**`engineering_only/VOLATILITY_MCP_REFERENCE_v4.0.md`** (`4.0.2-alpha →
+4.1.0-alpha`). Contents rebuilt as nine sections, every row verified 2026-08-17
+against kapman-polygon-mcp-v2 (source plus live `get_options_metrics` calls) and
+kapman-polygon-viewer `backend/app/iv_history.py`.
+
+### What the verification turned up
+
+Beyond the known-stale rows in the issue:
+
+- **The history floor was wrong by 3×.** The file documented
+  `min_history_points=20`; the live floor is `MIN_HISTORY = 60` in the viewer's
+  `iv_history.py`. A KB reader reasoning about which tickers can carry a tier
+  would have been wrong about roughly every name with 20–59 points of history.
+- **The 25-delta retrieval has no fallback chain.** The file documented three
+  steps (nearest-delta within `0.15` → percentile-by-strike → median-by-strike).
+  The live implementation is a single signed-delta bucket at target `± 0.10`,
+  picking the contract closest to target and returning `None` on an empty
+  bucket. Both the step count and the tolerance were wrong.
+- **`VOLATILITY_004` has no live counterpart at all** — no put/call *volume*
+  ratio is emitted. Only `put_call_ratio` (by open interest) and `oi_ratio`
+  (volume ÷ OI) exist.
+- **`252` survives, but as something else** — it is the viewer's trailing
+  `WINDOW`, not an MCP `DEFAULT_HISTORY_LOOKBACK`.
+- **The processing-status trio and the confidence ladder are gone.**
+  `MISSING_OPTIONS` / `PARTIAL` / `SUCCESS` and the `contracts_with_iv >= 40`
+  ladder exist on no surface. Live vocabularies are `avg_iv_status`,
+  `iv_hv_status`, `iv_rank_status` and `atm_iv_source`, now tabulated as emitted.
+- **The retired two-source model was still written as guidance.** Contents said
+  Pass 1 reads Polygon `avg_iv` and Pass 2's canonical source is the Schwab
+  options chain ATM portion, with an accepted `+1`–`+4` pp bias between them —
+  a model `VOLATILITY_015` retired. An engineer consulting this file for Pass 2
+  IV sourcing was pointed at a source the runtime explicitly forbids.
+
+### Added — mechanics the file never carried
+
+Chain scope and caps (moneyness band, chain DTE max, contract caps, long-bucket
+parameters, the 30-symbol batch cap and its defaults); the `atm_iv` selection
+ladder and its `atm_iv_source` outcomes; the ATM-to-ATM term-structure anchor
+rule including the deliberate no-cross-expiry-bracketing decision (#28) and the
+realized-vs-target anchor DTEs; `iv_seeded_share` and its suppression semantics;
+and a producers-and-division-of-labour table stating that there are **two**
+producers, since conflating them is what stranded the IV tier in #112.
+
+One `[CONTENT GAP]` remains and is restated rather than filled: no producer
+emits a freshness policy, so naming a window is a runtime decision, not a
+tool-surface fact. The file stays `status: draft` on that basis.
+
 ## 2026-08-17 — retire two layers inherited from the excised v2.3 surface (closes #113)
 
 Follow-up to #112, same class of defect: runtime content describing a producer
