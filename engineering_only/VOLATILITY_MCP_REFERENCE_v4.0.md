@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 4.0.0-alpha
-file_last_updated: 2026-07-02
+kb_version: 4.0.1-alpha
+file_last_updated: 2026-08-17
 status: draft
 tier: —
 ---
@@ -69,7 +69,7 @@ This file documents volatility-metrics MCP tool-surface mechanics extracted from
 | Processing status: `MISSING_OPTIONS` | No snapshot or no contracts |
 | Processing status: `PARTIAL` | Contracts exist but `avg_iv` is null |
 | Processing status: `SUCCESS` | Full pipeline output |
-| Parallel diagnostic | `insufficient_iv_history` when history is below the 20-point floor |
+| Parallel diagnostic | `insufficient_iv_history` when history is below the 20-point floor — **v2.3-era, retired.** No live producer emits it (verified 2026-08-17: absent from kapman-polygon-mcp-v2 and kapman-polygon-viewer). The live gate is the viewer's five-value `iv_rank_status`; see VOLATILITY § Operational heuristics, "IV history depth is a precondition" |
 | Confidence high | `contracts_with_iv >= 40` AND `front_month_contracts >= 5` AND `back_month_contracts >= 5` |
 | Confidence medium | `contracts_with_iv >= 20` |
 | Confidence low | Otherwise |
