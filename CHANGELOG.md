@@ -1,5 +1,55 @@
 # KapMan KB Changelog
 
+## 2026-08-23 — trade_ticket record kind: the canonical, lineage-stamped, broker-derivable trade object (closes #116)
+
+### Changed — `llm_runtime/`
+
+Increment 0 of the ticket layer (go-live plan §07). Four operator decisions locked before
+drafting: quantity at approval (1-B); lifecycle as event records (2-A); staleness TTL of
+origin session + first 30 minutes of the next regular session (3); closing tickets deferred
+with `side` vocabulary reserved (4).
+
+**`llm_runtime/JOURNAL_MGMT_v4.0.md`** (`4.0.5 → 4.0.6`): the journal gains **LOG 4** —
+`log/tickets/<YYYY-MM>/` — and a dedicated heuristic defining the `trade_ticket` record:
+lineage-derived ids (`<lineage>/P2-NN/T1`), the instrument block with derived `osi_symbol`,
+entry range + chain quality + sizing band, the exit contract, the manifest block, and
+`status: PROPOSED`. A ticket is **a proposal record, not a position** — no `positions.md`
+entry, no entry-time snapshot, no execution claim. Lifecycle is a chain of immutable event
+records (`_approved` / `_rejected` / `_expired` / `_executed`), so append-only survives
+multiple writers by construction; the APPROVED event is where broker-facing values are born
+(limit inside the entry range or an explicit override note; duration; derived instruction;
+quantity computed against the destination account's denominator). PROPOSED tickets expire —
+deviation is always visible, staleness is always fatal. No persisted regime state, per
+WYCKOFF session scoping. **Schwab-derivable, never Schwab-shaped.**
+
+**`llm_runtime/PASS2_VALIDATION_v4.0.md`** (`4.0.3 → 4.0.4`): new render clause — every
+Validated recommendation is written as one ticket; Flagged/Rejected get none, because a
+ticket asserts authorization and those states withhold it. The entry-time-snapshot heuristic
+governs unchanged. Evidence for the record's existence: five 2026-08-07 fills measured
+against a superseded Pass 2 for three days, and an entry filled ~25% above its validated
+range with nothing at order entry to surface either.
+
+### Added — `engineering_only/` (no upload)
+
+**`engineering_only/TICKET_BROKER_MAPPING_v4.0.md`** (new, INDEX-registered): the ticket →
+Trader API mapping as a paper contract — OSI symbol rule, field table, instruction
+derivation, translator guards (staleness/range/status), worked example. Increment 4's
+`translate()` implements this table with golden tests; no translation code ships now
+(no individual-developer Schwab sandbox to test against).
+
+### Named limitations (tracked as follow-ups, not silent)
+
+1. **Multi-leg structures produce no ticket yet** — Pass 2 validates debit spreads
+   regularly, and the Increment-0 grammar is single-leg; the run's Rule 7 manifest names
+   the omission until the legs-list extension lands.
+2. **Snapshot-timing tension left untouched by design:** PASS2's entry-time snapshot is
+   still specified at validation while live practice (upheld 2026-08-16) captures at
+   confirmed execution; the ticket's EXECUTED event is the natural future home. Separate
+   issue, HITL.
+
+kapman-journal side (mechanical): `log/tickets/` scaffolded with a pointer README —
+a pointer, not a copy, per the tenor-skill drift lesson.
+
 ## 2026-08-18 — theta-adjusted target horizon: name the life test's direction, guard non-negative theta (closes #115)
 
 ### Fixed — a test that fired on the comfortable case and read as a warning

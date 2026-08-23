@@ -248,6 +248,7 @@ This repository separates runtime and engineering materials:
 | engineering_only/PORTFOLIO_MGMT_MCP_REFERENCE_v4.0.md | — | reference | Portfolio-management MCP and persistence reference |
 | engineering_only/PIPELINE_FEED_VIEW_SPEC_v4.0.md | — | reference | Viewer "Export -" pipeline-feed view column-set contract; tracks the canonical ATM IV / IV-HV surfacing and the §A1 ingest-map reconciliation |
 | engineering_only/FINNHUB_MCP_REFERENCE_v4.0.md | — | reference | Finnhub MCP tool-surface contract — the earnings source-of-authority (get_earnings_calendar) consumed by SIGNAL Heuristic 0, PASS1 Step 0, the PASS2 re-check, and the Portfolio earnings-exposure advisory |
+| engineering_only/TICKET_BROKER_MAPPING_v4.0.md | — | reference | trade_ticket → Schwab Trader API order mapping (kb#116): OSI symbol rule, field table, instruction derivation, translator guards; golden-test contract for the future kapman-execution translate() |
 
 ### Current file inventory table
 

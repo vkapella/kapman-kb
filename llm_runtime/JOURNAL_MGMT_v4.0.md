@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.5
-file_last_updated: 2026-08-16
+kb_version: 4.0.6
+file_last_updated: 2026-08-23
 status: active
 tier: T2
 ---
@@ -39,9 +39,23 @@ The asymmetry is deliberate and worth naming: a *positive* finding is self-evide
 
 When the operator pastes a viewer or tradelog export, the session derives a single lineage ID from the payload's own `exported_at` timestamp plus a per-day sequence suffix — never from the session's notion of "now," which has no reliable clock. The format is `VS-YYYYMMDD-HHMM-NN`: a source prefix, the export date and time mirrored from `exported_at`, and a two-digit per-day sequence that disambiguates collisions. That ID is the shared spine of the run — written verbatim into the handoff record and copied, never reformatted or regenerated, into the Pass 1 and Pass 2 records that descend from it. On receipt the session echoes it back with the payload's `row_count` and `as_of` ("received VS-20260625-1335-01, 47 rows, as_of 2026-06-25") so the operator can eyeball it against what the viewer exported, and it prints the same ID in the header of every Pass 1 / Pass 2 table it renders, so lineage is visible in-session, not only in the file. If a pasted export carries no `exported_at`, lineage cannot be derived — the session surfaces "lineage unavailable — export carries no `exported_at`" and proceeds with the run's logs flagged lineage-degraded; it never fabricates an ID from the session clock.
 
-**The journal holds three logs — the input split by source, the two outputs by pass — each written one file per run and never reopened.**
+**The journal holds four logs — the input split by source, the two pass outputs, and the ticket log — each written one file per record and never reopened.**
 
-Handoffs are partitioned first by source, because a viewer scan and a tradelog positions snapshot are different payloads feeding different modes: `handoffs/viewer/<YYYY-MM>/` captures the pasted viewer export that feeds Pass 1, and `handoffs/tradelog/<YYYY-MM>/` captures the pasted tradelog positions snapshot that feeds Portfolio mode (together, LOG 1, the input). `log/pass1/<YYYY-MM>/` captures every Pass 1 determination, including NO_TRADE and WAIT with disposition and reason (LOG 2). `log/pass2/<YYYY-MM>/` captures every Pass 2 trade with exact strike, expiration, entry range, and targets (LOG 3). Each run writes a new file named by its lineage ID under the matching source-or-pass and month directory; a prior run's file is never edited or reopened. The month directory is a partition for tidy diffs, not a shared file — there is no read-modify-write on a monthly file, which is what keeps the clone→commit→push round-trip conflict-free even from a stale clone. The handoff's `kind`/`source` frontmatter still records the payload type for machine parsing; the directory split makes that fact visible on the filesystem without opening the file. The lineage chain is recorded by parent links: the Pass 1 record carries `source_handoff`, the Pass 2 record carries `parent_pass1`, so the three logs join back to a single handoff.
+Handoffs are partitioned first by source, because a viewer scan and a tradelog positions snapshot are different payloads feeding different modes: `handoffs/viewer/<YYYY-MM>/` captures the pasted viewer export that feeds Pass 1, and `handoffs/tradelog/<YYYY-MM>/` captures the pasted tradelog positions snapshot that feeds Portfolio mode (together, LOG 1, the input). `log/pass1/<YYYY-MM>/` captures every Pass 1 determination, including NO_TRADE and WAIT with disposition and reason (LOG 2). `log/pass2/<YYYY-MM>/` captures every Pass 2 trade with exact strike, expiration, entry range, and targets (LOG 3). `log/tickets/<YYYY-MM>/` captures the trade tickets Pass 2 renders for Validated recommendations, together with their lifecycle event records (LOG 4) — grammar in the dedicated heuristic below. Each run writes a new file named by its lineage ID under the matching source-or-pass and month directory; a prior run's file is never edited or reopened. The month directory is a partition for tidy diffs, not a shared file — there is no read-modify-write on a monthly file, which is what keeps the clone→commit→push round-trip conflict-free even from a stale clone. The handoff's `kind`/`source` frontmatter still records the payload type for machine parsing; the directory split makes that fact visible on the filesystem without opening the file. The lineage chain is recorded by parent links: the Pass 1 record carries `source_handoff`, the Pass 2 record carries `parent_pass1`, so the three logs join back to a single handoff.
+
+**A validated recommendation becomes a trade ticket — a broker-neutral trade object written as a chain of immutable records (LOG 4).**
+
+One file per ticket under `log/tickets/<YYYY-MM>/`, written by Pass 2 for every Validated recommendation — never for Flagged or Rejected. The ticket id extends the lineage spine: `<lineage>/P2-NN/T1`, filename-safe as `<lineage>_P2-NN_T1.md`. A ticket is a **proposal record, not a position**: writing one creates no `positions.md` entry, triggers no entry-time snapshot, and asserts nothing about execution — it records what Pass 2 authorized, so any later fill can be measured against the specification that governed it.
+
+The PROPOSED ticket carries: the **instrument block** — root, expiration, right, strike, and the derived `osi_symbol` (the exact broker-format contract string, computed, never typed); the Pass-2 fields — structure, entry range, chain quality, sizing band; the **exit contract** — stop anchor {level, basis, dealer window}, targets {level, probability, horizon}, trail {unit, per-venue basis}, earnings/catalyst advisories; the **manifest** — KB commit, model, `screen_version`, `v2_schema_version`, denominator {value, source, as-of, status} when declared and named absent otherwise; the **account** (entity-scoped destination when known, else `unassigned`); `side: open` (`close` is reserved vocabulary for a later increment — never written by this rule); `status: PROPOSED`.
+
+**Quantity is deliberately absent from a PROPOSED ticket.** Pass 2 emits a sizing band — a rule, not a count — and the count requires the destination account's denominator and a live price, both of which belong to the approval moment. A quantity on a proposal would go stale the moment the option moved, computed against capital that may not be the capital that funds the trade.
+
+**Lifecycle is a chain of event records, never an edit.** Each transition is its own file beside the ticket — `_approved.md`, `_rejected.md`, `_expired.md`, `_executed.md` — so every state change carries its own timestamp and author, and no ticket file is ever reopened; append-only survives multiple writers by construction. The APPROVED event is where broker-facing values are born: {limit_price — inside the ticket's entry range or carrying an explicit override note; duration; instruction — derived from structure + side, stamped never typed; quantity — computed from the sizing band against the destination account's denominator at the approved limit; account}. The EXECUTED event records the match to a broker fill via the §A2 import join — written when the fill is confirmed, not when an order is sent.
+
+**A PROPOSED ticket expires.** Its entry range is a chain snapshot, and option prices age in hours: the ticket is approvable through its origin session and the first 30 minutes of the next regular trading session; past that boundary it is EXPIRED — recorded as an event when next observed, since append-only records need no live process — and the path back is a fresh Pass 2, which issues a new ticket with a fresh range. Approval inside the window at a price outside the range is an override that must say so; approval outside the window is not possible. **Deviation is always visible; staleness is always fatal.**
+
+A ticket carries **no persisted regime state** — "the thesis still holds" is a fresh-fetch question under WYCKOFF's session scoping, at approval as much as at any other moment. And a ticket is **Schwab-derivable, never Schwab-shaped**: every field a broker order needs is present or deterministically derivable (the mapping is pinned in `engineering_only/TICKET_BROKER_MAPPING_v4.0.md`), but the grammar is broker-neutral — a manually executed Fidelity fill and an API-routed Schwab fill are the same record shape. Tickets and their events are staged journal writes like any other: each appears in the run's Rule 7 manifest.
 
 **Memory files are written end-of-run, overwritten in place, on the trigger that owns each file.**
 
@@ -72,6 +86,8 @@ Logging is complete by construction only if completeness is checked before outpu
 | Tradelog snapshot (input) | `handoffs/tradelog/<YYYY-MM>/<lineage_id>.md` |
 | Pass 1 records (output) | `log/pass1/<YYYY-MM>/<lineage_id>.md` |
 | Pass 2 records (output) | `log/pass2/<YYYY-MM>/<lineage_id>.md` |
+| Trade tickets (output) | `log/tickets/<YYYY-MM>/<lineage_id>_P2-NN_T1.md` |
+| Ticket lifecycle events | `log/tickets/<YYYY-MM>/<lineage_id>_P2-NN_T1_<event>.md` |
 | Position state + entry snapshot | `memory/positions.md` |
 | Standing overrides | `memory/overrides.md` |
 | Active universe | `memory/watchlist.md` |
@@ -92,7 +108,8 @@ This is a v4.0-native runbook; the journal layer did not exist in v3.0 or v2.3, 
 - `SRC` — source prefix: `VS` viewer scan, `TL` tradelog snapshot.
 - `YYYYMMDD-HHMM` — mirrored from the export's `exported_at`, in the timezone the export carries.
 - `NN` — two-digit per-day sequence for collisions (`01` first).
-- Derived from `exported_at`, never the session clock; copied verbatim across all three logs; never reformatted.
+- Derived from `exported_at`, never the session clock; copied verbatim across all four logs; never reformatted.
+- **Ticket ids** extend the spine: `<lineage>/P2-NN/T1` (record id) ↔ `<lineage>_P2-NN_T1` (filename form); event files append `_approved` / `_rejected` / `_expired` / `_executed`.
 
 **Directory layout.**
 ```
