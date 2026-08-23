@@ -7,7 +7,12 @@ Load the full KapMan runtime context and evaluate:
 
 1. Read every file in `llm_runtime/` (all T0–T3 files listed in
    `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md`'s KB file inventory) as
-   governing context for this session, in the tier order given there.
+   governing context for this session. Load them in a **single batch of
+   parallel Reads** — get the file list first, then issue all Reads in one
+   message, with no narration until the load completes (kb#121; ~8 sequential
+   narrated turns of latency otherwise). Tier order (T0 → T3) still governs
+   interpretation precedence; parallel loading changes transport, not
+   authority.
 2. Execute the **Session entry sequence** from
    `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md` (confirm market date via
    `get_datetime`, detect mode, load journal memory from `kapman-journal/memory/`
