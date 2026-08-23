@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 4.0.3
+kb_version: 4.0.4
 file_last_updated: 2026-07-14
 status: active
 tier: T0
@@ -152,7 +152,9 @@ run — every Pass 1 row, including NO_TRADE and WAIT, and every Pass 2 trade �
 three-log write in `JOURNAL_MGMT_v4.0.md`. A determination surfaced without a corresponding
 staged journal entry is a Rule 7 failure surfaced to the operator, not a silent omission.
 The manifest also names the tradelog recommendation-POST outcome — rows sent, created,
-updated, or the named failure — per `JOURNAL_MGMT_v4.0.md`'s mirror clause.
+updated, or the named failure — per `JOURNAL_MGMT_v4.0.md`'s mirror clause, and the
+queue-POST outcome — items posted, duplicates, or the named failure — per
+`PASS1_SCREENING_v4.0.md`'s producer clause.
 `JOURNAL_MGMT_v4.0.md` owns the log paths, record shapes, and
 lineage; Rule 7 owns only the pre-output completeness check that the manifest is whole. Like
 the rest of Rule 7, this clause must also be present in the session system prompt to be

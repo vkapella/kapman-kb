@@ -1,5 +1,25 @@
 # KapMan KB Changelog
 
+## 2026-08-23 — producer clause: unresolved flags leave the run as queue items (closes #126)
+
+### Changed — `llm_runtime/`
+
+The last link of Increment 2. The consume side landed in #124/#125; this closes the loop
+on the producer side, so a flagged spring now travels the full path the ticket-layer
+program named as its success criterion: **flag → queue item → Today-screen card →
+declaration → fresh run re-verifies → outcome.**
+
+**`llm_runtime/PASS1_SCREENING_v4.0.md`** (`4.0.9 → 4.0.10`, operator-approved clause):
+at end of run, each ticker ending `pipeline-flagged` with no in-session resolution posts
+one `WYCKOFF_FLAGGED` queue item (`queue_item_id = <rec_id>/Q1`; snapshot = exactly what
+the run showed, three-state nulls preserved; hash per the contract). Automatic and
+transport-not-judgment — it keeps the question askable after the session ends, which is
+exactly what parked the 71-row spring cohort. In-session resolutions produce no item.
+Mirror-write failure discipline: a failed POST is reported, never blocks.
+
+**`llm_runtime/KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md`** (`4.0.3 → 4.0.4`,
+mechanical rider): the Rule 7 manifest also names the queue-POST outcome.
+
 ## 2026-08-23 — Tradelog queue surfaces verified and registered (closes #125)
 
 ### Changed — mechanical follow-through of #124's endpoint rule
