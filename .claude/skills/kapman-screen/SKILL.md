@@ -10,8 +10,11 @@ Load the full KapMan runtime context and evaluate:
    governing context for this session. Load them in a **single batch of
    parallel Reads** — get the file list first, then issue all Reads in one
    message, with no narration until the load completes (kb#121; ~8 sequential
-   narrated turns of latency otherwise). Tier order (T0 → T3) still governs
-   interpretation precedence; parallel loading changes transport, not
+   narrated turns of latency otherwise). `SIGNAL_v4.0.md` exceeds the
+   single-Read token cap: read it as **two ranged Reads in the same batch**
+   (offset 1 / limit 250, then offset 251), and treat any other file the Read
+   tool refuses for size the same way (kb#128). Tier order (T0 → T3) still
+   governs interpretation precedence; parallel loading changes transport, not
    authority.
 2. Execute the **Session entry sequence** from
    `KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md` (confirm market date via
