@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.2
+kb_version: 4.0.3
 file_last_updated: 2026-07-23
 status: active
 tier: T1
@@ -130,6 +130,10 @@ This characterization does **not** fire a veto, force a close, or resize anythin
 
 No Wyckoff reading carries forward from a prior conversation. At the start of every session, every ticker is UNKNOWN regardless of what was confirmed previously. The runtime does not assert a prior-session phase as a starting point, does not ask the operator to re-confirm a reading from yesterday, and does not treat the operator's mention of a prior reading ("we confirmed accumulation on AAPL last week") as confirmation for the current session. If the operator states a phase directly at session start without running propose-confirm or receiving a pipeline-accepted reading, the runtime treats that statement as an operator-declared override rather than a propose-confirm confirmation; the behavioral consequence is the same (the stated phase becomes authoritative), but the runtime notes that the reading was declared rather than pipeline-accepted or propose-confirmed, which informs the data-quality surface in the report.
 
+**A queued declaration transports the operator's statement about a reviewed proposal — never confirmation state.**
+
+When a pipeline-flagged reading is resolved outside the session that raised it (the Tradelog Today queue), what returns to a later run is a declaration: the proposal snapshot the operator reviewed, the operator's statement, and when it was stated. The receiving session still starts the ticker at `UNKNOWN`, re-fetches the current viewer reading, and runs the current validity, confidence-tier, force-flag, and freshness gates before the declaration is considered at all. Then: if the fresh reading qualifies for automatic acceptance on its own, it is `pipeline-accepted` from the fresh data and the declaration is recorded as answered. If the fresh reading is still flagged and still materially matches the reviewed proposal, an ACCEPT or OVERRIDE statement establishes a current-session `declared` reading — the same authority any directly-stated operator reading carries, labeled the same way in the data-quality surface. ESTIMATE invokes the estimation path; DEFER leaves the ticker `UNKNOWN`. If the fresh reading has materially diverged from the reviewed proposal — reading, gate outcome, flag reasons, required-field availability, or freshness — the declaration is not applied: the ticker stays `pipeline-flagged` and the divergence is surfaced to the operator as a new exchange. A declaration never suppresses a fresh flag, never carries a prior session's confirmation, and never ages into authority — staleness makes it more likely to be returned, not less. The machine grammar (queue item, snapshot, comparison, idempotency) lives in `engineering_only/HITL_QUEUE_CONTRACT_v4.0.md`; the consuming run stages the ingested declaration as a journal handoff per `JOURNAL_MGMT`.
+
 **Markdown requires a confirmed `sow`; soft markdown without `sow` is not active.**
 
 A ticker does not enter a `markdown` reading without a confirmed `sow` event. This applies on both paths: a viewer `regime` of `markdown` without a confirmed `sow` in `last_event` / `setup_tags` triggers the SOW-gated-markdown force-flag and the flagged-reading exchange rather than auto-accepting. `distribution` can persist — and the distribution behavioral consequences apply — without a confirmed `sow`. The transition from `distribution` to `markdown` is `sow`-gated on both paths. Soft markdown (distribution rolling into markdown without explicit weakness confirmation) is disabled in the runtime by default.
@@ -182,7 +186,7 @@ On the viewer-ingest path the inputs arrive in the pasted handoff row; on the es
 |---|---|---|
 | `pipeline-accepted` | Viewer-ingest path; validity gate passed; `g ≥ τ_high`; force-flag inputs present; no hard force-flag firing | Full — identical to `confirmed` |
 | `confirmed` | Estimation path; operator accepted propose-confirm exchange | Full |
-| `declared` | Operator stated phase directly without propose-confirm; no viewer pipeline reading | Full; data-quality surface notes declared status |
+| `declared` | Operator stated the regime/phase directly in the current session — including through a queued declaration accepted only after fresh revalidation | Full; data-quality surface notes `declared` status |
 | `pipeline-flagged` | Viewer-ingest path; `g` in `[τ_low, τ_high)`, a hard force-flag present, or a force-flag input absent; operator has not yet resolved | UNKNOWN — conservative defaults until resolved; resolves to `pipeline-accepted`, `declared`, or estimation path `confirmed` |
 | `unconfirmed` | Estimation path; operator declined or propose-confirm not run | UNKNOWN — conservative defaults |
 

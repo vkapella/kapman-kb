@@ -1,5 +1,50 @@
 # KapMan KB Changelog
 
+## 2026-08-23 — HITL queue contract: queued declarations transport operator statements, never confirmation state (closes #124)
+
+### Changed — `llm_runtime/`
+
+The Increment-2 Today-queue prerequisite (go-live plan §07). A queue resolution made
+outside the session that raised the flag returns to a later run as a **declaration** —
+{proposal snapshot, operator statement, stated_at} — a fact about the operator, never a
+fact about the market. Supersedes withdrawn #123; its engineering grammar survived
+adversarial review and is retained as the contract base, with one scope correction:
+the Codex design made Tradelog the sole holder of a decision input, inverting the
+journal-is-authority doctrine (#119's mirror clause) — restored here.
+
+**`llm_runtime/WYCKOFF_v4.0.md`** (`4.0.2 → 4.0.3`): new heuristic — the receiving
+session still starts the ticker at `UNKNOWN`, re-fetches, and runs all current gates
+before the declaration is considered; fresh auto-acceptance wins outright; a still-flagged,
+materially-matching proposal + ACCEPT/OVERRIDE establishes a current-session `declared`
+reading; ESTIMATE routes to the estimation path; DEFER leaves `UNKNOWN`; material
+divergence returns the proposal as a new exchange. A declaration never suppresses a fresh
+flag and never ages into authority — staleness makes it more likely to be returned. The
+`declared` status row notes the queued path.
+
+**`llm_runtime/JOURNAL_MGMT_v4.0.md`** (`4.0.10 → 4.0.11`): `handoffs/queue/<YYYY-MM>/`
+(kind `queue_declaration`) — each declaration a run consumed, staged verbatim by the
+consuming session exactly as a fetched export is staged; one file per `queue_item_id`.
+The journal remains the record of authority; a run must be auditable from the journal
+alone. Tree diagram also gains the missing `log/tickets/` line from #116 (mechanical).
+
+**`llm_runtime/PASS1_SCREENING_v4.0.md`** (`4.0.8 → 4.0.9`): the input contract names
+queued declarations as a context-declaration arrival path, resolved per WYCKOFF's rule.
+
+### Added — `engineering_only/` (no upload)
+
+**`engineering_only/HITL_QUEUE_CONTRACT_v4.0.md`** (new, INDEX-registered): the
+machine grammar — immutable queue items with derived status; source lineage echoed
+never minted; proposal snapshots preserving present/null/absent as three states;
+declaration grammar (ACCEPT/OVERRIDE/ESTIMATE/DEFER, hash-echo tamper check,
+latest-`stated_at` wins, consumed at most once); fixed-field material comparison
+(confidence diverges only across the named τ gate boundaries; deliberately no
+declaration TTL — divergence does the aging); fresh-run outcome record; RFC 8785
+canonical-JSON SHA-256 hashing with golden tests deferred to Increment-2 code.
+Scope is `WYCKOFF_FLAGGED` only; endpoint names enter the contract only after the
+Tradelog surface exists and is verified. Deliberately unchanged: KPSI, GUARDRAILS,
+PORTFOLIO_MGMT (portfolio declarations need their own contract), REPORT_FORMAT;
+the kapman-screen skill waits for verified endpoints.
+
 ## 2026-08-23 — kapman-screen loads the runtime KB in one parallel batch (closes #121)
 
 ### Changed — `.claude/skills/` (mechanical)

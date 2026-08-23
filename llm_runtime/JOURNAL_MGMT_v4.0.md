@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.10
+kb_version: 4.0.11
 file_last_updated: 2026-08-23
 status: active
 tier: T2
@@ -41,7 +41,7 @@ When the operator pastes a viewer or tradelog export, the session derives a sing
 
 **The journal holds four logs — the input split by source, the two pass outputs, and the ticket log — each written one file per record and never reopened.**
 
-Handoffs are partitioned first by source, because a viewer scan and a tradelog positions snapshot are different payloads feeding different modes: `handoffs/viewer/<YYYY-MM>/` captures the pasted viewer export that feeds Pass 1, and `handoffs/tradelog/<YYYY-MM>/` captures the pasted tradelog positions snapshot that feeds Portfolio mode (together, LOG 1, the input). `log/pass1/<YYYY-MM>/` captures every Pass 1 determination, including NO_TRADE and WAIT with disposition and reason (LOG 2). `log/pass2/<YYYY-MM>/` captures every Pass 2 trade with exact strike, expiration, entry range, and targets (LOG 3). `log/tickets/<YYYY-MM>/` captures the trade tickets Pass 2 renders for Validated recommendations, together with their lifecycle event records (LOG 4) — grammar in the dedicated heuristic below. Each run writes a new file named by its lineage ID under the matching source-or-pass and month directory; a prior run's file is never edited or reopened. The month directory is a partition for tidy diffs, not a shared file — there is no read-modify-write on a monthly file, which is what keeps the clone→commit→push round-trip conflict-free even from a stale clone. The handoff's `kind`/`source` frontmatter still records the payload type for machine parsing; the directory split makes that fact visible on the filesystem without opening the file. The lineage chain is recorded by parent links: the Pass 1 record carries `source_handoff`, the Pass 2 record carries `parent_pass1`, so the three logs join back to a single handoff.
+Handoffs are partitioned first by source, because a viewer scan and a tradelog positions snapshot are different payloads feeding different modes: `handoffs/viewer/<YYYY-MM>/` captures the pasted viewer export that feeds Pass 1, and `handoffs/tradelog/<YYYY-MM>/` captures the pasted tradelog positions snapshot that feeds Portfolio mode (together, LOG 1, the input). `handoffs/queue/<YYYY-MM>/` captures each queued declaration a run consumed (`kind: queue_declaration`) — the declaration verbatim, proposal snapshot included, one file per `queue_item_id`, staged by the **consuming** session at ingest exactly as a fetched export is staged; the journal remains the record of authority, the Tradelog queue is transport and display, and a run must be auditable from the journal alone (grammar in `engineering_only/HITL_QUEUE_CONTRACT_v4.0.md`; behavior in WYCKOFF's queued-declaration rule). `log/pass1/<YYYY-MM>/` captures every Pass 1 determination, including NO_TRADE and WAIT with disposition and reason (LOG 2). `log/pass2/<YYYY-MM>/` captures every Pass 2 trade with exact strike, expiration, entry range, and targets (LOG 3). `log/tickets/<YYYY-MM>/` captures the trade tickets Pass 2 renders for Validated recommendations, together with their lifecycle event records (LOG 4) — grammar in the dedicated heuristic below. Each run writes a new file named by its lineage ID under the matching source-or-pass and month directory; a prior run's file is never edited or reopened. The month directory is a partition for tidy diffs, not a shared file — there is no read-modify-write on a monthly file, which is what keeps the clone→commit→push round-trip conflict-free even from a stale clone. The handoff's `kind`/`source` frontmatter still records the payload type for machine parsing; the directory split makes that fact visible on the filesystem without opening the file. The lineage chain is recorded by parent links: the Pass 1 record carries `source_handoff`, the Pass 2 record carries `parent_pass1`, so the three logs join back to a single handoff.
 
 **A validated recommendation becomes a trade ticket — a broker-neutral trade object written as a chain of immutable records (LOG 4).**
 
@@ -88,6 +88,7 @@ Logging is complete by construction only if completeness is checked before outpu
 |---|---|
 | Viewer export (input) | `handoffs/viewer/<YYYY-MM>/<lineage_id>.md` |
 | Tradelog snapshot (input) | `handoffs/tradelog/<YYYY-MM>/<lineage_id>.md` |
+| Consumed queue declaration (input) | `handoffs/queue/<YYYY-MM>/<queue_item_id>.md` |
 | Pass 1 records (output) | `log/pass1/<YYYY-MM>/<lineage_id>.md` |
 | Pass 2 records (output) | `log/pass2/<YYYY-MM>/<lineage_id>.md` |
 | Trade tickets (output) | `log/tickets/<YYYY-MM>/<lineage_id>_P2-NN_T1.md` |
@@ -124,15 +125,17 @@ kapman-journal/
 │   └── watchlist.md
 ├── handoffs/
 │   ├── viewer/<YYYY-MM>/      # LOG 1 — viewer exports (INPUT → Pass 1)
-│   └── tradelog/<YYYY-MM>/    # LOG 1 — tradelog snapshots (INPUT → Portfolio)
+│   ├── tradelog/<YYYY-MM>/    # LOG 1 — tradelog snapshots (INPUT → Portfolio)
+│   └── queue/<YYYY-MM>/       # LOG 1 — consumed queue declarations (INPUT)
 └── log/
     ├── pass1/<YYYY-MM>/       # LOG 2 — every Pass 1 row incl. NO_TRADE/WAIT
-    └── pass2/<YYYY-MM>/       # LOG 3 — every Pass 2 trade w/ exact strike/exp/targets
+    ├── pass2/<YYYY-MM>/       # LOG 3 — every Pass 2 trade w/ exact strike/exp/targets
+    └── tickets/<YYYY-MM>/     # LOG 4 — trade tickets + lifecycle event records
 ```
 
 **Handoff frontmatter** (per §A4):
 ```
-kind: pass1_handoff | portfolio_snapshot
+kind: pass1_handoff | portfolio_snapshot | queue_declaration
 source: kapman-polygon-viewer | kapman-tradelog
 lineage_id: VS-20260625-1335-01      # derived from exported_at + per-day seq
 exported_at: 2026-06-25T13:35:03Z    # source-of-truth timestamp

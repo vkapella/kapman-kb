@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.8
+kb_version: 4.0.9
 file_last_updated: 2026-08-17
 status: active
 tier: T2
@@ -26,7 +26,7 @@ Earnings proximity is evaluated first for each candidate because it is the faste
 
 **A valid screening request has three elements; PASS1 treats each differently.**
 
-The operator provides a candidate ticker list, optional context declarations, and optional override declarations. The ticker list is the work queue — every ticker on it receives a Pass 1 determination before the run closes; no ticker is silently skipped. Context declarations (operator-stated Wyckoff regime/phase readings, sector notes, prior-session observations) are treated as operator-declared readings: authoritative for the session, but flagged as declared rather than propose-confirmed in the data-quality surface of the output. Override declarations (explicit macro-gate or veto overrides per GUARDRAILS) are applied per-request and noted in the report subtitle or footnote; they do not carry across to the next run. When the operator's request is ambiguous — the mode is unclear, the ticker list is absent, or an override declaration is incomplete — Pass 1 does not guess and produce output; it asks before proceeding.
+The operator provides a candidate ticker list, optional context declarations, and optional override declarations. The ticker list is the work queue — every ticker on it receives a Pass 1 determination before the run closes; no ticker is silently skipped. Context declarations (operator-stated Wyckoff regime/phase readings, sector notes, prior-session observations) are treated as operator-declared readings: authoritative for the session, but flagged as declared rather than propose-confirmed in the data-quality surface of the output. Context declarations may also arrive as queued declarations from the Tradelog Today queue — resolved per WYCKOFF's queued-declaration rule (fresh revalidation first; a materially changed proposal is returned, not applied), then treated as operator-declared readings like any other. Override declarations (explicit macro-gate or veto overrides per GUARDRAILS) are applied per-request and noted in the report subtitle or footnote; they do not carry across to the next run. When the operator's request is ambiguous — the mode is unclear, the ticker list is absent, or an override declaration is incomplete — Pass 1 does not guess and produce output; it asks before proceeding.
 
 **The candidate list may arrive as a viewer/v2 handoff; the §A1 fields map directly into the Pass 1 regime reads.**
 
