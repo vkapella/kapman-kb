@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.6
+kb_version: 4.0.7
 file_last_updated: 2026-08-23
 status: active
 tier: T2
@@ -47,7 +47,7 @@ Handoffs are partitioned first by source, because a viewer scan and a tradelog p
 
 One file per ticket under `log/tickets/<YYYY-MM>/`, written by Pass 2 for every Validated recommendation — never for Flagged or Rejected. The ticket id extends the lineage spine: `<lineage>/P2-NN/T1`, filename-safe as `<lineage>_P2-NN_T1.md`. A ticket is a **proposal record, not a position**: writing one creates no `positions.md` entry, triggers no entry-time snapshot, and asserts nothing about execution — it records what Pass 2 authorized, so any later fill can be measured against the specification that governed it.
 
-The PROPOSED ticket carries: the **instrument block** — root, expiration, right, strike, and the derived `osi_symbol` (the exact broker-format contract string, computed, never typed); the Pass-2 fields — structure, entry range, chain quality, sizing band; the **exit contract** — stop anchor {level, basis, dealer window}, targets {level, probability, horizon}, trail {unit, per-venue basis}, earnings/catalyst advisories; the **manifest** — KB commit, model, `screen_version`, `v2_schema_version`, denominator {value, source, as-of, status} when declared and named absent otherwise; the **account** (entity-scoped destination when known, else `unassigned`); `side: open` (`close` is reserved vocabulary for a later increment — never written by this rule); `status: PROPOSED`.
+The PROPOSED ticket carries: the **instrument block** — root, expiration, right, strike, and the derived `osi_symbol` (the exact broker-format contract string, computed, never typed); the Pass-2 fields — structure, entry range, chain quality, sizing band; the **exit contract** — stop anchor {level, basis, dealer window, durability {touch_prob, atr_multiple}}, targets {level, probability, horizon}, trail {unit, per-venue basis}, earnings/catalyst advisories; the **manifest** — KB commit, model, `screen_version`, `v2_schema_version`, denominator {value, source, as-of, status} when declared and named absent otherwise; the **account** (entity-scoped destination when known, else `unassigned`); `side: open` (`close` is reserved vocabulary for a later increment — never written by this rule); `status: PROPOSED`.
 
 **Quantity is deliberately absent from a PROPOSED ticket.** Pass 2 emits a sizing band — a rule, not a count — and the count requires the destination account's denominator and a live price, both of which belong to the approval moment. A quantity on a proposal would go stale the moment the option moved, computed against capital that may not be the capital that funds the trade.
 

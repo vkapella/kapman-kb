@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.4
-file_last_updated: 2026-08-18
+kb_version: 4.0.5
+file_last_updated: 2026-08-23
 status: active
 tier: T2
 ---
@@ -37,7 +37,7 @@ In Portfolio mode, the operator is asking about existing positions only. PORTFOL
 - Step 5b: Evaluate the Earnings-exposure advisory — fetch the next confirmed earnings date for each open position's ticker via `Finnhub MCP Server:get_earnings_calendar` and flag any position whose expiration falls on or after that date.
 - Step 5c: Evaluate the **Catalyst-affordability advisory** — using the same earnings date already fetched at Step 5b (no additional call), compute the theta cost of holding to that catalyst and compare it to the position's current unrealized gain. Fires when the cost of reaching the catalyst exceeds the gain being protected.
 - Step 5d: Evaluate the **theta-adjusted target horizon** per SIGNAL for each open position's Stop and Profit target levels — `T_θ`, `D_θ`, and the two affordability tests. Annotation only; no branch here closes, resizes, or refuses anything.
-- Step 6: Evaluate exit-trigger proximity. When entry-time Stop and Profit target alert levels are present in position context, compare current spot and current option price to those levels and surface proximity language when either level is imminently relevant. When entry-time alert levels are absent from position context, do not suppress this step — instead apply the SIGNAL approximation formula fresh from current-session data: use current-session Greeks (from broker screenshot or live chain pull), Schwab dealer flip as Stop anchor, nearest call wall above spot as Profit target anchor, and the SIGNAL trail-stop reference band (20–30% mark for long calls and long puts; 15–25% mark for LEAPs; 25–35% bid/ask for long calls and long puts; 20–30% bid/ask for LEAPs). Surface all four mandatory fields per position with an inline note: "Current-session computed — entry-time levels not supplied."
+- Step 6: Evaluate exit-trigger proximity. When entry-time Stop and Profit target alert levels are present in position context, compare current spot and current option price to those levels and surface proximity language when either level is imminently relevant. When entry-time alert levels are absent from position context, do not suppress this step — instead apply the SIGNAL approximation formula fresh from current-session data: use current-session Greeks (from broker screenshot or live chain pull), Schwab dealer flip as Stop anchor, nearest call wall above spot as Profit target anchor, and the SIGNAL trail-stop reference band (20–30% mark for long calls and long puts; 15–25% mark for LEAPs; 25–35% bid/ask for long calls and long puts; 20–30% bid/ask for LEAPs). Surface all four mandatory fields per position with an inline note: "Current-session computed — entry-time levels not supplied." Every stop anchor surfaced at this step — entry-time or current-session reconstructed — carries the SIGNAL durability figures (ex-ante touch probability and ATR multiple; the ATR fallback labeled when IV is unavailable), and the refusal annotation surfaces when no candidate clears `STOP_DURABILITY_MAX_TOUCH_PROB` per SYSTEM_PARAMS — reconstructed anchors are selected by the same proximity rule and inherit the same defect, so they get the same floor.
 - Step 7: Assemble and surface the portfolio view. Execute the sub-sequence below in order — do not skip steps.
 
   - Step 7a: State the mandatory per-position field list from REPORT_FORMAT before generating any output. For every open position, confirm a data source or named fallback exists for each field. This manifest is stated inline before the first position block is written.

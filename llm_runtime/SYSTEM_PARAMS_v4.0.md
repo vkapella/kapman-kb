@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 4.0.4
-file_last_updated: 2026-08-16
+kb_version: 4.0.5
+file_last_updated: 2026-08-23
 status: active
 tier: T3
 ---
@@ -41,6 +41,7 @@ SYSTEM_PARAMS defines values. It does not define what to do with them. The behav
 | `DGPI_STRONG_BAND` | 30 | DGPI magnitude (\|x\|) | DEALER | At/above this magnitude the tier is **strongly supportive** (≥ +30) or **hostile** (≤ -30); between `DGPI_NEUTRAL_BAND` and this is moderately-supportive / weakening. The producer's "significant" + "extreme" (>60) bands fold into the strong tier (the KB does not surface a separate 60 cutpoint). |
 | `HOSTILE_MACRO_DGPI_MAX` | -30 | signed DGPI | DEALER, GUARDRAILS | SPY DGPI at/below this (combined with SPY below gamma flip) is the DGPI half of the hostile-macro composite. Set to the hostile tier (-`DGPI_STRONG_BAND`). Because DGPI is log-compressed, SPY's \|DGPI\| is almost always large, so the hostile-macro gate is **sign-dominated** in practice — this threshold mainly prevents firing on a near-neutral SPY. Independently tunable. |
 | `DEALER_ANCHOR_DTE_BAND` | 0–60 | calendar days (DTE) | SIGNAL, DEALER | The DTE window for the dealer-metrics read **when an exit anchor derives from a wall level**. Deliberately promoted into this file despite resembling a tool-surface filter: the exclusion above covers pipeline parameters, but this file owns what the runtime *"consumes directly when making structure, sizing, or expiration decisions"* — and a wall that becomes a Stop or Profit target level is exactly such a decision. Pinned because an unpinned window made broker-actionable anchors non-reproducible session-over-session (a $10 swing in a PLTR stop anchor between two runs one day apart, 2026-08-14). Matches the producer's own precedent: kapman-polygon-mcp-v2#27 fixed the Wyckoff scan's embedded options block at the same window by design, on the reasoning that a per-call window makes the output parameter-dependent. **Does not apply at the LEAP horizon** — see SIGNAL's dealer-anchor heuristic. |
+| `STOP_DURABILITY_MAX_TOUCH_PROB` | **PENDING CALIBRATION** | probability [0–1] (ex-ante touch) | SIGNAL, PORTFOLIO_MGMT | The maximum acceptable ex-ante touch probability for a candidate Stop-alert anchor. **No value ships with the mechanism** — `TIER_GATE_TAU_HIGH`/`TIER_GATE_TAU_LOW` have carried "provisional" uncalibrated since June, and this parameter gates a broker-actionable price, so its value falls out of the ~2026-09-15 economics re-evaluation (every stop the journal has ever set: touch probability and ATR multiple when set, whether touched, what followed). **Until calibrated, the floor does not bind selection** — the probability is computed and rendered, and a would-fail anchor is annotated, never rejected. Promoted here on the #110 reasoning: a stop the operator places at a broker is a decision this file's charter covers. |
 | `EARNINGS_BLOCK_DAYS` | 7 | calendar days | PASS1, PASS2, SIGNAL | Hard WAIT. Earnings ≤ 7d from screening date: immediate WAIT output, no further regime evaluation, no override path. Earnings date sourced from `Finnhub MCP Server:get_earnings_calendar` per SIGNAL Heuristic 0; date-only calendar-day count, session hour as context. |
 | `EARNINGS_CAUTION_DAYS` | 21 | calendar days | PASS1, PASS2, SIGNAL, PORTFOLIO_MGMT | Soft WAIT. Earnings 8–21d out: WAIT with named operator-approval gate. Candidate does not advance to Eligible until operator explicitly redirects in current session. Also defines the Step-0 fetch window (screening date + this + 7d buffer) per SIGNAL Heuristic 0. |
 | `DTE_DECAY_WARNING_THRESHOLD` | 21 | calendar days | PORTFOLIO_MGMT | The remaining DTE at or below which PORTFOLIO_MGMT surfaces a DTE decay warning for an open position. Signals that the operator may want to roll or close rather than hold to expiration. Operator-configurable; 21 days is the default, corresponding to the point where theta decay accelerates materially for most structures. |
@@ -60,6 +61,7 @@ This file is consumed by:
 - `RISK_v4.0.md` — reads `CONDITIONAL_TOP_SIZE_PCT` as the conditional-top sizing-band magnitude
 - `VOLATILITY_v4.0.md` — reads `IV_HV_ELEVATED_THRESHOLD`, `IV_EXTREME_PERCENTILE_FLOOR` and `IV_EXTREME_PERCENTILE_FLOOR_SEEDED` as the Appendix band boundary values
 - `SIGNAL_v4.0.md` — additionally reads `DEALER_ANCHOR_DTE_BAND` as the pinned dealer read window for wall-derived exit anchors
+- `SIGNAL_v4.0.md` and `PORTFOLIO_MGMT_v4.0.md` — read `STOP_DURABILITY_MAX_TOUCH_PROB` as the stop-anchor durability floor (annotate-only until calibrated)
 - `DEALER_v4.0.md` — reads `NEAR_FLIP_BAND_PCT` as the near-flip zone Appendix band value, and `DGPI_NEUTRAL_BAND` / `DGPI_STRONG_BAND` / `HOSTILE_MACRO_DGPI_MAX` as the DGPI tier cutpoints and hostile-macro DGPI threshold
 - `PORTFOLIO_MGMT_v4.0.md` — reads `DTE_DECAY_WARNING_THRESHOLD` for DTE decay warning evaluation at Step 5 of the Portfolio mode workflow
 - `WYCKOFF_v4.0.md` — reads `TIER_GATE_TAU_HIGH` and `TIER_GATE_TAU_LOW` as the viewer/v2 ingest tier-gate boundaries that resolve a pasted reading to `pipeline-accepted`, `pipeline-flagged`, or estimation-path

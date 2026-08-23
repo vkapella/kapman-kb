@@ -1,5 +1,63 @@
 # KapMan KB Changelog
 
+## 2026-08-23 — stop-anchor durability: every candidate anchor carries an ex-ante touch probability (closes #111)
+
+### Changed — `llm_runtime/`
+
+The Stop alert contract specified where to anchor a stop and said nothing about whether the
+anchor was **durable** — far enough from spot, over the position's remaining life, that
+touching it carries information. Worse, the selection rule actively preferred the most
+fragile level ("proximity wins"), and the input contract could not express durability even
+if the prose had asked (no IV, no ATR, no remaining DTE). The KB already performs this
+reasoning everywhere else — WYCKOFF's event vocabulary is ATR-normalized end to end, and
+the Regime exit advisory weighs horizon against regime volatility for the trigger that
+merely flags — while the trigger that produces an actual sale got none of it. Journal
+evidence: three consecutive stop-breach exits (2026-07-20/23) whose levels were all
+un-breached within three sessions — stops inside the noise band, unable to carry
+information. This completes the exit-anchor trilogy: #110 made anchors reproducible,
+#100 made targets time-affordable, #111 makes anchors informative.
+
+**`llm_runtime/SIGNAL_v4.0.md`** (`4.0.7 → 4.0.8`): Stop alert inputs gain remaining DTE
+(already live via the theta-horizon heuristic) and the chain snapshot's ATM implied
+volatility, with ATR as the labeled fallback — no new source, no new fetch. New heuristic:
+per-candidate `P_touch ≈ 2·N(ln(B/S)/(σ√T))` — driftless first-passage, deliberately
+conservative (ignoring drift is the right default for a level whose job is to detect the
+absence of drift). Selection becomes **closest-that-clears-the-floor** (preference ordering
+preserved; `STOP_DURABILITY_MAX_TOUCH_PROB` adds a floor beneath it), with an explicit
+**refusal case**: "No durable underlying stop at this horizon — every candidate anchor sits
+inside the noise band. Manage the exit on an option-price trail, or reconsider the
+structure." At swing tenor that may be the common case, and it is information the contract
+previously could not express.
+
+**`llm_runtime/SYSTEM_PARAMS_v4.0.md`** (`4.0.4 → 4.0.5`): new
+`STOP_DURABILITY_MAX_TOUCH_PROB`, value **PENDING CALIBRATION — deliberately unset.**
+τ_high/τ_low have carried "provisional" uncalibrated since June; a fourth guessed constant
+would repeat that, and this one gates a broker-actionable price. The value falls out of the
+~2026-09-15 economics re-evaluation, whose dataset already exists: every stop the journal
+has ever set, its touch probability and ATR multiple when set, whether touched, what
+followed. **Until calibrated, the floor does not bind** — the probability is computed and
+rendered on every anchor, a would-fail anchor is annotated never rejected, and the refusal
+case renders as an annotation. Enforcement switches on when the re-evaluation supplies the
+value — the same discipline that keeps [CAL] items from being self-tuned mid-pilot.
+
+**`llm_runtime/REPORT_FORMAT_v4.0.md`** (`4.0.5 → 4.0.6`): subsection 3 renders the
+durability figures beside every stop level, always — *"Stop 460.00 (put wall, 0–60 DTE) —
+3.3 ATR, ~48% touch over 95d"* — plus the refusal annotation. Cap 35 → 45 words.
+
+**`llm_runtime/PORTFOLIO_MGMT_v4.0.md`** (`4.0.4 → 4.0.5`): Step 6's current-session anchor
+reconstruction applies the same computation, rendering, and refusal annotation —
+reconstructed anchors are selected by the same proximity rule and inherit the same defect.
+
+**`llm_runtime/JOURNAL_MGMT_v4.0.md`** (`4.0.6 → 4.0.7`, operator-approved addition beyond
+the issue's file list): the trade ticket's stop-anchor field gains
+`durability {touch_prob, atr_multiple}`, so every proposal the operator approves shows the
+durability of its own stop at approval time — #111 composing with #116 at no extra cost.
+
+Out of scope, per the issue: the volatility-blind trail-stop reference band (same defect
+family, separate issue) and Profit target durability (deliberate asymmetry — a noise-touched
+stop costs realized capital and destroys the signal value of every future stop; an untouched
+target costs opportunity).
+
 ## 2026-08-23 — trade_ticket record kind: the canonical, lineage-stamped, broker-derivable trade object (closes #116)
 
 ### Changed — `llm_runtime/`
