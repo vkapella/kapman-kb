@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.7
+kb_version: 4.0.8
 file_last_updated: 2026-08-23
 status: active
 tier: T2
@@ -51,7 +51,7 @@ The PROPOSED ticket carries: the **instrument block** — root, expiration, righ
 
 **Quantity is deliberately absent from a PROPOSED ticket.** Pass 2 emits a sizing band — a rule, not a count — and the count requires the destination account's denominator and a live price, both of which belong to the approval moment. A quantity on a proposal would go stale the moment the option moved, computed against capital that may not be the capital that funds the trade.
 
-**Lifecycle is a chain of event records, never an edit.** Each transition is its own file beside the ticket — `_approved.md`, `_rejected.md`, `_expired.md`, `_executed.md` — so every state change carries its own timestamp and author, and no ticket file is ever reopened; append-only survives multiple writers by construction. The APPROVED event is where broker-facing values are born: {limit_price — inside the ticket's entry range or carrying an explicit override note; duration; instruction — derived from structure + side, stamped never typed; quantity — computed from the sizing band against the destination account's denominator at the approved limit; account}. The EXECUTED event records the match to a broker fill via the §A2 import join — written when the fill is confirmed, not when an order is sent.
+**Lifecycle is a chain of event records, never an edit.** Each transition is its own file beside the ticket — `_approved.md`, `_rejected.md`, `_expired.md`, `_executed.md` — so every state change carries its own timestamp and author, and no ticket file is ever reopened; append-only survives multiple writers by construction. The APPROVED event is where broker-facing values are born: {limit_price — inside the ticket's entry range or carrying an explicit override note; duration; instruction — derived from structure + side, stamped never typed; quantity — computed from the sizing band against the destination account's denominator at the approved limit; account}. The EXECUTED event records the match to a broker fill via the §A2 import join — written when the fill is confirmed, not when an order is sent. Writing it has one consequence beyond the event file itself: the entry-time snapshot captured on the parent Pass 2 record (`parent_pass2` via the ticket's lineage) is transcribed verbatim into `memory/positions.md`, keyed `(instrument_key, account_id)` — the one moment a validated specification becomes a position. Transcription copies; it never re-fetches, recomputes, or updates the captured values.
 
 **A PROPOSED ticket expires.** Its entry range is a chain snapshot, and option prices age in hours: the ticket is approvable through its origin session and the first 30 minutes of the next regular trading session; past that boundary it is EXPIRED — recorded as an event when next observed, since append-only records need no live process — and the path back is a fresh Pass 2, which issues a new ticket with a fresh range. Approval inside the window at a price outside the range is an override that must say so; approval outside the window is not possible. **Deviation is always visible; staleness is always fatal.**
 
@@ -59,11 +59,11 @@ A ticket carries **no persisted regime state** — "the thesis still holds" is a
 
 **Memory files are written end-of-run, overwritten in place, on the trigger that owns each file.**
 
-The three memory files change on distinct triggers, and each write is a full overwrite of that file, never an append. `positions.md` is written at two moments: at Pass 2 validation of a new entry, when the position and its immutable entry-time regime snapshot (entry Wyckoff regime, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels) are recorded; and on a Portfolio-mode positions refresh from a tradelog or broker snapshot, when the open/closed set and live fields (mark, net_qty, unrealized P&L) are reconciled. A refresh updates live state only — the entry-time snapshot is write-once and is never rewritten. `overrides.md` is written when the operator explicitly states a standing preference to remember across sessions (e.g., "always block earnings within seven days"); it is never inferred from conversational context, and a standing override recorded here does not activate the per-request macro-gate override defined in `KAPMAN_GUARDRAILS` — it is a remembered convenience, not an active gate. `watchlist.md` is written when the active universe changes — a new viewer handoff defines or refreshes it, or the operator adds or removes tickers. All three writes ride the same end-of-run commit as the logs.
+The three memory files change on distinct triggers, and each write is a full overwrite of that file, never an append. `positions.md` is written at two moments: at the ticket's EXECUTED event, when a confirmed fill transcribes the position and its immutable entry-time regime snapshot (entry Wyckoff regime, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels — values captured at Pass 2 validation on the Pass 2 record) into the ledger; and on a Portfolio-mode positions refresh from a tradelog or broker snapshot, when the open/closed set and live fields (mark, net_qty, unrealized P&L) are reconciled. A refresh updates live state only — the entry-time snapshot is write-once and is never rewritten. `overrides.md` is written when the operator explicitly states a standing preference to remember across sessions (e.g., "always block earnings within seven days"); it is never inferred from conversational context, and a standing override recorded here does not activate the per-request macro-gate override defined in `KAPMAN_GUARDRAILS` — it is a remembered convenience, not an active gate. `watchlist.md` is written when the active universe changes — a new viewer handoff defines or refreshes it, or the operator adds or removes tickers. All three writes ride the same end-of-run commit as the logs.
 
 **Numeric regime reads are never persisted as authoritative; the entry-time snapshot is the sole, narrow exemption.**
 
-DGPI, gamma flip and walls, IV, HV, vol-status, and every other numeric regime value are re-fetched at Pass 2 from their source-of-authority tool and are never carried forward — from memory, a handoff, or a prior log — as the number a new decision is made on. The Pass 1 → Pass 2 boundary the KB already enforces is untouched: the journal persists decisions and identifiers, not live regime numbers. The one exemption is the entry-time snapshot in `positions.md` — persisted deliberately, as immutable historical entry context, so Portfolio's Regime-exit advisory can measure decay against the conditions a position was opened under. It is a record, not an authority, and is never re-read to seed a new Pass 1 or Pass 2 decision; a fresh decision always re-fetches the live regime. This is the same boundary the guardrail in `KAPMAN_GUARDRAILS` states as a refusal — this runbook owns where the exempt snapshot is written and read.
+DGPI, gamma flip and walls, IV, HV, vol-status, and every other numeric regime value are re-fetched at Pass 2 from their source-of-authority tool and are never carried forward — from memory, a handoff, or a prior log — as the number a new decision is made on. The Pass 1 → Pass 2 boundary the KB already enforces is untouched: the journal persists decisions and identifiers, not live regime numbers. The one exemption is the entry-time snapshot — captured at Pass 2 validation onto the Pass 2 record and transcribed into `positions.md` at the ticket's EXECUTED event — persisted deliberately, as immutable historical entry context, so Portfolio's Regime-exit advisory can measure decay against the conditions a position was opened under. It is a record, not an authority, and is never re-read to seed a new Pass 1 or Pass 2 decision; a fresh decision always re-fetches the live regime. This is the same boundary the guardrail in `KAPMAN_GUARDRAILS` states as a refusal — this runbook owns where the exempt snapshot is written and read.
 
 **Before any report renders, the Rule 7 self-audit confirms a staged log entry exists for every row.**
 
@@ -75,7 +75,7 @@ Logging is complete by construction only if completeness is checked before outpu
 
 **Interleave with the screening runbooks.**
 - **Pass 1** (`PASS1_SCREENING`): each determination — Eligible, NO_TRADE, WAIT — stages a Pass 1 record carrying `source_handoff` (the run's lineage ID), the `{date, ticker, structure, pass}` key, disposition + reason, candidate zone, `decided_at`, and `underlying_ref`. Nothing writes mid-run; entries stage and commit end-of-run.
-- **Pass 2** (`PASS2_VALIDATION`): each validated trade stages a Pass 2 record carrying `parent_pass1`, `{ticker, strike, expiration}`, exact spec, entry range, targets, `option_mid`, `decided_at` — and writes the immutable entry-time snapshot into `positions.md`.
+- **Pass 2** (`PASS2_VALIDATION`): each validated trade stages a Pass 2 record carrying `parent_pass1`, `{ticker, strike, expiration}`, exact spec, entry range, targets, `option_mid`, `decided_at` — and the immutable entry-time snapshot block; `positions.md` gains the position only at the ticket's EXECUTED event, when the snapshot is transcribed.
 - **Portfolio** (`PORTFOLIO_MGMT`): a tradelog positions snapshot is pasted, written to `handoffs/tradelog/`, and reconciled into `positions.md` (live fields only; entry snapshot untouched); the Regime-exit advisory reads that entry-time snapshot.
 
 **Where each artifact is written.**
@@ -140,9 +140,9 @@ row_count: 47
 
 **Pass 1 record header** (per §A4): `rec_id`, `source_handoff: <lineage_id>`, `{date, ticker, structure, pass}`, disposition (Eligible | NO_TRADE | WAIT) + reason, candidate zone, `decided_at`, `underlying_ref`, `journal_schema_version`, reserved `attack_flags[]` / `invalidation_conditions[]` (empty until Stage 3).
 
-**Pass 2 record header** (per §A4): `rec_id`, `parent_pass1: <rec_id>`, `{ticker, strike, expiration}`, exact spec, entry range, targets, `option_mid`, `decided_at`, `journal_schema_version`.
+**Pass 2 record header** (per §A4): `rec_id`, `parent_pass1: <rec_id>`, `{ticker, strike, expiration}`, exact spec, entry range, targets, `option_mid`, `decided_at`, `journal_schema_version` — and, for Validated recommendations, the **entry-time snapshot block**: the five regime fields, the eight SIGNAL stop/profit levels, and the entry-context riders, held here immutably until (and unless) a ticket EXECUTED event transcribes them into `positions.md`. A never-executed validation keeps its snapshot in the log forever and it goes nowhere — a record of conditions, not a position.
 
-**`positions.md` record grammar (per open position).** One record per open position; `positions.md` is overwritten in place, never appended (per the write model above). The join key is two distinct labeled tokens — `instrument_key` and `account_id` — parsed from named fields, never positional header text; `PORTFOLIO_MGMT` Step 1b matches the `(instrument_key, account_id)` pair. One labeled line per field. The five entry-time regime fields and the eight SIGNAL stop/profit levels are write-once at Pass 2 (the sole no-persist exemption); the live-refresh block is overwritten in place on each Portfolio refresh.
+**`positions.md` record grammar (per open position).** One record per open position; `positions.md` is overwritten in place, never appended (per the write model above). The join key is two distinct labeled tokens — `instrument_key` and `account_id` — parsed from named fields, never positional header text; `PORTFOLIO_MGMT` Step 1b matches the `(instrument_key, account_id)` pair. One labeled line per field. The five entry-time regime fields and the eight SIGNAL stop/profit levels are captured at Pass 2 validation and written once, at the ticket's EXECUTED event (the sole no-persist exemption); the live-refresh block is overwritten in place on each Portfolio refresh.
 
 ```
 instrument_key: <stable instrument id>     # join key part 1 — named field, not header text
@@ -150,19 +150,19 @@ account_id:     <account id>               # join key part 2 — entry context i
 parent_pass2:   <Pass 2 rec_id>            # lineage to the validating Pass 2 record
 journal_schema_version: 4.0
 
-# entry-time regime snapshot — the FIVE exempt fields; WRITE-ONCE at Pass 2; never rewritten on refresh (the no-persist exemption)
+# entry-time regime snapshot — the FIVE exempt fields; captured at Pass 2 validation, WRITE-ONCE at the ticket's EXECUTED event; never rewritten on refresh (the no-persist exemption)
 entry_wyckoff_phase: <accumulation | reaccumulation | markup | distribution | redistribution | markdown | ranging_undefined>   # holds the confirmed REGIME (cycle-stage axis, per D-d), NOT the A–E phase; in a real entry never `ranging_undefined`/`UNKNOWN` (a position opens only on a confirmed, direction-aligned regime)
 entry_dgpi_tier:  <Strongly supportive | Moderately supportive | Near-neutral | Weakening | Hostile>
 entry_flip_zone:  <Well above flip | Near-flip | Well below flip>
 entry_iv_hv_band: <Cheap | Neutral | Elevated>
 entry_vol_status: <FULL | LIMITED | INVALID>
 
-# entry-time structural riders — WRITE-ONCE at Pass 2; NON-exempt entry context (outside the five-field exemption); categorical/boolean, not numeric regime reads; each may be absent
+# entry-time structural riders — captured at Pass 2 validation, WRITE-ONCE at the ticket's EXECUTED event; NON-exempt entry context (outside the five-field exemption); categorical/boolean, not numeric regime reads; each may be absent
 entry_wyckoff_event: <lowercase canonical event | null>   # confirmed entry landmark from WYCKOFF "Wyckoff canonical vocabulary" (~27 events): bullish e.g. spring/shakeout/lps/sos/jac; bearish e.g. utad/ut/lpsy/sow
 entry_phase:         <A | B | C | D | E | null>           # schematic phase at entry (typically C test or D entry window; null when trending, no active range). The recommended rider PORTFOLIO's D→B/A phase-regression sub-branch reads
 phase_c_confirmed:   <true | false>                       # was the decisive phase-C test confirmed at entry (bullish spring/shakeout; bearish utad)? Records the post-/pre-phase-C distinction RISK applied LIVE when sizing (post-C → upper/conditional-top; pre-C → conditional floor); reserved entry context — no current reader
 
-# eight SIGNAL stop/profit levels — WRITE-ONCE at Pass 2; named individually, one per line
+# eight SIGNAL stop/profit levels — captured at Pass 2 validation, WRITE-ONCE at the ticket's EXECUTED event; named individually, one per line
 stop_underlying_price:   <price>
 stop_est_option_price:   <price>
 stop_trail_bidask:       <value>

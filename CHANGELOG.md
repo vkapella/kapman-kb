@@ -1,5 +1,57 @@
 # KapMan KB Changelog
 
+## 2026-08-23 — entry-time snapshot: captured at validation, persisted at the ticket's EXECUTED event (closes #117)
+
+### Changed — `llm_runtime/`
+
+The spec said the entry-time snapshot is written to `positions.md` **at validation**; live
+practice refused that twice — on 2026-08-07 ("writing 16 fabricated open positions would
+corrupt the real position ledger") and in the 2026-08-16 fork-reconciliation record ("a
+validated specification is not a stored exit contract") — and every new Pass 2 run had to
+re-derive the interpretation. kb#116's ticket lifecycle supplied the resolution point the
+old text lacked: the **EXECUTED event**, written when a fill is confirmed via the §A2
+import join, is the moment a validated specification becomes a position.
+
+The change is not a bare trigger swap, because of a value-provenance gap: the five regime
+fields must hold **validation-time** values (a re-fetch at fill-confirmation — possibly
+days later — would record the wrong conditions), but the session writing the EXECUTED
+event doesn't have them, and the ticket cannot carry them ("no persisted regime state",
+per WYCKOFF, from #116). Resolution: **capture at validation onto the Pass 2 record
+(LOG 3); transcribe verbatim into `positions.md` at the ticket's EXECUTED event.** The
+Pass 2 record is append-only, so the snapshot survives immutably without a position
+existing; `positions.md` only ever contains actual positions; the ticket stays
+regime-free; and the #116 TTL (origin session + first 30 minutes of next RTH) bounds the
+gap between captured conditions and actual entry to at most ~one session — which is what
+makes validation-time values legitimate entry context.
+
+**`llm_runtime/PASS2_VALIDATION_v4.0.md`** (`4.0.4 → 4.0.5`): the snapshot heuristic
+re-anchored — capture onto the Pass 2 log record at validation; **validation writes no
+`positions.md` entry**; the snapshot becomes a position record at exactly one moment, the
+EXECUTED event. Named explicitly: positions entered outside the ticket flow (manual buys
+with no Pass 2; executed **Flagged** candidates, which get no ticket per #116) have no
+captured snapshot — PORTFOLIO_MGMT's current-session reconstruction and absent-context
+degrade remain the documented path, unchanged from prior behavior, and reconstruction is
+always labeled, never backfilled as if captured.
+
+**`llm_runtime/JOURNAL_MGMT_v4.0.md`** (`4.0.7 → 4.0.8`): the EXECUTED event gains its one
+consequence beyond the event file — transcription of the parent Pass 2 record's snapshot
+block into `positions.md`, keyed `(instrument_key, account_id)`; transcription copies,
+never re-fetches. The Pass 2 record header gains the entry-time snapshot block for
+Validated recommendations (a never-executed validation keeps its snapshot in the log
+forever and it goes nowhere). Memory-file triggers, the no-persist exemption prose, the
+session-flow bullet, and the `positions.md` schema comments follow the new trigger.
+
+**`llm_runtime/KAPMAN_GUARDRAILS_v4.0.md`** (`4.0.1 → 4.0.2`): the sole no-persist
+exemption's wording follows — captured at validation onto the Pass 2 record, transcribed
+at the EXECUTED event; semantics unchanged (a record, not an authority; never re-read to
+seed a decision; exactly this narrow). The exemption's footprint widens from one home to
+two — the capture record and the transcription — with unchanged meaning.
+
+**`llm_runtime/PORTFOLIO_MGMT_v4.0.md`** (`4.0.5 → 4.0.6`, operator-approved addition
+beyond the issue's file list): mechanical trigger-wording follow-through — the overview,
+the JOURNAL_MGMT inputs row, and 13 position-context schema rows now read "captured at
+Pass 2, written at the EXECUTED event." No behavior change.
+
 ## 2026-08-23 — stop-anchor durability: every candidate anchor carries an ex-ante touch probability (closes #111)
 
 ### Changed — `llm_runtime/`

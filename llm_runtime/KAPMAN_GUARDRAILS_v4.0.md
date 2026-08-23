@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.1
-file_last_updated: 2026-07-20
+kb_version: 4.0.2
+file_last_updated: 2026-08-23
 status: active
 tier: T0
 ---
@@ -43,7 +43,7 @@ KapMan output is operational guidance for live capital, not analysis-for-analysi
 
 **Numeric regime reads are never persisted as authoritative.**
 - DGPI, gamma flip and walls, IV, HV, vol-status, and every other numeric regime value are re-fetched at Pass 2 from their source-of-authority tool. They are never carried forward — from memory, a handoff, or a prior log — as the number a new decision is made on. A regime is something Claude re-reads, not remembers.
-- **Sole exemption — the entry-time snapshot.** The Pass-2 snapshot written to `positions.md` (entry Wyckoff regime, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels) is persisted deliberately, as *immutable historical entry context*: a record of the conditions a position was opened under, so Portfolio's Regime-exit advisory can measure decay against them. It is a record, not an authority. It is never re-read to seed a new Pass 1 or Pass 2 decision — a fresh decision always re-fetches the live regime. The exemption is exactly this narrow.
+- **Sole exemption — the entry-time snapshot.** The snapshot Pass 2 captures at validation onto the Pass 2 log record (entry Wyckoff regime, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels), transcribed verbatim into `positions.md` at the ticket's EXECUTED event, is persisted deliberately, as *immutable historical entry context*: a record of the conditions a position was opened under, so Portfolio's Regime-exit advisory can measure decay against them. It is a record, not an authority. It is never re-read to seed a new Pass 1 or Pass 2 decision — a fresh decision always re-fetches the live regime. The exemption is exactly this narrow.
 
 ---
 
@@ -88,7 +88,7 @@ Any format departure not matching one of the above recognized types is a guardra
 | Rule-ID legend-only | `REPORT_FORMAT_v4.0.md`, `REPORT_STYLE_v4.0.md` | Format file owns where legends appear; guardrails owns the prohibition on body-text rule IDs. |
 | Field length caps | `REPORT_FORMAT_v4.0.md` | Format file owns the numeric caps and footnote overflow mechanics; guardrails owns the "hard cap, not guideline" stance. |
 | Memory is convenience | `JOURNAL_MGMT_v4.0.md` | JOURNAL_MGMT owns the session-start memory load and the load-and-reconcile / precedence mechanics; guardrails owns the "live input wins, memory is never authority" floor. |
-| Numeric reads not persisted | `JOURNAL_MGMT_v4.0.md`, `PASS2_VALIDATION_v4.0.md`, `PORTFOLIO_MGMT_v4.0.md` | PASS2 writes the exempt entry-time snapshot, PORTFOLIO reads it, JOURNAL_MGMT owns where it is written and read; guardrails owns the prohibition on treating any other persisted regime value as authoritative. |
+| Numeric reads not persisted | `JOURNAL_MGMT_v4.0.md`, `PASS2_VALIDATION_v4.0.md`, `PORTFOLIO_MGMT_v4.0.md` | PASS2 captures the exempt entry-time snapshot at validation, the ticket's EXECUTED event transcribes it into `positions.md`, PORTFOLIO reads it, JOURNAL_MGMT owns where it is written and read; guardrails owns the prohibition on treating any other persisted regime value as authoritative. |
 
 **Entry point for every session.** Before any screening or portfolio output, Claude should mentally confirm three things:
 
