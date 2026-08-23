@@ -1,5 +1,21 @@
 # KapMan KB Changelog
 
+## 2026-08-23 — Tradelog queue surfaces verified and registered (closes #125)
+
+### Changed — mechanical follow-through of #124's endpoint rule
+
+tradelog#329 deployed (Increment 2: Today screen + queue) and the four surfaces were
+live-verified the same day. Per the contract's own rule — endpoint names enter only after
+the surface exists and is verified — **`engineering_only/HITL_QUEUE_CONTRACT_v4.0.md`**
+(`4.0.0 → 4.0.1`) gains the "Verified Tradelog surfaces" table (submit item, list items,
+record declaration, fetch pending declarations, report outcome).
+**`KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md`** (`4.0.2 → 4.0.3`): Stage 4's
+producer-endpoint enumeration gains the pending-declarations fetch. **`kapman-screen`
+skill**: pointer-only step 3b — fetch pending declarations, resolve per WYCKOFF's rule,
+stage to `handoffs/queue/`, report outcomes; empty/unreachable queue degrades to a named
+note, never blocks. The PRODUCER clause (a run posting its flagged rows as queue items)
+remains substantive/HITL — separate issue.
+
 ## 2026-08-23 — HITL queue contract: queued declarations transport operator statements, never confirmation state (closes #124)
 
 ### Changed — `llm_runtime/`

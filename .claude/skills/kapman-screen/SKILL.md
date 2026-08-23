@@ -37,6 +37,15 @@ Load the full KapMan runtime context and evaluate:
      fetching is a transport, not a trigger; never re-shape a fetched envelope.
    - If tickers/paste/fetch all fail to resolve candidates, ask before
      proceeding.
+3b. Before screening, fetch pending queue declarations from the tradelog
+   Today queue (`GET /api/queue/pending-declarations`, per
+   `engineering_only/HITL_QUEUE_CONTRACT_v4.0.md`) and resolve each per
+   WYCKOFF's queued-declaration rule — fresh revalidation first; a materially
+   changed proposal is returned, never applied. Stage each consumed
+   declaration to `handoffs/queue/` per `JOURNAL_MGMT_v4.0.md` and report
+   the outcome back (`POST /api/queue/outcomes`). Skip silently when the
+   queue is empty or unreachable (named in the run's data-quality surface,
+   never blocking).
 4. Run `PASS1_SCREENING_v4.0.md` against the resolved candidates and produce
    the report per `REPORT_FORMAT_v4.0.md` / `REPORT_STYLE_v4.0.md`.
 5. If `kapman-journal` is attached, log every disposition (Eligible, NO_TRADE,

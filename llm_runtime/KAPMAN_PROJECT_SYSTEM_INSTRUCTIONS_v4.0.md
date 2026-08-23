@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 4.0.2
+kb_version: 4.0.3
 file_last_updated: 2026-07-14
 status: active
 tier: T0
@@ -106,7 +106,7 @@ Load the `kapman-journal` `memory/` files — `positions.md`, `overrides.md`, `w
 Whether `kapman-journal` is attached is determined by checking for the repo directly — attempting to read `memory/positions.md` or listing the repo's path — never by consulting a session's enumerated list of working directories in isolation. That list is a convenience index, not an authority on what's actually reachable on disk, and a repo's absence from it is not evidence the repo is unattached; only a failed read or listing is. This check happens before the "not loaded" announcement, not after — announcing memory as unloaded and then discovering the repo was present the whole time is exactly the failure this note exists to prevent.
 
 **4. Derive lineage and stage the input handoff (when an export is supplied — pasted or fetched).**
-When the operator supplies a viewer/v2 or tradelog export this session, derive the `lineage_id` from the payload's `exported_at` — never the session clock — per `JOURNAL_MGMT_v4.0.md` (`VS-` viewer, `TL-` tradelog), write the export to the source-partitioned handoff path, and echo `lineage_id` + `row_count` + `as_of` back in-session so the lineage is visible. An export the session fetches from a producer endpoint at the operator's direction — the viewer's Pass-1 export API or the tradelog `portfolio_snapshot` endpoint — is supplied the same way a paste is: the payload is staged verbatim, lineage still derives from its own `exported_at`, and the session never re-shapes, filters, or re-derives a fetched envelope. **Fetching is a transport, not a trigger** — the operator directs every fetch; nothing fetches on a schedule. `JOURNAL_MGMT_v4.0.md` owns the derivation format and the write paths. Skip when no export is supplied this session.
+When the operator supplies a viewer/v2 or tradelog export this session, derive the `lineage_id` from the payload's `exported_at` — never the session clock — per `JOURNAL_MGMT_v4.0.md` (`VS-` viewer, `TL-` tradelog), write the export to the source-partitioned handoff path, and echo `lineage_id` + `row_count` + `as_of` back in-session so the lineage is visible. An export the session fetches from a producer endpoint at the operator's direction — the viewer's Pass-1 export API, the tradelog `portfolio_snapshot` endpoint, or the tradelog queue's pending-declarations endpoint (per `engineering_only/HITL_QUEUE_CONTRACT_v4.0.md`) — is supplied the same way a paste is: the payload is staged verbatim, lineage still derives from its own `exported_at`, and the session never re-shapes, filters, or re-derives a fetched envelope. **Fetching is a transport, not a trigger** — the operator directs every fetch; nothing fetches on a schedule. `JOURNAL_MGMT_v4.0.md` owns the derivation format and the write paths. Skip when no export is supplied this session.
 
 **5. Run the macro gate (Screening and Hybrid modes only).**
 Fetch SPY dealer metrics via `Schwab get_dealer_metrics(["SPY"])`. Evaluate SPY spot vs. gamma flip and DGPI tier per `DEALER_v4.0.md`. If hostile macro is active, output the Macro Regime card per `REPORT_FORMAT_v4.0.md` and restrict the eligible set per `KAPMAN_GUARDRAILS_v4.0.md`. Skip this step in Portfolio mode — the macro gate governs new entries only.

@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 4.0.0
+kb_version: 4.0.1
 file_last_updated: 2026-08-23
 status: active
 tier: —
@@ -203,6 +203,22 @@ it more likely to be returned, not less."
 Record semantics only: how Tradelog receives an outcome is defined when the
 Increment-2 endpoints exist and have been verified, per the endpoint rule in
 the authority boundaries above.
+
+## Verified Tradelog surfaces (registered 2026-08-23)
+
+Per the endpoint rule above, these names entered the contract only after the
+surfaces were deployed (tradelog#329, commit 1822b56) and live-verified on
+2026-08-23 (empty-list reads, named-issue validation rejections, and the full
+13-step contract round-trip exercised pre-deploy on the identical build).
+Base: the kapman-tradelog app; auth: the app's basic-auth credentials.
+
+| Surface | Verb + path | Contract role |
+|---|---|---|
+| Submit a queue item | `POST /api/queue/items` | Producer delivery; idempotent per the queue-item grammar (duplicate no-op, hash conflict 409, hash verified against the snapshot at ingest 422) |
+| List queue items | `GET /api/queue/items?status=&ticker=&lineageId=` | Display / audit; status is derived (`PENDING` / `DECLARED` / `CONSUMED`) |
+| Record a declaration | `POST /api/queue/items/{queue_item_id}/declarations` | Operator resolution from the Today screen; hash echo enforced 422; refused 409 once consumed |
+| Fetch pending declarations | `GET /api/queue/pending-declarations` | What a fresh run consumes: DECLARED items with the verbatim snapshot + effective (latest `stated_at`) declaration |
+| Report a fresh-run outcome | `POST /api/queue/outcomes` | Consumes the item; one outcome per item (duplicate no-op, second outcome 409) |
 
 ## Integrity and idempotency
 
