@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 4.0.1
+kb_version: 4.0.2
 file_last_updated: 2026-07-14
 status: active
 tier: T0
@@ -105,8 +105,8 @@ Load the `kapman-journal` `memory/` files — `positions.md`, `overrides.md`, `w
 
 Whether `kapman-journal` is attached is determined by checking for the repo directly — attempting to read `memory/positions.md` or listing the repo's path — never by consulting a session's enumerated list of working directories in isolation. That list is a convenience index, not an authority on what's actually reachable on disk, and a repo's absence from it is not evidence the repo is unattached; only a failed read or listing is. This check happens before the "not loaded" announcement, not after — announcing memory as unloaded and then discovering the repo was present the whole time is exactly the failure this note exists to prevent.
 
-**4. Derive lineage and stage the input handoff (when an export is pasted).**
-When the operator supplies a viewer/v2 or tradelog export this session, derive the `lineage_id` from the payload's `exported_at` — never the session clock — per `JOURNAL_MGMT_v4.0.md` (`VS-` viewer, `TL-` tradelog), write the export to the source-partitioned handoff path, and echo `lineage_id` + `row_count` + `as_of` back in-session so the lineage is visible. `JOURNAL_MGMT_v4.0.md` owns the derivation format and the write paths. Skip when no export is pasted this session.
+**4. Derive lineage and stage the input handoff (when an export is supplied — pasted or fetched).**
+When the operator supplies a viewer/v2 or tradelog export this session, derive the `lineage_id` from the payload's `exported_at` — never the session clock — per `JOURNAL_MGMT_v4.0.md` (`VS-` viewer, `TL-` tradelog), write the export to the source-partitioned handoff path, and echo `lineage_id` + `row_count` + `as_of` back in-session so the lineage is visible. An export the session fetches from a producer endpoint at the operator's direction — the viewer's Pass-1 export API or the tradelog `portfolio_snapshot` endpoint — is supplied the same way a paste is: the payload is staged verbatim, lineage still derives from its own `exported_at`, and the session never re-shapes, filters, or re-derives a fetched envelope. **Fetching is a transport, not a trigger** — the operator directs every fetch; nothing fetches on a schedule. `JOURNAL_MGMT_v4.0.md` owns the derivation format and the write paths. Skip when no export is supplied this session.
 
 **5. Run the macro gate (Screening and Hybrid modes only).**
 Fetch SPY dealer metrics via `Schwab get_dealer_metrics(["SPY"])`. Evaluate SPY spot vs. gamma flip and DGPI tier per `DEALER_v4.0.md`. If hostile macro is active, output the Macro Regime card per `REPORT_FORMAT_v4.0.md` and restrict the eligible set per `KAPMAN_GUARDRAILS_v4.0.md`. Skip this step in Portfolio mode — the macro gate governs new entries only.
@@ -124,7 +124,7 @@ Enter the output sequence for the confirmed mode per `REPORT_FORMAT_v4.0.md`. Do
 | 1 | Confirm market date via `get_datetime()` | All | Yes — do not proceed on stale date |
 | 2 | Detect mode | All | Yes — do not fetch data before mode is confirmed |
 | 3 | Load journal memory, announce, apply precedence | All | Yes — memory loads before mode output; live input overrides it |
-| 4 | Derive lineage + stage input handoff (on paste) | All (when an export is pasted) | Yes — lineage is minted before the data is used |
+| 4 | Derive lineage + stage input handoff (on supply — paste or fetch) | All (when an export is supplied) | Yes — lineage is minted before the data is used |
 | 5 | Macro gate via SPY dealer metrics | Screening, Hybrid | Yes — eligible set is not defined until gate resolves |
 | 6 | Load position context, check DTE decay | Portfolio, Hybrid | Yes — DTE flags precede mode output |
 | 7 | Proceed to mode output | All | — |
@@ -151,6 +151,8 @@ output, also confirm that a staged journal entry exists for every logged determi
 run — every Pass 1 row, including NO_TRADE and WAIT, and every Pass 2 trade — per the
 three-log write in `JOURNAL_MGMT_v4.0.md`. A determination surfaced without a corresponding
 staged journal entry is a Rule 7 failure surfaced to the operator, not a silent omission.
+The manifest also names the tradelog recommendation-POST outcome — rows sent, created,
+updated, or the named failure — per `JOURNAL_MGMT_v4.0.md`'s mirror clause.
 `JOURNAL_MGMT_v4.0.md` owns the log paths, record shapes, and
 lineage; Rule 7 owns only the pre-output completeness check that the manifest is whole. Like
 the rest of Rule 7, this clause must also be present in the session system prompt to be

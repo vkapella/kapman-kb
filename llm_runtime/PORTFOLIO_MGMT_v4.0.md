@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.6
+kb_version: 4.0.7
 file_last_updated: 2026-08-23
 status: active
 tier: T2
@@ -194,7 +194,7 @@ No legacy rule IDs map to this file. Body-text references in legacy report legen
 
 **Tradelog `portfolio_snapshot` ingest — §A2 source map.**
 
-The live position fields are ingested from the `kapman-tradelog` `portfolio_snapshot` export (open-positions-only; `GET /api/export/portfolio-snapshot` or the "Copy snapshot JSON" button). Each open leg maps as below.
+The live position fields are ingested from the `kapman-tradelog` `portfolio_snapshot` export (open-positions-only; `GET /api/export/portfolio-snapshot` or the "Copy snapshot JSON" button). The session may fetch the export itself from the endpoint at the operator's direction, or ingest the operator's pasted Copy output — the same payload by contract. A fetched snapshot is staged to `handoffs/tradelog/` and lineage-derived from its own `exported_at`, identically to a paste. Each open leg maps as below.
 
 | `portfolio_snapshot` field (per open leg) | Position-context field | Mapping note |
 |---|---|---|

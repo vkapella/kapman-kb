@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.6
+kb_version: 4.0.7
 file_last_updated: 2026-08-17
 status: active
 tier: T2
@@ -30,7 +30,7 @@ The operator provides a candidate ticker list, optional context declarations, an
 
 **The candidate list may arrive as a viewer/v2 handoff; the §A1 fields map directly into the Pass 1 regime reads.**
 
-In the v4.0 runtime the candidate list is most often a filtered viewer/v2 watchlist, delivered as a pasted handoff in Stage 1 (a direct export later — the dual path is "paste now, tool later"). When a viewer handoff is present, each row is both a work-queue item and a pre-populated set of Pass-1 regime reads; PASS1 ingests the §A1 fields rather than re-fetching them, subject to the Pass 1 → Pass 2 boundary preserved below. A raw ticker list with no viewer fields remains a valid request — those tickers simply carry no pre-populated reads and are resolved through WYCKOFF's estimation path and live Pass-1 fetches. The §A1 ingest map:
+In the v4.0 runtime the candidate list is most often a filtered viewer/v2 watchlist, delivered as a pasted handoff in Stage 1, or fetched by the session from the viewer's Pass-1 export endpoint at the operator's direction (viewer#89; until that endpoint lands, paste is the only §A1 transport) — the "paste now, tool later" dual path, with the tool path now named. Transport changes nothing downstream: a fetched envelope ingests exactly as a pasted one. When a viewer handoff is present, each row is both a work-queue item and a pre-populated set of Pass-1 regime reads; PASS1 ingests the §A1 fields rather than re-fetching them, subject to the Pass 1 → Pass 2 boundary preserved below. A raw ticker list with no viewer fields remains a valid request — those tickers simply carry no pre-populated reads and are resolved through WYCKOFF's estimation path and live Pass-1 fetches. The §A1 ingest map:
 
 | Viewer/v2 field | Pass 1 consumer | Notes |
 |---|---|---|
@@ -59,9 +59,11 @@ The envelope also carries two run-level fields the rows do not. **`pt_horizon_ba
 
 A viewer export that carries the `screen_*` fields also carries `screen_version` (the implementation that produced them — cite it in the run's data-quality surface so dispositions stay attributable) and `screen_thresholds` (the τ / IV-HV / DGPI values that implementation used). When `screen_thresholds` disagree with SYSTEM_PARAMS, **SYSTEM_PARAMS governs**: the run flags the drift, treats the pre-computed dispositions as stale, and re-derives from the raw §A1 fields. The envelope's `macro_context` block (the viewer's SPY dealer read — signed DGPI, flip, `position_vs_flip`, `confidence` — as of export time) seeds the Step-1 macro gate exactly as a pasted SPY reading would; the gate is still evaluated by the runtime per DEALER, and a stale or absent block degrades to a live SPY fetch, never to an assumed-supportive macro.
 
+An envelope may carry `feed_view {id, name}` — which pipeline-feed preset (`Export - Swing Long Calls` / `Swing Long Put` / `LEAPS` / `CSP`, per `engineering_only/PIPELINE_FEED_VIEW_SPEC`) filtered the cohort. When present, it is echoed in the run's data-quality surface and recorded on the Pass 1 log record, so the run states which feed defined its candidate set. When absent (older envelopes, manual copies predating viewer#89), the record says "feed not recorded" — never inferred from the rows.
+
 **The §A1 ingest has a required-field contract; absence degrades, never silently passes.**
 
-A pasted viewer handoff must carry the fields below for the §A1 ingest to be valid; when one is absent, the named degradation applies — the runtime never proceeds as if the field were favorable.
+A viewer handoff — pasted or fetched — must carry the fields below for the §A1 ingest to be valid; when one is absent, the named degradation applies — the runtime never proceeds as if the field were favorable.
 
 | Field | Role in the ingest | If absent |
 |---|---|---|

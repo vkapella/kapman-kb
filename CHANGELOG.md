@@ -1,5 +1,51 @@
 # KapMan KB Changelog
 
+## 2026-08-23 — fetch is a transport: §A1/§A2 fetch, end-of-run recommendation POST, feed_view lineage (closes #119)
+
+### Changed — `llm_runtime/`
+
+Three copy-paste seams in the operating loop each have (or are getting) an HTTP surface,
+but the contracts named only "pasted" transport. Fetch is now an equal transport — ingest
+semantics unchanged everywhere, and **fetching is a transport, not a trigger**: the
+operator directs every fetch; nothing fetches on a schedule. Paired with
+kapman-polygon-viewer#89 (the Pass-1 export endpoint), and consuming the tradelog
+surfaces that landed today (tradelog#326: `POST /api/recommendations`).
+
+**`llm_runtime/KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md`** (`4.0.1 → 4.0.2`): entry-
+sequence Stage 4 accepts supplied exports — pasted or fetched; a fetched envelope is
+staged verbatim, lineage still derives from its own `exported_at`, and a fetched envelope
+is never re-shaped, filtered, or re-derived. Rule 7's log-manifest line also names the
+tradelog recommendation-POST outcome.
+
+**`llm_runtime/PASS1_SCREENING_v4.0.md`** (`4.0.6 → 4.0.7`): the "paste now, tool later"
+dual path gains its named tool path — the viewer's export endpoint (viewer#89; the clause
+states plainly that until it lands, paste is the only §A1 transport — the KB never claims
+an untested producer capability). New: the envelope's `feed_view {id, name}` — which
+pipeline-feed preset filtered the cohort — is echoed in the data-quality surface and the
+Pass 1 log record; absent means "feed not recorded", never inferred from the rows. This
+closes a real lineage gap: until now no run recorded which feed defined its candidate set.
+
+**`llm_runtime/PORTFOLIO_MGMT_v4.0.md`** (`4.0.6 → 4.0.7`): the session may fetch the
+tradelog `portfolio_snapshot` itself from `GET /api/export/portfolio-snapshot` at the
+operator's direction — same payload as the Copy button by contract, staged and
+lineage-derived identically.
+
+**`llm_runtime/JOURNAL_MGMT_v4.0.md`** (`4.0.9 → 4.0.10`): lineage prose goes
+transport-neutral; the Pass 1 record header gains optional `feed_view`; and a new clause —
+**the run's recommendation rows are POSTed to the tradelog measurement plane, a mirror,
+never a second authority**: idempotent on `rec_id`, rebuildable from the journal at any
+time, failed POST degrades to a reported error and never blocks the report or the commit,
+outcome named in the Rule 7 manifest.
+
+**`.claude/skills/kapman-screen/SKILL.md`** (mechanical, pointer-not-copy): the no-paste
+path — fetch watchlists and views, present the export-eligible feed presets as selectable
+options, fetch the envelope, proceed per Stage 4 unchanged; plus the end-of-run POST
+pointer. `/kapman-screen <feed> <watchlist>` skips the prompt.
+
+Deliberately unchanged: the operator initiates every run; journal writes remain git,
+single-writer, append-only; no numeric regime state crosses sessions; declarations
+(Increment 2) are a separate issue.
+
 ## 2026-08-23 — multi-leg trade tickets: debit spreads get a legs list (closes #118)
 
 ### Changed — `llm_runtime/`
