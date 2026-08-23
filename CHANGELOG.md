@@ -1,5 +1,17 @@
 # KapMan KB Changelog
 
+## 2026-08-23 — kapman-screen loads the runtime KB in one parallel batch (closes #121)
+
+### Changed — `.claude/skills/` (mechanical)
+
+A fresh USE session was observed loading the 15-file / ~632KB runtime corpus in 2–5-file
+batches with narration between tiers — ~8 sequential turns of latency before any work.
+The skill now instructs a **single batch of parallel Reads, silently**; tier order still
+governs interpretation precedence — parallel loading changes transport, not authority.
+Token volume is untouched (and untouchable at load time: no cross-session prompt cache
+exists at operating cadence). The only real token reducer — relocating provenance freight
+out of the loaded corpus — is #122, measurement-first, no changes until the number is in.
+
 ## 2026-08-23 — the §A1 fetch transport is live: pending-viewer#89 phrasing retired (closes #120)
 
 ### Changed — `llm_runtime/`
