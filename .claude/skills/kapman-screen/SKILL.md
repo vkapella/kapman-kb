@@ -20,8 +20,9 @@ Load the full KapMan runtime context and evaluate:
      its `exported_at` per `JOURNAL_MGMT_v4.0.md`, echo the ID + `row_count` +
      `as_of` back, and — if `kapman-journal` is attached — write the handoff to
      `handoffs/viewer/<YYYY-MM>/` before screening.
-   - If no arguments were given: offer the fetch path (viewer#89 export API;
-     falls back to asking for a paste while that endpoint is pending). Fetch
+   - If no arguments were given: offer the fetch path (the viewer's export
+     API, live since 2026-08-23 — auth via the `VIEWER_API_TOKEN` bearer in
+     the viewer repo's local `.env`; paste remains a valid fallback). Fetch
      the watchlists (`GET /api/watchlists`) and views (`GET /api/views`) from
      the viewer, present the export-eligible feed presets as selectable
      options (plus the watchlist when more than one exists), then fetch

@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.7
+kb_version: 4.0.8
 file_last_updated: 2026-08-17
 status: active
 tier: T2
@@ -30,7 +30,7 @@ The operator provides a candidate ticker list, optional context declarations, an
 
 **The candidate list may arrive as a viewer/v2 handoff; the §A1 fields map directly into the Pass 1 regime reads.**
 
-In the v4.0 runtime the candidate list is most often a filtered viewer/v2 watchlist, delivered as a pasted handoff in Stage 1, or fetched by the session from the viewer's Pass-1 export endpoint at the operator's direction (viewer#89; until that endpoint lands, paste is the only §A1 transport) — the "paste now, tool later" dual path, with the tool path now named. Transport changes nothing downstream: a fetched envelope ingests exactly as a pasted one. When a viewer handoff is present, each row is both a work-queue item and a pre-populated set of Pass-1 regime reads; PASS1 ingests the §A1 fields rather than re-fetching them, subject to the Pass 1 → Pass 2 boundary preserved below. A raw ticker list with no viewer fields remains a valid request — those tickers simply carry no pre-populated reads and are resolved through WYCKOFF's estimation path and live Pass-1 fetches. The §A1 ingest map:
+In the v4.0 runtime the candidate list is most often a filtered viewer/v2 watchlist, delivered as a pasted handoff in Stage 1, or fetched by the session from the viewer's Pass-1 export endpoint at the operator's direction (`GET /api/export/pass1`, bearer-token auth, pipeline-feed presets only — viewer#89, live since 2026-08-23) — the "paste now, tool later" dual path, with the tool path delivered. Transport changes nothing downstream: a fetched envelope ingests exactly as a pasted one. When a viewer handoff is present, each row is both a work-queue item and a pre-populated set of Pass-1 regime reads; PASS1 ingests the §A1 fields rather than re-fetching them, subject to the Pass 1 → Pass 2 boundary preserved below. A raw ticker list with no viewer fields remains a valid request — those tickers simply carry no pre-populated reads and are resolved through WYCKOFF's estimation path and live Pass-1 fetches. The §A1 ingest map:
 
 | Viewer/v2 field | Pass 1 consumer | Notes |
 |---|---|---|

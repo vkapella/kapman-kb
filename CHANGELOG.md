@@ -1,5 +1,20 @@
 # KapMan KB Changelog
 
+## 2026-08-23 — the §A1 fetch transport is live: pending-viewer#89 phrasing retired (closes #120)
+
+### Changed — `llm_runtime/`
+
+**`llm_runtime/PASS1_SCREENING_v4.0.md`** (`4.0.7 → 4.0.8`): #119's fetch clause
+deliberately said "until that endpoint lands, paste is the only §A1 transport" so the KB
+never claimed an untested producer capability. viewer#89 landed and was live-verified on
+prod the same day (bearer-token guards, preset-only 422, PRESET_LAYOUT_VERSION 11
+migration, and a 77-row Swing-Long-Calls envelope from the 224-symbol watchlist in 0.9s,
+every row inside the preset's cohort set). The pending phrasing retires; the clause now
+names the endpoint (`GET /api/export/pass1`, bearer auth, pipeline-feed presets only).
+The `kapman-screen` skill's "while that endpoint is pending" note goes the same way
+(mechanical). No semantic change — transport permission was #119; this is the capability
+arriving.
+
 ## 2026-08-23 — fetch is a transport: §A1/§A2 fetch, end-of-run recommendation POST, feed_view lineage (closes #119)
 
 ### Changed — `llm_runtime/`
