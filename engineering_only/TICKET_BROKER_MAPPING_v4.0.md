@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: reference
-kb_version: 4.0.0
+kb_version: 4.0.1
 file_last_updated: 2026-08-23
 status: active
 tier: —
@@ -25,12 +25,13 @@ lives in this mapping and in the APPROVED event.
 
 ## Scope
 
-Single-leg structures only: `LONG_CALL`, `LONG_PUT`, `CSP`, `LEAP_LONG_CALL`,
-`LEAP_SHORT_PUT`. **Multi-leg structures (call/put debit spreads) are a named
-limitation of Increment 0** — Pass 2 validates them regularly, and a spread
-ticket needs a legs list this grammar does not yet define. Tracked as its own
-follow-up issue; until it lands, spread recommendations produce no ticket and the
-run's Rule 7 manifest names the omission.
+Single-leg structures — `LONG_CALL`, `LONG_PUT`, `CSP`, `LEAP_LONG_CALL`,
+`LEAP_SHORT_PUT` — plus vertical debit spreads: `CALL_DEBIT_SPREAD` /
+`PUT_DEBIT_SPREAD`, via the ticket grammar's `legs[]` form (kb#118). Spread
+recommendations now produce tickets like any other Validated recommendation;
+the Increment-0 omission clause is retired. The multi-leg **broker encoding**
+below is `PENDING VERIFICATION` — see that section's marker — so spread tickets
+are fully recordable and approvable, but not yet translatable.
 
 ## The OSI symbol rule
 
@@ -59,12 +60,49 @@ which-contract-did-I-actually-buy questions structurally impossible.
 | — | (fixed) | `orderStrategyType` | `SINGLE` |
 | — | (fixed) | `complexOrderStrategyType` | `NONE` |
 
+## Multi-leg mapping — vertical debit spreads (`PENDING VERIFICATION`)
+
+> **PENDING VERIFICATION — every vertical-specific value in this section is the
+> expected shape, not a pinned vendor contract.** Schwab's Trader API offers no
+> individual-developer paper sandbox, and the entity's developer app (the P0
+> week-one enrollment item) does not exist yet. Never infer a vendor contract:
+> **the translator refuses multi-leg translation while this marker stands** —
+> the same annotates-never-binds discipline as `STOP_DURABILITY_MAX_TOUCH_PROB`.
+> Pinning happens when the checklist below has been run against the entity's
+> developer app; remove the marker only then, with the verification date noted.
+
+Expected shape — one order, two legs, priced as a net debit:
+
+| Source | Ticket / event field | Trader API field | Rule |
+|---|---|---|---|
+| — | (fixed) | `orderStrategyType` | `SINGLE` (expected: verticals remain `SINGLE`; the complex type is the qualifier) |
+| — | (fixed) | `complexOrderStrategyType` | `VERTICAL` |
+| ticket | `legs[n].instrument.osi_symbol` | `orderLegCollection[n].instrument.symbol` | verbatim, one entry per leg |
+| ticket | `legs[n].position` | `orderLegCollection[n].instruction` | long leg → `BUY_TO_OPEN`, short leg → `SELL_TO_OPEN` (side: open) — see table below |
+| approved | `quantity` × `legs[n].ratio` | `orderLegCollection[n].quantity` | `quantity` counts spreads; per-leg contract count derived, never typed |
+| approved | `limit_price` | `price` | the **net debit**, string, 2 decimals; MUST fall inside the ticket's net-debit `entry_range` or the APPROVED event carries an explicit override note |
+| — | (fixed) | `orderType`, `session`, `duration` | as the single-leg table — `LIMIT`, `NORMAL`, `DAY`/`GOOD_TILL_CANCEL` |
+
+**Verification checklist (run against the entity's developer app before pinning):**
+
+1. The `complexOrderStrategyType` enum value for a two-leg vertical — and whether
+   `orderStrategyType` stays `SINGLE` alongside it.
+2. Leg-ordering constraints in `orderLegCollection` (long-first vs. unordered).
+3. The net-debit price convention — sign, format, and whether debit/credit is
+   inferred from the legs or declared.
+4. The instruction pair accepted on verticals (`BUY_TO_OPEN`/`SELL_TO_OPEN` as
+   expected).
+5. A preview/validate-endpoint response for a known-good payload before any
+   golden test asserts against this section.
+
 ## Instruction derivation
 
 | Structure | side: open | side: close (reserved — future increment) |
 |---|---|---|
 | `LONG_CALL`, `LONG_PUT`, `LEAP_LONG_CALL` | `BUY_TO_OPEN` | `SELL_TO_CLOSE` |
 | `CSP`, `LEAP_SHORT_PUT` | `SELL_TO_OPEN` | `BUY_TO_CLOSE` |
+| `CALL_DEBIT_SPREAD`, `PUT_DEBIT_SPREAD` — long leg | `BUY_TO_OPEN` | `SELL_TO_CLOSE` |
+| `CALL_DEBIT_SPREAD`, `PUT_DEBIT_SPREAD` — short leg | `SELL_TO_OPEN` | `BUY_TO_CLOSE` |
 
 ## Guards the translator must enforce (mirroring the grammar)
 
@@ -78,6 +116,9 @@ which-contract-did-I-actually-buy questions structurally impossible.
 - **No regime fields:** the payload carries no thesis or regime content — those
   are ticket/journal concerns, and "the thesis still holds" is a fresh-fetch
   question, never a translated one.
+- **Pending verification:** a multi-leg ticket is untranslatable while the
+  multi-leg section's `PENDING VERIFICATION` marker stands — record and approve,
+  never translate against an unverified vendor encoding.
 
 ## Worked example
 
@@ -101,3 +142,35 @@ range 16.60–16.90) + APPROVED {limit_price 16.85, duration DAY, quantity 2}:
   ]
 }
 ```
+
+## Worked example — vertical (`PENDING VERIFICATION`; expected shape only)
+
+Ticket `VS-20260807-1425-01/P2-02/T1` (HON `CALL_DEBIT_SPREAD` 250C/270C ×
+2026-10-16 — a real Validated recommendation from the 2026-08-07 run, recorded at
+~$6.70 net debit) + APPROVED {limit_price 6.70, duration DAY, quantity 2}:
+
+```json
+{
+  "orderType": "LIMIT",
+  "session": "NORMAL",
+  "duration": "DAY",
+  "orderStrategyType": "SINGLE",
+  "complexOrderStrategyType": "VERTICAL",
+  "price": "6.70",
+  "orderLegCollection": [
+    {
+      "instruction": "BUY_TO_OPEN",
+      "quantity": 2,
+      "instrument": { "symbol": "HON   261016C00250000", "assetType": "OPTION" }
+    },
+    {
+      "instruction": "SELL_TO_OPEN",
+      "quantity": 2,
+      "instrument": { "symbol": "HON   261016C00270000", "assetType": "OPTION" }
+    }
+  ]
+}
+```
+
+No golden test may assert against this payload until the verification checklist
+has been run and the marker removed.

@@ -1,7 +1,7 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.5
+kb_version: 4.0.6
 file_last_updated: 2026-08-23
 status: active
 tier: T2
@@ -95,7 +95,7 @@ After all candidates have been processed, Pass 2 assembles the validated-set sum
 
 **Every Validated recommendation is written as a trade ticket — the proposal leaves the session as a record, not only as prose.**
 
-At the end of a Pass 2 run, each Validated recommendation is rendered as one `trade_ticket` record per `JOURNAL_MGMT`'s ticket grammar — Flagged and Rejected candidates get no ticket, because a ticket asserts authorization and those states withhold it. The ticket is the canonical machine-readable form of the validated specification: instrument block with the derived `osi_symbol`, entry range, chain quality, sizing band, exit contract, manifest. Pass 2 owns the trigger and the field capture; `JOURNAL_MGMT` owns the path, grammar, and lifecycle. Writing a ticket is not an execution act and not a position act: it creates no `positions.md` entry and does not move the entry-time snapshot, whose own heuristic governs. The record exists because its absence has already cost money measured in the journal: five fills measured against a superseded Pass 2 for three days, and an entry filled ~25% above its validated range with nothing at order entry to surface either.
+At the end of a Pass 2 run, each Validated recommendation is rendered as one `trade_ticket` record per `JOURNAL_MGMT`'s ticket grammar — Flagged and Rejected candidates get no ticket, because a ticket asserts authorization and those states withhold it. The ticket is the canonical machine-readable form of the validated specification: instrument block with the derived `osi_symbol` — a legs list with per-leg `osi_symbol` for spread structures, priced as one net-debit object — entry range, chain quality, sizing band, exit contract, manifest. Pass 2 owns the trigger and the field capture; `JOURNAL_MGMT` owns the path, grammar, and lifecycle. Writing a ticket is not an execution act and not a position act: it creates no `positions.md` entry and does not move the entry-time snapshot, whose own heuristic governs. The record exists because its absence has already cost money measured in the journal: five fills measured against a superseded Pass 2 for three days, and an entry filled ~25% above its validated range with nothing at order entry to surface either.
 
 **At validation, capture the entry-time snapshot onto the Pass 2 record; it reaches `positions.md` only at the ticket's EXECUTED event.**
 

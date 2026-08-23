@@ -1,5 +1,51 @@
 # KapMan KB Changelog
 
+## 2026-08-23 — multi-leg trade tickets: debit spreads get a legs list (closes #118)
+
+### Changed — `llm_runtime/`
+
+The Increment-0 ticket grammar was single-leg, so the recommendations Pass 2 was being
+most careful about produced no ticket at all: 4 of 16 Validated recommendations on the
+2026-08-07 run were debit spreads (HON 250/270, NTNX 60/70, PANW 360/380, SNOW 320/340),
+and the spread-mandate makes the gap worst in exactly the elevated-IV regimes that
+mandate the structure. This is the extension #116 reserved vocabulary for — not a
+migration.
+
+**`llm_runtime/JOURNAL_MGMT_v4.0.md`** (`4.0.8 → 4.0.9`): the ticket grammar gains the
+spread-ticket clause — for `CALL_DEBIT_SPREAD` / `PUT_DEBIT_SPREAD` the instrument block
+becomes `legs[]`, per leg {instrument block incl. derived `osi_symbol`; `position: long |
+short` — a per-leg axis deliberately NOT named `side`, which remains the ticket-level
+open/close verb from #116 decision 4; `ratio`, integer, 1 for verticals, carried so a
+future non-1:1 structure is an extension not a migration}. The entry range covers the
+**net debit**; chain quality, sizing band, exit contract, manifest, and account stay
+position-level; one recommendation is still one ticket; lifecycle, TTL, expiry, and event
+records untouched. At approval the limit is the net debit inside the net-debit range, and
+`quantity` counts spreads — per-leg contract count is `quantity × ratio`, derived never
+typed.
+
+**`llm_runtime/PASS2_VALIDATION_v4.0.md`** (`4.0.5 → 4.0.6`): the render clause names the
+legs-list form; spread recommendations now render tickets like any other Validated
+recommendation, so the Rule 7 manifest omission line for spreads dies.
+
+### Changed — `engineering_only/` (no upload)
+
+**`engineering_only/TICKET_BROKER_MAPPING_v4.0.md`** (`4.0.0 → 4.0.1`): scope extends to
+vertical debit spreads and the Increment-0 omission clause is retired. New multi-leg
+mapping section — expected shape: `orderStrategyType: SINGLE` + `complexOrderStrategyType:
+VERTICAL`, two `orderLegCollection` entries (long `BUY_TO_OPEN` / short `SELL_TO_OPEN`),
+`price` = net debit — marked **`PENDING VERIFICATION` in its entirety**: Schwab offers no
+individual-developer paper sandbox and the entity's developer app does not exist yet, and
+a vendor contract is never inferred. The translator gains a fifth guard — a multi-leg
+ticket is untranslatable while the marker stands (the same annotates-never-binds
+discipline as `STOP_DURABILITY_MAX_TOUCH_PROB`) — so spread tickets are fully recordable
+and approvable now, and become translatable only after the five-point verification
+checklist (enum value + strategy-type pairing, leg ordering, price convention,
+instruction pair, preview-endpoint check) runs against the entity's developer app.
+Instruction-derivation table extends per leg, `close` still reserved. Second worked
+example added from the real 2026-08-07 record: `VS-20260807-1425-01/P2-02/T1` (HON
+250/270 × 2026-10-16, ~$6.70 net debit) — no golden test may assert against it until the
+marker is removed.
+
 ## 2026-08-23 — entry-time snapshot: captured at validation, persisted at the ticket's EXECUTED event (closes #117)
 
 ### Changed — `llm_runtime/`
