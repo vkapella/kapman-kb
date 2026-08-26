@@ -1,5 +1,39 @@
 # KapMan KB Changelog
 
+## 2026-08-25 — credential transport moves to TOOL_SURFACE; agents switch to the tradelog bearer (closes #131, advances #130)
+
+### Changed — `engineering_only/` + `.claude/skills/`
+
+The credential clause in `kapman-screen` told the session to source a token in one step and
+curl with it in the next. Agent shells do not persist environment between tool calls, so
+`$VAR` was empty at the call and every fetch 401'd — on **every** surface, not just the web
+sandbox #130 describes. Verified live 2026-08-25: identical command and credential returns
+200 in one invocation, 401 when split.
+
+**`engineering_only/TOOL_SURFACE_v4.0.md`** (`4.0.0-alpha → 4.0.1-alpha`, `scaffolding →
+draft`) gains the transport contract it was scaffolded for: the producer host table (base
+URLs, machine auth, credential names), the credential resolution order (env-first, `.env`
+fallback, named-gap third — #130's proposal, relocated), and the single-invocation hard
+rule with the verified idiom. Purpose and Contents filled; `Legacy anchors` and the
+`PIPELINE_010`/`PIPELINE_012` appendix entries remain placeholders.
+
+**Agents now authenticate to the tradelog with `API_BEARER_TOKEN`**, not
+`BASIC_AUTH_USER`/`BASIC_AUTH_PASSWORD`. Basic auth worked but is the human browser login —
+unscoped across all paths and not rotatable without also rotating operator access. The
+bearer is checked first and confined to `/api/*`. Verified: bearer on
+`/api/queue/pending-declarations` → 200, off `/api` → 401, token deployed on Fly. This is
+the prerequisite for per-person agent credentials.
+
+**`.claude/skills/kapman-screen/SKILL.md`** (69 → 63 lines, operator-drafted per AGENTS.md
+"Editing a skill body is substantive content work"): the credential clause thins to a
+pointer at TOOL_SURFACE, and the fetch-path bullet cites `PASS1_SCREENING_v4.0.md`
+(Operational heuristics) instead of restating the endpoint's auth. #130 proposed writing
+hosts *into* the skill; Rule 1 excludes producers, endpoints, and tool-surface workarounds
+from skill bodies, so the fix inverts that — the skill returns to pointers only.
+
+#130 stays open pending a live `/kapman-screen` run from the surface that failed: it passes
+when the run fetches candidates without asking the operator to paste.
+
 ## 2026-08-23 — producer clause: unresolved flags leave the run as queue items (closes #126)
 
 ### Changed — `llm_runtime/`

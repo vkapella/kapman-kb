@@ -28,19 +28,13 @@ Load the full KapMan runtime context and evaluate:
      its `exported_at` per `JOURNAL_MGMT_v4.0.md`, echo the ID + `row_count` +
      `as_of` back, and — if `kapman-journal` is attached — write the handoff to
      `handoffs/viewer/<YYYY-MM>/` before screening.
-   - **Credentials, for every fetch in this skill:** source them from the
-     sibling repos' local `.env` files into environment variables and
-     reference them as `$VARS` — the viewer's `VIEWER_API_TOKEN` from
-     `kapman-polygon-viewer/.env`, the tradelog's `BASIC_AUTH_USER`/
-     `BASIC_AUTH_PASSWORD` from `kapman-tradelog/.env`, e.g.
-     `source <(grep "^VIEWER_API_TOKEN" "../kapman-polygon-viewer/.env" | sed 's/^/export /')`
-     then `curl -H "Authorization: Bearer $VIEWER_API_TOKEN" …`. **Never
-     paste a secret value literally into a command line** — the permission
-     layer blocks plaintext secrets in command text, and the value would
-     land in the transcript (kb#129).
+   - **Credentials and hosts, for every fetch in this skill:** resolve per
+     `engineering_only/TOOL_SURFACE_v4.0.md` — its producer host table,
+     credential resolution order, and single-invocation rule govern. Do not
+     restate them here; that file wins on any disagreement.
    - If no arguments were given: offer the fetch path (the viewer's export
-     API, live since 2026-08-23 — auth via the `VIEWER_API_TOKEN` bearer in
-     the viewer repo's local `.env`; paste remains a valid fallback). Fetch
+     API, live since 2026-08-23, per `PASS1_SCREENING_v4.0.md` Operational
+     heuristics; paste remains a valid fallback). Fetch
      the watchlists (`GET /api/watchlists`) and views (`GET /api/views`) from
      the viewer, present the export-eligible feed presets as selectable
      options (plus the watchlist when more than one exists), then fetch
