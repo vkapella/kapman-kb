@@ -1,5 +1,30 @@
 # KapMan KB Changelog
 
+## 2026-08-25 — MFE timing measured on the realized record; queued for the September re-evaluation (#132)
+
+### Added — `docs/`
+
+**`docs/MFE_TIMING_2026-08-25.md`** — measurement prompted by the working belief that swing
+trades are opened at 60–120 DTE but reach MFE in under 10 days. Measured on 588 real closed
+lots from the tradelog `LotExcursion` record (`GET /api/analysis/excursions`).
+
+The headline is confirmed: long calls reach MFE at a median of 6 days, 67% within 10 days,
+against a 12-day median hold. The inference is not supported. MFE lands at 83% of the way
+through the hold for long calls and 100% for cash-secured puts and covered calls — the peak
+sits at the exit, which is exit-truncated measurement rather than edge decay. The 30+ day
+cohort confirms it: median days-to-MFE rises to 32.5 and the ≤10-day share falls to 24%.
+
+Two explanations remain live and prescribe opposite changes — the move is genuinely fast
+(shorten DTE) versus exits are early (keep the band, hold longer). Evidence tilts toward the
+latter. The discriminating test is post-exit continuation, which neither dataset reaches:
+`live_onsets.csv` is right-censored at `fwd_bars` max 12. **No parameter or contract changed;
+`SWING_DTE_BAND` is explicitly not touched pending #132.**
+
+Carries a knock-on for the weekly-conflict force-flag (18 of 37 queued items on the
+2026-08-26 run, kapman-kb#127): the case for the weekly timeframe governing assumes 10–17
+week holds, and the realized median is 12 days. Sequenced to resolve after the DTE question,
+not before.
+
 ## 2026-08-25 — credential transport moves to TOOL_SURFACE; agents switch to the tradelog bearer (closes #131, advances #130)
 
 ### Changed — `engineering_only/` + `.claude/skills/`
