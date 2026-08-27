@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 4.0.4
-file_last_updated: 2026-07-14
+kb_version: 4.0.5
+file_last_updated: 2026-08-26
 status: active
 tier: T0
 ---
@@ -97,8 +97,8 @@ Claude executes the following sequence at the start of every session, before any
 **1. Confirm market date and session context.**
 Call `Schwab get_datetime()` to establish the current market date. Confirm whether markets are open or closed. If data appears stale relative to the confirmed date, flag it before proceeding. Do not assume the date from conversation context — session context may be stale from a prior run.
 
-**2. Detect mode.**
-Apply the mode detection sequence in § Mode detection above. If mode cannot be determined from operator input, ask before proceeding. Do not fetch data speculatively while waiting for mode confirmation.
+**2. Detect mode and declare scope.**
+Apply the mode detection sequence in § Mode detection above. If mode cannot be determined from operator input, ask before proceeding. Do not fetch data speculatively while waiting for mode confirmation. When the confirmed mode produces sizing, tickets, or portfolio output, the operator also declares the run's scope: the legal entity being traded for and the environment (`live` | `paper`). `RISK_v4.0.md` refuses sizing against an undeclared entity; the declaration is echoed in the report header and stamped into every journal record per `JOURNAL_MGMT_v4.0.md`.
 
 **3. Load journal memory and announce.**
 Load the `kapman-journal` `memory/` files — `positions.md`, `overrides.md`, `watchlist.md` — as session-start context, and announce what was loaded, distinguishing "loaded, N records" from "file not loaded" from "loaded but empty." Memory is a convenience cache, not authority: when live operator or broker input, or a pasted export, disagrees with memory, the live value wins and the mismatch is surfaced — never silently resolved. Numeric regime reads are never persisted as authoritative; the sole exemption is the entry-time snapshot in `positions.md`. `JOURNAL_MGMT_v4.0.md` owns the load mechanics, paths, and precedence; `KAPMAN_GUARDRAILS_v4.0.md` owns the memory-not-authority floor and the no-persist exemption. In the connected-repo context (Claude Code on the web with `kapman-journal` attached) the files are read directly; in a plain project session they arrive by operator paste or attachment, and if not provided the "not loaded" condition is announced and the session proceeds.
@@ -122,7 +122,7 @@ Enter the output sequence for the confirmed mode per `REPORT_FORMAT_v4.0.md`. Do
 | Step | Action | Modes | Blocking? |
 |---|---|---|---|
 | 1 | Confirm market date via `get_datetime()` | All | Yes — do not proceed on stale date |
-| 2 | Detect mode | All | Yes — do not fetch data before mode is confirmed |
+| 2 | Detect mode + declare entity scope | All | Yes — do not fetch data before mode is confirmed; sizing/ticket/portfolio output needs a declared entity |
 | 3 | Load journal memory, announce, apply precedence | All | Yes — memory loads before mode output; live input overrides it |
 | 4 | Derive lineage + stage input handoff (on supply — paste or fetch) | All (when an export is supplied) | Yes — lineage is minted before the data is used |
 | 5 | Macro gate via SPY dealer metrics | Screening, Hybrid | Yes — eligible set is not defined until gate resolves |

@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.7
-file_last_updated: 2026-08-23
+kb_version: 4.0.8
+file_last_updated: 2026-08-26
 status: active
 tier: T2
 ---
@@ -212,7 +212,7 @@ The live position fields are ingested from the `kapman-tradelog` `portfolio_snap
 | `unrealized_pnl` | Unrealized P&L (display) | `null` when `mark` is unavailable |
 | `mae_pct` / `mfe_pct` / `excursion_as_of` | Advisory display input only | Gated by snapshot `open_excursions_available`; daily-mark, coverage-dependent excursion since entry. Never a gate or trigger — display alongside the exit-trigger advisory (e.g. "−12% heat vs −15% stop"). Suppress when `open_excursions_available` is false or the leg value is `null` |
 
-Snapshot envelope: `exported_at` is the lineage clock (the `TL-` lineage_id derives from it per `JOURNAL_MGMT_v4.0`); `as_of` is the instant the open positions were priced (the as-of for `mark` / `unrealized_pnl` / excursions); `tradelog_schema_version` is echoed for join reproducibility; `account_ids` scopes the snapshot (`[]` = all accounts). The export is open-positions-only — closed lots, the entry-time regime snapshot, and the SIGNAL alert levels are not in it (closed lots are out of scope here; the regime snapshot and alert levels are journal-owned, read per the next subsection).
+Snapshot envelope: `exported_at` is the lineage clock (the `TL-` lineage_id derives from it per `JOURNAL_MGMT_v4.0`); `as_of` is the instant the open positions were priced (the as-of for `mark` / `unrealized_pnl` / excursions); `tradelog_schema_version` is echoed for join reproducibility; since `tradelog_schema_version` 1.1 the envelope carries a `scope` block — `mode: EXPLICIT`, `legal_entity {slug, legal_name}`, `environment` (`LIVE` | `PAPER`), and fully enumerated `account_ids` — and the producer fails closed rather than export a mixed, unclassified, or all-accounts payload; `[]`-means-all is retired. The consuming run's declared entity must match `scope.legal_entity` or the run stops. A payload with no scope block is a pre-1.1 export: usable only for LEGACY_UNSCOPED review, never for an entity-scoped run. The export is open-positions-only — closed lots, the entry-time regime snapshot, and the SIGNAL alert levels are not in it (closed lots are out of scope here; the regime snapshot and alert levels are journal-owned, read per the next subsection).
 
 **§A2 structure/direction derivation rules.**
 

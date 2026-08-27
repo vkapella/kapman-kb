@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: principle
-kb_version: 4.0.1
-file_last_updated: 2026-08-13
+kb_version: 4.0.2
+file_last_updated: 2026-08-26
 status: active
 tier: T1
 ---
@@ -11,7 +11,7 @@ tier: T1
 
 ## Principle
 
-Position sizing is the mechanism by which conviction and regime translate into capital at risk. Every other guardrail in KapMan — data honesty, structure selection, macro gating — exists to make sure the *direction* of a trade is sound; sizing is what determines whether a sound trade can survive being wrong, and whether an unsound trade can do real damage when it fails. The governing judgment is that sizing is regime-conditional, never fixed: the same ticker with the same Wyckoff regime deserves different allocation depending on dealer regime, volatility regime, and chain quality, and the regime assessments themselves live in their own principle files (`WYCKOFF_v4.0.md`, `DEALER_v4.0.md`, `VOLATILITY_v4.0.md`). RISK does not re-derive those regimes; it consumes them and converts them into a sizing band. The sizing denominator is the combined value of all funded, real-capital accounts in the operator's household; paper accounts are excluded from the denominator even when they execute the same screening output, because the dollars at risk are notional. The one rule that survives every regime is that no single position is ever a portfolio-shaping event — the absolute ceiling exists so that being catastrophically wrong on a single name cannot end the portfolio's ability to keep operating. Below that ceiling, sizing moves in bands, not cliffs: a clean direction-aligned trend (a long in `markup`, a long put in `markdown`) — or a post-phase-C continuation branch (`reaccumulation`/`redistribution`) — with supportive dealer regime and a full liquid chain earns the top of the band; the same setup with thin chain liquidity, elevated IV, or weakening dealer support earns the bottom; pre-confirmation setups (a range regime without its confirmed phase-C — `spring`/`shakeout` on the bullish side, `utad` on the bearish side) earn only conditional sizing (and are refused outright by the SIGNAL Wyckoff veto unless the operator overrides); and hostile macro regimes refuse the structure outright per `KAPMAN_GUARDRAILS_v4.0.md`. The near-flip one-tier reduction from GUARDRAILS steps down from whichever band RISK has selected, never replaces it. CSP sizing is governed by margin capacity, not premium percentage — premium-as-percent-of-portfolio is the wrong denominator for a structure whose risk is defined by assigned share cost. The operator retains override authority over individual sizing decisions, but the override mechanics live in GUARDRAILS; RISK enforces only the bands and the absolute ceiling.
+Position sizing is the mechanism by which conviction and regime translate into capital at risk. Every other guardrail in KapMan — data honesty, structure selection, macro gating — exists to make sure the *direction* of a trade is sound; sizing is what determines whether a sound trade can survive being wrong, and whether an unsound trade can do real damage when it fails. The governing judgment is that sizing is regime-conditional, never fixed: the same ticker with the same Wyckoff regime deserves different allocation depending on dealer regime, volatility regime, and chain quality, and the regime assessments themselves live in their own principle files (`WYCKOFF_v4.0.md`, `DEALER_v4.0.md`, `VOLATILITY_v4.0.md`). RISK does not re-derive those regimes; it consumes them and converts them into a sizing band. The sizing denominator is entity-scoped: the combined value of the funded, real-capital accounts belonging to the one legal entity the run is trading for — never a sum across entities, and never including paper accounts, whose dollars at risk are notional. The one rule that survives every regime is that no single position is ever a portfolio-shaping event — the absolute ceiling exists so that being catastrophically wrong on a single name cannot end the portfolio's ability to keep operating. Below that ceiling, sizing moves in bands, not cliffs: a clean direction-aligned trend (a long in `markup`, a long put in `markdown`) — or a post-phase-C continuation branch (`reaccumulation`/`redistribution`) — with supportive dealer regime and a full liquid chain earns the top of the band; the same setup with thin chain liquidity, elevated IV, or weakening dealer support earns the bottom; pre-confirmation setups (a range regime without its confirmed phase-C — `spring`/`shakeout` on the bullish side, `utad` on the bearish side) earn only conditional sizing (and are refused outright by the SIGNAL Wyckoff veto unless the operator overrides); and hostile macro regimes refuse the structure outright per `KAPMAN_GUARDRAILS_v4.0.md`. The near-flip one-tier reduction from GUARDRAILS steps down from whichever band RISK has selected, never replaces it. CSP sizing is governed by margin capacity, not premium percentage — premium-as-percent-of-portfolio is the wrong denominator for a structure whose risk is defined by assigned share cost. The operator retains override authority over individual sizing decisions, but the override mechanics live in GUARDRAILS; RISK enforces only the bands and the absolute ceiling.
 
 ## Operational heuristics
 
@@ -34,7 +34,7 @@ Elevated IV (IV/HV materially above 1) makes long-premium structures expensive a
 When `DEALER_v4.0.md` flags near-flip conditions, the sizing band is selected normally, then stepped down one tier from that band. The reduction is mechanical; it is not a refusal and is not optional. If the selected band is already at the conditional floor (e.g., a direction-aligned regime pre-phase-C, or a limited chain), the step-down produces no-new-entry for that candidate rather than negative sizing.
 
 **CSP sizing is margin-capacity-driven.**
-A CSP's risk is the cost of taking assignment on the underlying, not the premium collected. Sizing therefore looks at how many shares the operator can absorb at the strike across the combined account base, not at premium as a percentage of portfolio value. The absolute ceiling (single-position cap) applies to the *assignment cost*, not the premium. A CSP whose assignment cost would exceed the single-position cap is too large regardless of how attractive the premium looks.
+A CSP's risk is the cost of taking assignment on the underlying, not the premium collected. Sizing therefore looks at how many shares the operator can absorb at the strike across the declared entity's account base, not at premium as a percentage of portfolio value. The absolute ceiling (single-position cap) applies to the *assignment cost*, not the premium. A CSP whose assignment cost would exceed the single-position cap is too large regardless of how attractive the premium looks.
 
 **LEAP sizing decouples from short-term regime.**
 LEAPs with 12+ months to expiration are not meaningfully governed by current dealer or volatility regime — those regimes will turn over multiple times before the position closes. LEAP sizing is governed by conviction in the underlying thesis and by the absolute ceiling. A LEAP entered during hostile macro is still bounded by the single-position cap, but is not refused under the macro gate. The decoupling applies to both LEAP structures — the long call and the short put (per SIGNAL's LEAP structure selector); the short put's risk denominator is assignment cost per the CSP convention below, applied at the LEAP horizon.
@@ -42,14 +42,14 @@ LEAPs with 12+ months to expiration are not meaningfully governed by current dea
 **Portfolio-level concentration limits apply across structures.**
 The single-position ceiling is per-name across all structures combined. A long call, a CSP, and a hedge on the same ticker are one position for ceiling purposes. Sector concentration is a separate band: when multiple positions in the same sector approach a combined limit, new entries in that sector size to the floor of their individual band until the concentration eases. The specific sector concentration band is in the Appendix.
 
-**Sizing denominator is real-capital-only.**
-Percentage caps apply to the combined value of all funded, live-trading accounts. Paper accounts (Schwab paper in the current configuration) are excluded from the denominator even when they execute the same screening output, because the dollars at risk are notional. As real accounts are added, they join the denominator; as accounts transition from paper to funded, they join automatically. The operator declares the real-capital total at the start of a session (or carries it from a prior session); sizing math uses that declared value. If the operator has not declared a real-capital total for the current session, sizing output is deferred and the denominator is requested before the report proceeds. The declared value lives in the session context only — it is not persisted to memory or project knowledge.
+**Sizing denominator is entity-scoped and real-capital-only.**
+Percentage caps apply to the combined value of the funded, live-trading accounts of one legal entity — the entity declared for the run. Accounts of any other entity are excluded no matter who operates them: the corporation's trades size against the corporation's capital only, personal trades against personal capital only. Paper accounts are excluded from every denominator even when they execute the same screening output, because the dollars at risk are notional. As real accounts are added under an entity they join that entity's denominator; a paper account that transitions to funded joins the denominator of the entity that owns it. The operator declares the entity and its real-capital total at the start of a session (or carries both from a prior session); sizing math uses those declared values. If either is undeclared for the current session, sizing output is deferred and the declaration is requested before the report proceeds. The declared values live in the session context only — not persisted to memory or project knowledge.
 
 **Short-DTE clustering is a portfolio risk, not a per-trade risk.**
 When multiple open positions share short DTE (a cluster of expirations within a narrow window), the portfolio is exposed to a single-day liquidity event that can affect all of them simultaneously. New entries that would add to an existing short-DTE cluster size to the floor of their band; if the cluster is already heavy, new short-DTE entries are deferred.
 
 **Cash floor is a hard floor, not a target.**
-The operator maintains a cash reserve floor across the combined account base for opportunistic entries and for margin headroom under stress. New entries that would breach the floor are refused even if they otherwise pass every other check. The specific floor percentage is operator-set and lives in the Appendix as a reference, not a mandate.
+The operator maintains a cash reserve floor across the declared entity's account base for opportunistic entries and for margin headroom under stress. New entries that would breach the floor are refused even if they otherwise pass every other check. The specific floor percentage is operator-set and lives in the Appendix as a reference, not a mandate.
 
 **Downside protection is sized to portfolio delta, not to individual longs.**
 Hedges (SPY puts, VIX calls, sector inverse exposure) are sized against aggregate long-delta exposure, not against any individual position. A portfolio with $X of net long delta calls for a hedge sized to offset a defined fraction of that delta under a defined drawdown scenario. The specific hedge ratio is in the Appendix.
@@ -79,7 +79,7 @@ Hedges (SPY puts, VIX calls, sector inverse exposure) are sized against aggregat
 | Contract count cap (under limited chain) | `PASS2_VALIDATION_v4.0.md`, `REPORT_FORMAT_v4.0.md` | Constrains exact-contract output and rationale text |
 | Single-position ceiling check | `PORTFOLIO_MGMT_v4.0.md` | Portfolio mode validates that combined exposure to a name across structures does not exceed the ceiling |
 | Sector concentration band | `PORTFOLIO_MGMT_v4.0.md` | Portfolio mode flags new entries that would push sector exposure past the band |
-| Real-capital denominator | `PORTFOLIO_MGMT_v4.0.md`, `REPORT_FORMAT_v4.0.md` | Both screening and portfolio reports use the declared real-capital denominator; paper account values are not in the denominator |
+| Entity-scoped real-capital denominator | `PORTFOLIO_MGMT_v4.0.md`, `REPORT_FORMAT_v4.0.md` | Both screening and portfolio reports use the declared entity's real-capital denominator; paper and other-entity account values are never in the denominator |
 | Cash floor refusal | `PORTFOLIO_MGMT_v4.0.md` | Portfolio mode owns enforcement; RISK owns the principle |
 | Hedge sizing ratio | `PORTFOLIO_MGMT_v4.0.md` | Portfolio mode computes the required hedge against aggregate long delta using RISK's ratio |
 
@@ -88,7 +88,7 @@ Hedges (SPY puts, VIX calls, sector inverse exposure) are sized against aggregat
 1. Eligible structure has been determined (long call, debit spread, CSP, LEAP, hedge, or refused) — this is upstream of RISK.
 2. Wyckoff regime + phase (A–E), dealer regime, volatility regime, and chain quality are all assessed — RISK reads these as inputs.
 3. No active hostile-macro refusal applies to the structure under consideration, *or* an explicit override per GUARDRAILS is in effect.
-4. The real-capital denominator is established for this session — either declared by the operator or carried from a prior session. If undeclared, sizing does not proceed; the denominator is requested before output continues.
+4. The entity-scoped real-capital denominator is established for this session — the legal entity being traded for and that entity's real-capital total, either declared by the operator or carried from a prior session. If either is undeclared, sizing does not proceed; the declaration is requested before output continues.
 
 If any of these is missing or ambiguous, sizing does not proceed. A sizing band emitted on incomplete regime input or against an undeclared denominator is a guardrail violation, not a RISK violation — but the failure surfaces in the report as a no-size output.
 
@@ -171,17 +171,18 @@ The 5% ceiling is the only value in this Appendix that does not move with regime
 | Short-DTE cluster threshold | 3+ open positions within a 7-day expiration window | New entries adding to an established cluster size to floor; if cluster is heavy, deferred |
 | Hedge ratio | ~25–35% of aggregate long-delta exposure | Hedged via SPY puts, VIX calls, or sector inverse; reference assumes a ~10% market drawdown scenario |
 
-**Sizing denominator by household account composition.**
+**Sizing denominator by entity and account composition.**
 
-| Household account composition | Sizing denominator | Notes |
+| Entity / account composition | Sizing denominator | Notes |
 |---|---|---|
-| Fidelity funded; Schwab paper | Fidelity value only | Schwab is data source (chain validation, market data) but not in sizing denominator |
-| Fidelity funded; Schwab funded | Fidelity + Schwab | Both real-capital, combined denominator |
-| Fidelity funded + additional real account(s) | Sum of all funded accounts | New real accounts join the denominator as they come online |
-| Multiple real accounts, mixed account types (taxable / IRA / Roth) | Sum of all funded accounts | Account-type restrictions apply at execution, not at sizing |
-| Operator has not declared real-capital total this session | Sizing not emitted | Denominator requested before sizing output proceeds |
+| Kapman Capital Inc. — corporate account funded | Corporate account value only | Personal and paper accounts never enter the corporate denominator |
+| Personal — Fidelity funded; Schwab paper | Fidelity value only | Paper is data source (chain validation, market data), never denominator |
+| One entity, multiple funded accounts | Sum of that entity's funded accounts | New real accounts join their owning entity's denominator as they come online |
+| One entity, mixed account types (taxable / IRA / Roth) | Sum of that entity's funded accounts | Account-type restrictions apply at execution, not at sizing |
+| Accounts spanning two legal entities | Never combined | Each run declares one entity; a cross-entity denominator is a guardrail violation, not a sizing choice |
+| Entity or real-capital total undeclared this session | Sizing not emitted | Declaration requested before sizing output proceeds |
 
-A position taking 3% of the combined real-capital denominator with chain access only at Schwab is sized against the real-capital total and *executes from a real account*, not from paper. If no real account can execute the structure (e.g., chain depth available only at Schwab but Schwab is paper), the trade is flagged for execution-routing review rather than being sized against paper capital.
+A position taking 3% of the declared entity's real-capital denominator with chain access only at Schwab is sized against that entity's real-capital total and *executes from a real account owned by that entity* — not from paper, and never from another entity's account. If no real account of the entity can execute the structure (e.g., chain depth available only at Schwab but Schwab is paper), the trade is flagged for execution-routing review rather than being sized against paper or cross-entity capital.
 
 **Account-type restrictions are execution concerns, not sizing concerns.**
 
@@ -193,7 +194,7 @@ A position taking 3% of the combined real-capital denominator with chain access 
 | Margin status differences between accounts | Execution layer — CSP-as-margin-secured routes only to margin-eligible accounts |
 | Broker-specific assignment handling | Operator-side; outside RISK scope |
 
-RISK sizes against the combined real-capital denominator. The execution layer (not encoded in `llm_runtime/`) determines which account the trade lands in based on structure eligibility per account type. This separation keeps RISK as a sizing principle and lets account-routing live where it belongs.
+RISK sizes against the declared entity's real-capital denominator. The execution layer (not encoded in `llm_runtime/`) determines which of that entity's accounts the trade lands in based on structure eligibility per account type. This separation keeps RISK as a sizing principle and lets account-routing live where it belongs.
 
 **Chain quality tier mapping (consumed from PASS2).**
 

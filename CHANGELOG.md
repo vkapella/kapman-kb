@@ -1,5 +1,52 @@
 # KapMan KB Changelog
 
+## 2026-08-26 — entity-scoped sizing and run-scope grammar; §A2 `[]`-means-all retired (#134)
+
+### Changed — `llm_runtime/`
+
+Phase 2 of the Kapman Capital Inc. entity-segregation plan (operator-approved drafts;
+tradelog Phase 1 shipped as kapman-tradelog#333/#334/#335 with envelope 1.1 and the
+fail-closed export). Wash-sale logic is explicitly out of scope for the entire toolchain
+by operator decision — none is introduced here, under any name.
+
+**`RISK_v4.0.md`** (`4.0.1 → 4.0.2`) — the sizing denominator becomes **entity-scoped**:
+percentage caps apply to the funded, live accounts of the one legal entity the run trades
+for, never a sum across entities (paper remains excluded on its own axis, unchanged). The
+household composition table is replaced by an entity/account composition table with an
+explicit "accounts spanning two legal entities: never combined" row; the session-entry
+precondition now requires both the entity and its real-capital total before sizing emits;
+CSP absorption, the cash floor, execution routing, and the PORTFOLIO_MGMT/REPORT_FORMAT
+cross-reference all re-anchor to the declared entity's account base.
+
+**`JOURNAL_MGMT_v4.0.md`** (`4.0.11 → 4.0.12`, `journal_schema_version 4.0 → 4.1`) — new
+heuristic: **scope belongs to the consuming run, never the market artifact**. Viewer
+handoffs stay owner-neutral and are staged once; each consuming run mints
+`run_id = <source_lineage_id>-RNN` and stamps `legal_entity` + `environment` into every
+record it writes, so two runs can consume one handoff without filename or rec-id
+collisions and without touching the source. Lineage-ID derivation is untouched — the
+format, the verbatim-copy rule, and handoff filenames are exactly as before; `log/`
+filenames move to the run_id stem, which existing prefix parsers already accept. Records
+lacking scope frontmatter are **LEGACY_UNSCOPED** — never assumed personal, corporate, or
+paper. Tickets: on an entity-stamped run the destination account must belong to the run's
+entity and `unassigned` is not approvable; the APPROVED quantity computes against the
+run's entity-scoped denominator (resolving the prior destination-account-vs-combined
+wording tension with RISK).
+
+**`PORTFOLIO_MGMT_v4.0.md`** (`4.0.7 → 4.0.8`) — §A2 snapshot envelope: documents the
+1.1 `scope` block (EXPLICIT mode, `legal_entity`, `environment`, enumerated
+`account_ids`), retires `[]`-means-all, requires the consuming run's declared entity to
+match `scope.legal_entity`, and restricts scope-less pre-1.1 payloads to LEGACY_UNSCOPED
+review.
+
+**`KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md`** (`4.0.4 → 4.0.5`) — session-entry Step 2
+becomes "Detect mode and declare scope": runs producing sizing, tickets, or portfolio
+output declare the legal entity and environment up front; the declaration is echoed in
+the report header and stamped into journal records.
+
+**Operator action required:** re-upload `llm_runtime/` to LLM project knowledge — the
+uploaded copies predate the entity-scope grammar.
+
+
 ## 2026-08-25 — MFE timing measured on the realized record; queued for the September re-evaluation (#132)
 
 ### Added — `docs/`
