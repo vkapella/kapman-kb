@@ -1,5 +1,46 @@
 # KapMan KB Changelog
 
+## 2026-09-03 — scoped exports bound Portfolio mode; environment gated on ingest (#135)
+
+### Changed — `llm_runtime/`
+
+Follow-up to #134. With the tradelog `portfolio_snapshot` now single-scope (verified
+live: Fidelity-only, paper-only, and corporate-only envelopes; mixed scope refused), the
+read side needed two rules it did not have. Operator decision 2026-09-03: runs are per
+environment, never mixed — personal/live, personal/paper, and corporate/live are three
+separate runs with three separate exports.
+
+**`PORTFOLIO_MGMT_v4.0.md`** (`4.0.8 → 4.0.9`) — Step 1a: the export's `scope.account_ids`
+bounds the run; a `positions.md` record for an account outside it is **out of scope** —
+not reconciled, not flagged closed, not refreshed, not carried into Steps 2–7 — and
+absence from the export means "closed" only inside the scope. The test is the account
+list, never the entity by name, so a corporate review sees every personal leg as out of
+scope by the same rule. Step 7d's self-audit reports the out-of-scope count by account.
+§A2 envelope: the run now stops on an **environment** mismatch as well as an entity
+mismatch, naming both values. The absent-or-partial subsection states that an
+out-of-scope record is none of its three conditions.
+
+**`JOURNAL_MGMT_v4.0.md`** (`4.0.12 → 4.0.13`, `journal_schema_version 4.1 → 4.2`) —
+the consuming-run scope heuristic gates on `scope.environment` alongside
+`scope.legal_entity`. The memory-write trigger bounds a Portfolio refresh to the ingesting
+export's `scope.account_ids` and stamps each refreshed record with a new live-refresh
+field, `refreshed_scope` (echoed from the snapshot's scope block; absent on a pre-1.1
+refresh), so a partial refresh is distinguishable from a full one. `positions.md` remains
+one file spanning every scope — scope is applied at read time, never by splitting the
+file. Stale `journal_schema_version` literals (4.0/4.1) in the grammar examples corrected.
+
+**`KAPMAN_PROJECT_SYSTEM_INSTRUCTIONS_v4.0.md`** (`4.0.5 → 4.0.6`) — session-entry Step 6
+loads scope-matched position context: entity and environment must match the Step 2
+declaration or the run stops; only in-scope `positions.md` records participate.
+
+**Operator action required:** re-upload `llm_runtime/` to LLM project knowledge — this
+covers the still-pending #134 re-upload as well.
+
+**Not in this change:** the tradelog recommendation mirror's entity-blindness
+(kapman-tradelog#349) and out-of-mandate instrument handling for the corporate account's
+money-market position (separate issue when corporate runs are scheduled).
+
+
 ## 2026-08-26 — entity-scoped sizing and run-scope grammar; §A2 `[]`-means-all retired (#134)
 
 ### Changed — `llm_runtime/`

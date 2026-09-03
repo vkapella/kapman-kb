@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: orientation
-kb_version: 4.0.5
-file_last_updated: 2026-08-26
+kb_version: 4.0.6
+file_last_updated: 2026-09-03
 status: active
 tier: T0
 ---
@@ -112,7 +112,7 @@ When the operator supplies a viewer/v2 or tradelog export this session, derive t
 Fetch SPY dealer metrics via `Schwab get_dealer_metrics(["SPY"])`. Evaluate SPY spot vs. gamma flip and DGPI tier per `DEALER_v4.0.md`. If hostile macro is active, output the Macro Regime card per `REPORT_FORMAT_v4.0.md` and restrict the eligible set per `KAPMAN_GUARDRAILS_v4.0.md`. Skip this step in Portfolio mode — the macro gate governs new entries only.
 
 **6. Load position context (Portfolio and Hybrid modes only).**
-Map the open positions from the tradelog `portfolio_snapshot` export (the §A2 contract; a broker screenshot, CSV, or manual record is the fallback) to the position context schema, and read entry-time context from `positions.md` matched by `(instrument_key, account_id)`, per `PORTFOLIO_MGMT_v4.0.md` Step 1a/1b. Confirm DTE on all open positions against the `DTE_DECAY_WARNING_THRESHOLD` per `SYSTEM_PARAMS_v4.0.md`. Flag any position at or below threshold before mode output.
+Map the open positions from the tradelog `portfolio_snapshot` export (the §A2 contract; a broker screenshot, CSV, or manual record is the fallback) to the position context schema, and read entry-time context from `positions.md` matched by `(instrument_key, account_id)`, per `PORTFOLIO_MGMT_v4.0.md` Step 1a/1b. Confirm DTE on all open positions against the `DTE_DECAY_WARNING_THRESHOLD` per `SYSTEM_PARAMS_v4.0.md`. Flag any position at or below threshold before mode output. The export's `scope` block bounds the run: its entity and environment must match the Step 2 declaration or the run stops, and only `positions.md` records for accounts inside `scope.account_ids` are in scope — the rest are left untouched and counted in the self-audit, per `PORTFOLIO_MGMT_v4.0.md` Step 1a.
 
 **7. Proceed to mode output.**
 Enter the output sequence for the confirmed mode per `REPORT_FORMAT_v4.0.md`. Do not produce partial output before completing steps 1–6.
@@ -126,7 +126,7 @@ Enter the output sequence for the confirmed mode per `REPORT_FORMAT_v4.0.md`. Do
 | 3 | Load journal memory, announce, apply precedence | All | Yes — memory loads before mode output; live input overrides it |
 | 4 | Derive lineage + stage input handoff (on supply — paste or fetch) | All (when an export is supplied) | Yes — lineage is minted before the data is used |
 | 5 | Macro gate via SPY dealer metrics | Screening, Hybrid | Yes — eligible set is not defined until gate resolves |
-| 6 | Load position context, check DTE decay | Portfolio, Hybrid | Yes — DTE flags precede mode output |
+| 6 | Load scope-matched position context, check DTE decay | Portfolio, Hybrid | Yes — scope mismatch stops the run; DTE flags precede mode output |
 | 7 | Proceed to mode output | All | — |
 
 ## Runtime operational rules

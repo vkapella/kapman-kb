@@ -1,8 +1,8 @@
 ---
 system: KapMan
 doc_type: runbook
-kb_version: 4.0.12
-file_last_updated: 2026-08-26
+kb_version: 4.0.13
+file_last_updated: 2026-09-03
 status: active
 tier: T2
 ---
@@ -41,7 +41,7 @@ When the operator pastes a viewer or tradelog export, the session derives a sing
 
 **Scope belongs to the consuming run, never the market artifact.**
 
-A viewer export records what the market looked like; it is owner-neutral, staged once under `handoffs/`, and never re-scoped or duplicated. Entity intent is born when a run consumes it: each consuming run mints `run_id = <source_lineage_id>-RNN` and stamps `legal_entity` (the slug of the legal entity the run trades for) and `environment` (`live` | `paper`) into every record it writes — Pass 1, Pass 2, tickets. Two runs may consume the same handoff for different entities: they share `source_lineage_id`, differ in `run_id`, so filenames never collide and the handoff file is never touched. The tradelog `portfolio_snapshot` is the one scoped input: since envelope 1.1 it arrives carrying its own `scope` block (the producer fails closed otherwise), and the consuming run's declared entity must match `scope.legal_entity` — a mismatch stops the run; it never silently re-scopes. Records lacking scope frontmatter are **LEGACY_UNSCOPED** — read as unscoped history, never assumed personal, corporate, or paper.
+A viewer export records what the market looked like; it is owner-neutral, staged once under `handoffs/`, and never re-scoped or duplicated. Entity intent is born when a run consumes it: each consuming run mints `run_id = <source_lineage_id>-RNN` and stamps `legal_entity` (the slug of the legal entity the run trades for) and `environment` (`live` | `paper`) into every record it writes — Pass 1, Pass 2, tickets. Two runs may consume the same handoff for different entities: they share `source_lineage_id`, differ in `run_id`, so filenames never collide and the handoff file is never touched. The tradelog `portfolio_snapshot` is the one scoped input: since envelope 1.1 it arrives carrying its own `scope` block (the producer fails closed otherwise), and the consuming run's declared entity and environment must match `scope.legal_entity` and `scope.environment` — a mismatch on either stops the run, naming both values; it never silently re-scopes. Records lacking scope frontmatter are **LEGACY_UNSCOPED** — read as unscoped history, never assumed personal, corporate, or paper.
 
 **The journal holds four logs — the input split by source, the two pass outputs, and the ticket log — each written one file per record and never reopened.**
 
@@ -65,7 +65,7 @@ A ticket carries **no persisted regime state** — "the thesis still holds" is a
 
 **Memory files are written end-of-run, overwritten in place, on the trigger that owns each file.**
 
-The three memory files change on distinct triggers, and each write is a full overwrite of that file, never an append. `positions.md` is written at two moments: at the ticket's EXECUTED event, when a confirmed fill transcribes the position and its immutable entry-time regime snapshot (entry Wyckoff regime, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels — values captured at Pass 2 validation on the Pass 2 record) into the ledger; and on a Portfolio-mode positions refresh from a tradelog or broker snapshot, when the open/closed set and live fields (mark, net_qty, unrealized P&L) are reconciled. A refresh updates live state only — the entry-time snapshot is write-once and is never rewritten. `overrides.md` is written when the operator explicitly states a standing preference to remember across sessions (e.g., "always block earnings within seven days"); it is never inferred from conversational context, and a standing override recorded here does not activate the per-request macro-gate override defined in `KAPMAN_GUARDRAILS` — it is a remembered convenience, not an active gate. `watchlist.md` is written when the active universe changes — a new viewer handoff defines or refreshes it, or the operator adds or removes tickers. All three writes ride the same end-of-run commit as the logs.
+The three memory files change on distinct triggers, and each write is a full overwrite of that file, never an append. `positions.md` is written at two moments: at the ticket's EXECUTED event, when a confirmed fill transcribes the position and its immutable entry-time regime snapshot (entry Wyckoff regime, DGPI tier, flip-zone, IV/HV band, vol-status, and the eight SIGNAL stop/profit levels — values captured at Pass 2 validation on the Pass 2 record) into the ledger; and on a Portfolio-mode positions refresh from a tradelog or broker snapshot, when the open/closed set and live fields (mark, net_qty, unrealized P&L) are reconciled. A refresh updates live state only — the entry-time snapshot is write-once and is never rewritten. A refresh is also bounded by the ingesting export's `scope.account_ids`: records for accounts outside it are left exactly as they were — not marked closed, not re-marked — and each refreshed record stamps `refreshed_scope` so a later reader can tell a partial refresh from a full one. The open/closed reconcile applies only inside the scope. `positions.md` is therefore the one memory file that spans scopes by design; it is never split per entity or environment. `overrides.md` is written when the operator explicitly states a standing preference to remember across sessions (e.g., "always block earnings within seven days"); it is never inferred from conversational context, and a standing override recorded here does not activate the per-request macro-gate override defined in `KAPMAN_GUARDRAILS` — it is a remembered convenience, not an active gate. `watchlist.md` is written when the active universe changes — a new viewer handoff defines or refreshes it, or the operator adds or removes tickers. All three writes ride the same end-of-run commit as the logs.
 
 **Numeric regime reads are never persisted as authoritative; the entry-time snapshot is the sole, narrow exemption.**
 
@@ -150,7 +150,7 @@ source: kapman-polygon-viewer | kapman-tradelog
 lineage_id: VS-20260625-1335-01      # derived from exported_at + per-day seq
 exported_at: 2026-06-25T13:35:03Z    # source-of-truth timestamp
 as_of: 2026-06-25
-journal_schema_version: 4.1          # THIS repo's contract version
+journal_schema_version: 4.2          # THIS repo's contract version
 v2_schema_version: <echoed from export>  # viewer/v2 response contract — separate namespace
 row_count: 47
 legal_entity: kapman-capital         # portfolio_snapshot only — echoed from the payload's scope block, never invented
@@ -167,7 +167,7 @@ environment: live                    # portfolio_snapshot only — echoed from s
 instrument_key: <stable instrument id>     # join key part 1 — named field, not header text
 account_id:     <account id>               # join key part 2 — entry context is account-scoped; both required to match
 parent_pass2:   <Pass 2 rec_id>            # lineage to the validating Pass 2 record
-journal_schema_version: 4.0
+journal_schema_version: 4.2
 
 # entry-time regime snapshot — the FIVE exempt fields; captured at Pass 2 validation, WRITE-ONCE at the ticket's EXECUTED event; never rewritten on refresh (the no-persist exemption)
 entry_wyckoff_phase: <accumulation | reaccumulation | markup | distribution | redistribution | markdown | ranging_undefined>   # holds the confirmed REGIME (cycle-stage axis, per D-d), NOT the A–E phase; in a real entry never `ranging_undefined`/`UNKNOWN` (a position opens only on a confirmed, direction-aligned regime)
@@ -198,8 +198,9 @@ mark:            <current option price | null>
 net_qty:         <signed contract count>
 unrealized_pnl:  <value | null when mark is null>
 refreshed_as_of: <the refreshing snapshot's as_of>
+refreshed_scope: {legal_entity: <slug>, environment: <live | paper>, account_ids: [...]}   # echoed from the refreshing snapshot's scope block; absent on a pre-1.1 (LEGACY_UNSCOPED) refresh
 ```
 
 Everything above the live-refresh block is write-once entry context; a refresh that touches any write-once field is a grammar violation. The exempt-snapshot Wyckoff field `entry_wyckoff_phase` holds the confirmed **regime** — one of WYCKOFF's seven canonical regimes, the cycle-stage axis (per decision D-d) — not the A–E phase; the enum is the value domain (all seven), while a real entry is constrained to the direction-aligned eligible subset, so `ranging_undefined` and the `UNKNOWN` session-state never actually populate it (a position is opened only on a confirmed, direction-aligned regime). The five regime fields plus the eight SIGNAL levels are exactly the `KAPMAN_GUARDRAILS` entry-time exemption — the guaranteed write-once snapshot. The three structural riders — `entry_wyckoff_event` (a lowercase canonical event from WYCKOFF's vocabulary), `entry_phase` (the schematic phase A–E), and `phase_c_confirmed` (whether the decisive phase-C test was confirmed at entry) — are write-once entry context too, but **non-exempt**: they are categorical/boolean structural facts, not numeric regime reads, so the numeric no-persist prohibition never reached them; they sit outside the five-field exemption and may be absent even when the snapshot is present. `entry_phase` is the recommended rider PORTFOLIO's Regime-exit advisory reads for its D→B/A phase-regression sub-branch; `entry_wyckoff_event` and `phase_c_confirmed` are recorded as entry context with no current consumer — reserved for later calibration work, the same way the Pass-1 / Pass-2 records carry reserved `attack_flags[]` / `invalidation_conditions[]` (empty until Stage 3). `WYCKOFF_v4.0.md` owns the regime, phase, and event vocabulary.
 
-**Schema-version namespaces.** `journal_schema_version` is this repo's contract version (4.0). `v2_schema_version` is echoed verbatim from the viewer/v2 export — a separate namespace carried for join reproducibility, never conflated.
+**Schema-version namespaces.** `journal_schema_version` is this repo's contract version (4.2). `v2_schema_version` is echoed verbatim from the viewer/v2 export — a separate namespace carried for join reproducibility, never conflated.
